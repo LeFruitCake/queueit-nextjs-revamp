@@ -35,9 +35,51 @@ const classroom1:Classes ={
     createdDate: new Date(),
     isDeleted:false
 }
+const classroom2:Classes ={
+  cid:2,
+  createdBy:faculty,
+  courseType:"Project based",
+  courseCode:"ZXC",
+  section:"G01",
+  schoolYear:"2425",
+  semester:"2",
+  courseDescription:"Capstone 2",
+  classKey:"ZXC",
+  createdDate: new Date(),
+  isDeleted:false
+}
+const classroom3:Classes ={
+  cid:3,
+  createdBy:faculty,
+  courseType:"Project based",
+  courseCode:"ZXC",
+  section:"G01",
+  schoolYear:"2425",
+  semester:"2",
+  courseDescription:"Information Management 1",
+  classKey:"ZXC",
+  createdDate: new Date(),
+  isDeleted:false
+}
+const classroom4:Classes ={
+  cid:4,
+  createdBy:faculty,
+  courseType:"Project based",
+  courseCode:"ZXC",
+  section:"G01",
+  schoolYear:"2425",
+  semester:"2",
+  courseDescription:"Information Management 2",
+  classKey:"ZXC",
+  createdDate: new Date(),
+  isDeleted:false
+}
 
 const classes = new Set()
 classes.add(classroom1)
+classes.add(classroom2)
+classes.add(classroom3)
+classes.add(classroom4)
 
 
 const student:User ={

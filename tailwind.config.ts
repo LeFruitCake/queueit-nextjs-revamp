@@ -1,3 +1,4 @@
+import { green } from "@/Utils/Global_variables";
 import type { Config } from "tailwindcss";
 
 export default {
@@ -11,6 +12,8 @@ export default {
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        lgreen: "#CCFC57",
+        dpurple: "#7D57FC",
       },
     },
   },

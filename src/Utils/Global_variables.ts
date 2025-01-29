@@ -1,6 +1,5 @@
 export const BASE_URL = ''
 export const special_characters = ['"',"'",';','-','/','=','(',')','\\','%','/','<','>','&','{','}']
-export const primaryColor = "#046AD8"
 
 export interface User{
     uid:number

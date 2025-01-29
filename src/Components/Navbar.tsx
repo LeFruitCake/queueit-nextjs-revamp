@@ -58,7 +58,7 @@ const Navbar = () => {
         };
       }
     return (
-        <div className='w-full flex p items-center justify-between py-5' style={{height:'100px'}}>
+        <div className='w-full flex p items-center justify-between py-5 relative' style={{height:'100px', zIndex:1}}>
             <img onClick={()=>{router.replace('/dashboard')}} className='hidden md:block lg:block xl:block cursor-pointer' src={logo.src} alt="logo" style={{height:'100%'}} />
             <nav className='hidden md:flex lg:flex xl:flex ' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
                 <a href='/dashboard' className={`nav-a-tag${location.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
