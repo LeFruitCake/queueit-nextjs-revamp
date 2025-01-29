@@ -28,3 +28,8 @@ export interface Classes{
     createdDate: Date
     isDeleted:boolean
 }
+
+export enum UserType{
+    FACULTY = "ADVISER",
+    STUDENT = "STUDENT"
+}

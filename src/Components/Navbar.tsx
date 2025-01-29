@@ -5,9 +5,13 @@ import logo from '../../public/images/logo.png'
 import { Avatar, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
+import { useRouter } from 'next/navigation';
+import { useUserContext } from '@/Utils/AuthContext';
 
 const Navbar = () => {
-    const router = window.location
+    const location = window.location
+    const userContext = useUserContext()
+    const router = useRouter()
     const [avatarAnchorEl, setAvatarAnchorEl] = React.useState<null | HTMLElement>(null);
     const [notificationAnchorEl, setNotificationAnchorEl] = React.useState<null | HTMLElement>(null);
     const avatarOpen = Boolean(avatarAnchorEl);
@@ -25,14 +29,42 @@ const Navbar = () => {
     const handleNotificationClose = () => {
         setNotificationAnchorEl(null)
     }
+    function stringToColor(string: string) {
+        let hash = 0;
+        let i;
+      
+        /* eslint-disable no-bitwise */
+        for (i = 0; i < string.length; i += 1) {
+          hash = string.charCodeAt(i) + ((hash << 5) - hash);
+        }
+      
+        let color = '#';
+      
+        for (i = 0; i < 3; i += 1) {
+          const value = (hash >> (i * 8)) & 0xff;
+          color += `00${value.toString(16)}`.slice(-2);
+        }
+        /* eslint-enable no-bitwise */
+      
+        return color;
+      }
+      
+      function stringAvatar(name: string) {
+        return {
+          sx: {
+            bgcolor: stringToColor(name),
+          },
+          children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
+        };
+      }
     return (
-        <div className='w-full flex p items-center justify-between p-5' style={{height:'100px'}}>
-            <img className='hidden md:block lg:block xl:block' src={logo.src} alt="logo" style={{height:'100%'}} />
+        <div className='w-full flex p items-center justify-between py-5' style={{height:'100px'}}>
+            <img onClick={()=>{router.replace('/dashboard')}} className='hidden md:block lg:block xl:block cursor-pointer' src={logo.src} alt="logo" style={{height:'100%'}} />
             <nav className='hidden md:flex lg:flex xl:flex ' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
-                <a href='/dashboard' className={`nav-a-tag${router.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
-                <a href='/active' className={`nav-a-tag${router.pathname === '/active' ? '-active' : ''}`}>Queue</a>
-                <a href='/create' className={`nav-a-tag${router.pathname === '/create' ? '-active' : ''}`}>Availability</a>
-                <a href='/history' className={`nav-a-tag${router.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
+                <a href='/dashboard' className={`nav-a-tag${location.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
+                <a href='/active' className={`nav-a-tag${location.pathname === '/active' ? '-active' : ''}`}>Queue</a>
+                <a href='/create' className={`nav-a-tag${location.pathname === '/create' ? '-active' : ''}`}>Availability</a>
+                <a href='/history' className={`nav-a-tag${location.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
             </nav>
             <div className='block md:hidden lg:hidden xl:hidden'>
                 <IconButton onClick={()=>{setToggleDrawer(true)}}>
@@ -40,10 +72,10 @@ const Navbar = () => {
                 </IconButton>
                 <Drawer open={toggleDrawer} onClose={()=>{setToggleDrawer(false)}}>
                 <nav className='flex flex-col gap-3 p-5' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
-                    <a href='/dashboard' className={`nav-a-tag${router.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
-                    <a href='/active' className={`nav-a-tag${router.pathname === '/active' ? '-active' : ''}`}>Queue</a>
-                    <a href='/create' className={`nav-a-tag${router.pathname === '/create' ? '-active' : ''}`}>Availability</a>
-                    <a href='/history' className={`nav-a-tag${router.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
+                    <a href='/dashboard' className={`nav-a-tag${location.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
+                    <a href='/active' className={`nav-a-tag${location.pathname === '/active' ? '-active' : ''}`}>Queue</a>
+                    <a href='/create' className={`nav-a-tag${location.pathname === '/create' ? '-active' : ''}`}>Availability</a>
+                    <a href='/history' className={`nav-a-tag${location.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
                 </nav>
                 </Drawer>
             </div>
@@ -52,7 +84,7 @@ const Navbar = () => {
                     <NotificationsIcon style={{fontSize:'2.3rem'}}/>
                 </IconButton>
                 <IconButton style={{color:'silver'}} onClick={handleAvatarClick}>
-                    <Avatar/>
+                    <Avatar {...stringAvatar(`${userContext.user?.firstname} ${userContext.user?.lastname}`)}/>
                 </IconButton>
                 <Menu
                     anchorEl={avatarAnchorEl}
@@ -60,6 +92,14 @@ const Navbar = () => {
                     onClose={handleAvatarClose}
                     MenuListProps={{
                     'aria-labelledby': 'basic-button',
+                    }}
+                    anchorOrigin={{
+                        vertical:'bottom',
+                        horizontal:'center'
+                    }}
+                    transformOrigin={{
+                        vertical:'top',
+                        horizontal:'right'
                     }}
                 >
                     <MenuItem onClick={handleAvatarClose}>Profile</MenuItem>
@@ -71,10 +111,28 @@ const Navbar = () => {
                     open={notificationOpen}
                     onClose={handleNotificationClose}
                     MenuListProps={{
-                    'aria-labelledby': 'basic-button',
+                        'aria-labelledby': 'basic-button',
+                        sx:{
+                            // width:'50%',
+                            // backgroundColor:'black'
+                            padding:'1em'
+                        }
+                    }}
+                    PaperProps={{
+                        sx:{
+                            width:'40%'
+                        }
+                    }}
+                    anchorOrigin={{
+                        vertical:'bottom',
+                        horizontal:'center'
+                    }}
+                    transformOrigin={{
+                        vertical:'top',
+                        horizontal:'right'
                     }}
                 >
-                    Lorem ipsum dolor sit amet consectetur, adipisicing elit. Ipsam ea similique ratione ut dolores harum earum? Distinctio perferendis saepe nam maxime! Id temporibus odit autem voluptates cum ipsum aliquam praesentium.
+                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae molestiae, facere odit quasi dolorum distinctio repellendus eius a fugit dignissimos! Consequatur nostrum assumenda incidunt vitae tenetur architecto ducimus at consectetur?
                 </Menu>
             </div>
         </div>
