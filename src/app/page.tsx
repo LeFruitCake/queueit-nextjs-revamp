@@ -2,7 +2,7 @@ import logo from '../../public/images/logo.png'
 import star from '../../public/images/star.png'
 import squiggly from '../../public/images/squiggly.png'
 import meeting from '../../public/images/meeting.png'
-import { Button, Typography } from '@mui/material';
+import { Typography } from '@mui/material';
 
 
 export default function Home() {
@@ -20,7 +20,7 @@ export default function Home() {
       <div className='relative w-screen md:w-1/2 lg:w-1/2 xl:w-1/2 p-5'>
         <Typography sx={{fontSize:'clamp(2em, 7dvw + 2em, 5.5em)'}} fontWeight='bold'>Organize Your Workflow</Typography>
         <Typography sx={{fontSize:'clamp(1em, 0.3dvw + 1em, 1.5em)', width:'70%'}}>Simplify project progress tracking with streamlined and easified queueing management.</Typography>
-        <Button sx={{backgroundColor:'#CCFC57', border:'solid 1px black', color:'black', borderRadius:'15px', padding:'0.5em 3em', marginTop:'40px'}}>Login</Button>
+        <div style={{marginTop:'40px'}}><a href='/login' style={{backgroundColor:'#CCFC57', border:'solid 1px black', color:'black', borderRadius:'15px', padding:'0.5em 3em'}}>Login</a></div>
       </div>
     </div>
   );

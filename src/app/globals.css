@@ -19,3 +19,32 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.nav-a-tag{
+  color: silver;
+  font-weight: bold;
+  padding: 1em 2em;
+  display: flex;
+  gap: 10px;
+}
+
+.nav-a-tag:hover{
+  background-color: #CCFC57;
+  color: white;
+  border-radius: 15px;
+}
+
+.nav-a-tag-active{
+  background-color: #CCFC57;
+  color: white;
+  font-weight: bold;
+  padding: 1em 2em;
+  display: flex;
+  gap: 10px;
+  border-radius: 15px;
+}
+
+.nav-a-tag:active, .nav-a-tag:focus{
+  background-color: #013772;
+}
+
