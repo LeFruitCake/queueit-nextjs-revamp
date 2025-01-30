@@ -1,6 +1,9 @@
 export const BASE_URL = ''
 export const special_characters = ['"',"'",';','-','/','=','(',')','\\','%','/','<','>','&','{','}']
 
+export const lgreen = "#CCFC57"
+export const dpurple = "#7D57FC"
+
 export interface User{
     uid:number
     firstname:string

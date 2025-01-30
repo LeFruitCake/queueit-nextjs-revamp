@@ -99,7 +99,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 // Create a provider component
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser ] = useState<User | null>(student);
+  // const [user, setUser ] = useState<User | null>(student);
+  const [user, setUser ] = useState<User | null>(faculty);
 
   const login = (userData: User) => {
     setUser (userData);

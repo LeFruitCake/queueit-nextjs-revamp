@@ -62,9 +62,9 @@ const Navbar = () => {
             <img onClick={()=>{router.replace('/dashboard')}} className='hidden md:block lg:block xl:block cursor-pointer' src={logo.src} alt="logo" style={{height:'100%'}} />
             <nav className='hidden md:flex lg:flex xl:flex ' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
                 <a href='/dashboard' className={`nav-a-tag${location.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
-                <a href='/active' className={`nav-a-tag${location.pathname === '/active' ? '-active' : ''}`}>Queue</a>
-                <a href='/create' className={`nav-a-tag${location.pathname === '/create' ? '-active' : ''}`}>Availability</a>
-                <a href='/history' className={`nav-a-tag${location.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
+                <a href='/queue' className={`nav-a-tag${location.pathname === '/queue' ? '-active' : ''}`}>Queue</a>
+                <a href='/availability' className={`nav-a-tag${location.pathname === '/availability' ? '-active' : ''}`}>Availability</a>
+                <a href='/rubrics' className={`nav-a-tag${location.pathname === '/rubrics' ? '-active' : ''}`}>Rubrics</a>
             </nav>
             <div className='block md:hidden lg:hidden xl:hidden'>
                 <IconButton onClick={()=>{setToggleDrawer(true)}}>
