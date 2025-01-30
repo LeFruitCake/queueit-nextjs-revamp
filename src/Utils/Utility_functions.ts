@@ -71,3 +71,9 @@ export function millisecondsToHMS(milliseconds, setDifference) {
       setDifference(formattedTime);
   }
 }
+
+export function isPastTime(time:number){
+  const now = new Date().getTime()
+  console.log(time)
+  return time < now;
+}

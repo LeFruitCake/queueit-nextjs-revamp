@@ -3,22 +3,62 @@ import React, { useState } from 'react'
 import star from '../../public/images/star.png'
 import squiggly from '../../public/images/squiggly.png'
 import floating from '../../public/images/3.png'
-import { Button, MenuItem, Modal, Select, TextField, Typography } from '@mui/material'
-import { setMinTime } from '@/Utils/Utility_functions'
+import { Button, MenuItem, Modal, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { isPastTime, setMinTime } from '@/Utils/Utility_functions'
 import { dpurple } from '@/Utils/Global_variables'
+import { toast } from 'react-toastify'
 
 interface LetThemInModalProps{
     setIsQueueing: Function
     setTimeStop: Function
     setQueueingLimit: Function
     setQueueingFilter: Function
+    openQueueing: Function
+    open: boolean
+    setOpen: Function
 }
 
-const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeStop, setQueueingLimit, setQueueingFilter}) => {
-    const [open, setOpen] = React.useState(false);
+const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeStop, setQueueingLimit, setQueueingFilter, open, setOpen, openQueueing}) => {
+    
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const date = new Date().toDateString()
+
+    const handleTimeLimitChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+    
+        // Get the value from the input and create a Date object
+        const inputTime = e.target.value; // This is a string in the format "HH:MM"
+        
+        // Create a Date object for today with the input time
+        const [hours, minutes] = inputTime.split(':').map(Number);
+        const inputDate = new Date();
+        inputDate.setHours(hours, minutes, 0, 0); // Set hours and minutes, seconds and milliseconds to 0
+
+        // Compare the timestamps
+        if (isPastTime(inputDate.getTime())) {
+            toast.warning("Warning! you chose a past time.", {autoClose:2000, style:{fontWeight:'bold'}});
+        }
+        setTimeStop(inputDate.getTime())
+    }
+
+    const handleClassroomFilterSelectChange = (e:SelectChangeEvent)=>{
+        let classrooms = [... e.target.value]
+        if (classrooms.some(num => Number(num) == -1)){
+            setQueueingFilter([-1])
+        }else{
+            setQueueingFilter(classrooms)
+        }
+    }
+
+    const handleClassroomLimitChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
+        if (Number(e.target.value) < 0){
+            toast.warning("Warning! your limit is a negative number.", {autoClose:2000, style:{fontWeight:'bold'}});
+        }
+        setQueueingLimit(e.target.value)
+    }
+
+    
+
     return (
     <div className='bg-white rounded-lg border-2 border-black relative p-10'>
         
@@ -43,24 +83,20 @@ const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeSto
             <div className='bg-white absolute w-2/3 md:w-1/3 lg:w-1/3 xl:w-1/3 p-10 flex flex-col gap-3 rounded-xl' style={{top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}>
                 <div className='w-full flex-col md:flex-row lg:flex-row xl:flex-row flex justify-between items-center'>
                     <Typography fontWeight='bold'>{date}</Typography>
-                    <input className='border-2 border-silver p-3 rounded-xl' type="time" name="endTime" min={setMinTime()} />
+                    <input onChange={handleTimeLimitChange} className='border-2 border-silver p-3 rounded-xl' type="time" name="endTime" min={setMinTime()} />
                 </div>
                 <div className='w-full flex flex-col md:flex-row lg:flex-row xl:flex-row justify-between items-center'>
-                    <Select multiple defaultValue={[-1]} sx={{width:'100%'}} onChange={
-                        (e)=>{
-                          console.log(e.target.value)  
-                        }
-                    }>
+                    <Select multiple defaultValue={[-1]} sx={{width:'100%'}} onChange={handleClassroomFilterSelectChange}>
                         <MenuItem value={-1} defaultChecked>All Classrooms</MenuItem>
                     </Select>
                 </div>
                 <div className='w-full flex flex-col lg:flex-row xl:flex-row'>
                     <Typography sx={{flex:1}}>Enter maximum number of groups for consultation:</Typography>
-                    <input style={{flex:1}} type='number' defaultValue={0} min={0} className='border-2 border-silver p-3 rounded-xl'/>
+                    <input onChange={handleClassroomLimitChange} style={{flex:1}} type='number' defaultValue={0} min={0} className='border-2 border-silver p-3 rounded-xl'/>
                 </div>
                 <div className='w-full mt-5 flex justify-center gap-5'>
                     <Button onClick={handleClose} sx={{color:'black', padding:'1em 1.5em'}} >Cancel</Button>
-                    <Button onClick={()=>{setOpen(false);setIsQueueing(true)}} sx={{backgroundColor:dpurple, color:'white', padding:'1em 3em', borderRadius:'15px'}}>Open</Button>
+                    <Button onClick={openQueueing} sx={{backgroundColor:dpurple, color:'white', padding:'1em 3em', borderRadius:'15px'}}>Open</Button>
                 </div>
             </div>
         </Modal>

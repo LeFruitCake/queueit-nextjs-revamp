@@ -1,29 +1,40 @@
+import { dpurple } from '@/Utils/Global_variables'
 import { millisecondsToHMS } from '@/Utils/Utility_functions'
 import { Button } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 
 interface StopQueueingButtonProps{
-    timeStop: Date|null
+    timeStop: number|null
+    isQueueingOpen: boolean
+    setIsQueueingOpen: Function
 }
 
-const StopQueueingButton:React.FC<StopQueueingButtonProps> = ({timeStop}) => {
-    const endTime = timeStop?.getTime()
+const StopQueueingButton:React.FC<StopQueueingButtonProps> = ({timeStop, isQueueingOpen, setIsQueueingOpen}) => {
+    const endTime = timeStop
+    const timeNow = new Date().getTime()
     const [difference, setDifference] = useState(null);
     useEffect(()=>{
-        const intervalID = setInterval(()=>{
-            millisecondsToHMS(endTime,setDifference)
-            if (endTime && endTime <= Date.now()){
-                clearInterval(intervalID);
-                // closeQueueing();
+        // console.log(`timeStop: ${timeStop} and timeNow: ${timeNow} difference: ${difference}`)
+        if(endTime && endTime > timeNow && isQueueingOpen){
+            const intervalID = setInterval(()=>{
+                millisecondsToHMS(endTime,setDifference)
+                if (endTime && endTime <= Date.now()){
+                    clearInterval(intervalID);
+                    // closeQueueing();
+                }
+            },1000)
+            return ()=>{
+                clearInterval(intervalID)
             }
-        },1000)
-        return ()=>{
-            clearInterval(intervalID)
         }
-      },[endTime])
+      },[endTime, difference])
     return (
-        <Button>
-            
+        <Button onClick={()=>{setIsQueueingOpen(false)}} sx={{position:'relative', backgroundColor:dpurple, color:'white', width:'100%'}}>
+            {isQueueingOpen?
+                difference == null?<>Close Queueing</>:<>{`Queueing ends in ${difference}`}</>
+                :
+                <></>
+            }
         </Button>
     )
 }
