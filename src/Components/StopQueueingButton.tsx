@@ -29,7 +29,7 @@ const StopQueueingButton:React.FC<StopQueueingButtonProps> = ({timeStop, isQueue
         }
       },[endTime, difference])
     return (
-        <Button onClick={()=>{setIsQueueingOpen(false)}} sx={{position:'relative', backgroundColor:dpurple, color:'white', width:'100%'}}>
+        <Button onClick={()=>{setIsQueueingOpen(false)}} sx={{position:'relative', backgroundColor:dpurple, color:'white', width:'100%', height:'15%'}}>
             {isQueueingOpen?
                 difference == null?<>Close Queueing</>:<>{`Queueing ends in ${difference}`}</>
                 :
