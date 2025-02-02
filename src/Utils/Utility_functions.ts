@@ -5,13 +5,26 @@ import Person3 from '../../public/images/Person3.png'
 import Person4 from '../../public/images/Person4.png'
 import Person5 from '../../public/images/Person5.png'
 import Person6 from '../../public/images/Person6.png'
+import Group1 from '../../public/images/group1.png'
+import Group2 from '../../public/images/group2.png'
+import Group3 from '../../public/images/group3.png'
+import Group4 from '../../public/images/group4.png'
+import Group5 from '../../public/images/group5.png'
 
 let PersonArray = [Person1, Person2, Person3, Person4, Person5, Person6];
+
+let GroupArray = [Group1, Group2, Group3, Group4, Group5]
 
 export function randomPerson() {
     // Generate a random index between 0 and the length of the array - 1
     const randomNumber = Math.floor(Math.random() * PersonArray.length);
     return PersonArray[randomNumber].src;
+}
+
+export function groupImage(index:number) {
+  // Generate a random index between 0 and the length of the array - 1
+  const modolus = index%GroupArray.length;
+  return GroupArray[modolus].src;
 }
 
 //used to combat SQL Injection via eliminating entries w/ special characters ensuring regex entries.

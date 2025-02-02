@@ -45,7 +45,7 @@ const team1Proposal:ProjectProposal = {
 
 const team1:Team = {
   "tid":1,
-  "groupName":'SPEAR',
+  "groupName":'SPEAR SAKSI NI JAVA WAHA',
   "project":team1Proposal,
   "leader":user1,
   "classRef":c1,
@@ -121,13 +121,13 @@ const page = () => {
     //   console.log(isQueueingOpen)
     // },[isQueueingOpen])
     return (
-      <BaseComponent opacity={0.25} ovf={"hidden flex flex-col pb-5"}>
+      <BaseComponent opacity={0.25} ovf={" flex flex-col pb-5"}>
         {!isQueueingOpen && user?.role == UserType.FACULTY?
 
           <LetThemInModal open={open} setOpen={setOpen} openQueueing={openQueueing} setIsQueueing={setIsQueueingOpen} setQueueingFilter={setQueueingFilter} setQueueingLimit={setQueueingLimit} setTimeStop={setTimeStop}/>
           :
           <div className='relative pt-5 flex-grow flex flex-col-reverse lg:flex-row xl:flex-row w-full'>
-            <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 h-full' style={{minWidth:'300px'}}>
+            <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 h-full flex flex-col gap-3' style={{minWidth:'300px'}}>
               <StopQueueingButton isQueueingOpen={isQueueingOpen} timeStop={timeStop} setIsQueueingOpen={setIsQueueingOpen}/>
               <QueueingList teams={teams}/>
             </div>
