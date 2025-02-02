@@ -9,7 +9,7 @@ interface QueueingListProps{
 
 const QueueingList:React.FC<QueueingListProps> = ({teams}) => {
     return (
-        <div className='p-3 px-5 border-2 border-black bg-white rounded-md flex flex-col gap-10 h-full'>
+        <div className='p-3 px-5 border-2 border-black bg-white rounded-md flex flex-col gap-10 max-h-full'>
             <Typography variant='subtitle1'>Up Next</Typography>
         {Array.from(teams).map((team,index)=>(
             <QueueingTeam key={index} index={index} team={team}/>

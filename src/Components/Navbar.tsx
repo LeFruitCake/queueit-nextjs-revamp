@@ -7,6 +7,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '@/Utils/AuthContext';
+import { stringAvatar } from '@/Utils/Utility_functions';
 
 const Navbar = () => {
     const location = window.location
@@ -29,34 +30,7 @@ const Navbar = () => {
     const handleNotificationClose = () => {
         setNotificationAnchorEl(null)
     }
-    function stringToColor(string: string) {
-        let hash = 0;
-        let i;
-      
-        /* eslint-disable no-bitwise */
-        for (i = 0; i < string.length; i += 1) {
-          hash = string.charCodeAt(i) + ((hash << 5) - hash);
-        }
-      
-        let color = '#';
-      
-        for (i = 0; i < 3; i += 1) {
-          const value = (hash >> (i * 8)) & 0xff;
-          color += `00${value.toString(16)}`.slice(-2);
-        }
-        /* eslint-enable no-bitwise */
-      
-        return color;
-      }
-      
-      function stringAvatar(name: string) {
-        return {
-          sx: {
-            bgcolor: stringToColor(name),
-          },
-          children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`,
-        };
-      }
+    
     return (
         <div className='w-full flex p items-center justify-between py-5 relative' style={{height:'100px', zIndex:1}}>
             <img onClick={()=>{router.replace('/dashboard')}} className='hidden md:block lg:block xl:block cursor-pointer' src={logo.src} alt="logo" style={{height:'100%'}} />
@@ -73,9 +47,9 @@ const Navbar = () => {
                 <Drawer open={toggleDrawer} onClose={()=>{setToggleDrawer(false)}}>
                 <nav className='flex flex-col gap-3 p-5' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
                     <a href='/dashboard' className={`nav-a-tag${location.pathname === '/dashboard' ? '-active' : ''}`}>Home</a>
-                    <a href='/active' className={`nav-a-tag${location.pathname === '/active' ? '-active' : ''}`}>Queue</a>
-                    <a href='/create' className={`nav-a-tag${location.pathname === '/create' ? '-active' : ''}`}>Availability</a>
-                    <a href='/history' className={`nav-a-tag${location.pathname === '/history' ? '-active' : ''}`}>Rubrics</a>
+                    <a href='/queue' className={`nav-a-tag${location.pathname === '/queue' ? '-active' : ''}`}>Queue</a>
+                    <a href='/availability' className={`nav-a-tag${location.pathname === '/availability' ? '-active' : ''}`}>Availability</a>
+                    <a href='/rubrics' className={`nav-a-tag${location.pathname === '/rubrics' ? '-active' : ''}`}>Rubrics</a>
                 </nav>
                 </Drawer>
             </div>
