@@ -10,7 +10,7 @@ interface UserContextType {
 }
 
 
-const faculty:User ={
+export const faculty:User ={
     uid:1,
     firstname:"jasmine",
     lastname:"tulin",
@@ -22,7 +22,7 @@ const faculty:User ={
     enrolledClasses:new Set()
 }
 
-const classroom1:Classes ={
+export const classroom1:Classes ={
     cid:1,
     createdBy:faculty,
     courseType:"Project based",
@@ -35,7 +35,7 @@ const classroom1:Classes ={
     createdDate: new Date(),
     isDeleted:false
 }
-const classroom2:Classes ={
+export const classroom2:Classes ={
   cid:2,
   createdBy:faculty,
   courseType:"Project based",
@@ -82,7 +82,7 @@ classes.add(classroom3)
 classes.add(classroom4)
 
 
-const student:User ={
+export const student:User ={
     uid:1,
     firstname:"jandel",
     lastname:"macabecha",
@@ -100,6 +100,7 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 // Create a provider component
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser ] = useState<User | null>(student);
+  // const [user, setUser ] = useState<User | null>(faculty);
 
   const login = (userData: User) => {
     setUser (userData);
