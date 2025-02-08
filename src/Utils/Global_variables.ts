@@ -58,3 +58,66 @@ export interface ProjectProposal{
     adviser:User
     isDeleted:boolean
 }
+
+export interface QueueingManager{
+    queueID:number
+    adviserID:number
+    queueingGroups:Set<Team>
+    onHoldgroups:Set<Team>
+    tendingGroup:Team
+    timeEnds:Date
+    isActive:Boolean
+    cateringLimit:number
+}
+
+export interface MeetingEdition{
+    userID:number
+    edition:Date
+    editionNote:String
+}
+
+export interface Grade{
+    userID:number
+    meetingID:number
+    criterionID:number
+    editionNote:string
+    grade:number
+}
+
+export interface Meeting{
+    meetingID:number
+    adviserID:number
+    groupID:number
+    start:Date
+    end:Date
+    meetingDate:Date
+    attendance:Set<Number>
+    editedAttendance:Set<MeetingEdition>
+    grades:Set<Grade>
+    isDefaulted:boolean
+    defaultedLog:string
+}
+
+export interface Criterion{
+    criterionID:number
+    rubric:Rubric
+    title:string
+    description:string
+}
+
+export interface Rubric{
+    rubricID:number
+    title:string
+    description:string
+    criteria:Set<Criterion>
+    isPrivate:boolean
+    creator:User
+}
+
+export interface Chat{
+    userID:number
+    firstname:string
+    lastname:string
+    message:string
+}
+
