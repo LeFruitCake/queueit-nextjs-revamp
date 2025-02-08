@@ -16,11 +16,11 @@ export const classroom1:Classes ={
     cid:1,
     createdBy:faculty,
     courseType:"Project based",
-    courseCode:"ZXC",
+    courseCode:"IT344",
     section:"G01",
     schoolYear:"2425",
     semester:"2",
-    courseDescription:"Capstone",
+    courseDescription:"Applications Development and Emerging Technologies",
     classKey:"ZXC",
     createdDate: new Date(),
     isDeleted:false
@@ -29,7 +29,7 @@ export const classroom2:Classes ={
   cid:2,
   createdBy:faculty,
   courseType:"Project based",
-  courseCode:"ZXC",
+  courseCode:"IT345",
   section:"G01",
   schoolYear:"2425",
   semester:"2",
@@ -165,6 +165,9 @@ const team2:Team = {
   "isRecruitmentOpen":false,
   "isDeleted":false
 }
+
+export const sampleGroupMembers:Array<User> = [user1, user2, student,user1, user2, student]
+export const sampleTeams:Array<Team> = [team1, team2]
 
 //this is supposed to be QueueingList class from Queueit backend
 const teams = new Set([team1,team2])

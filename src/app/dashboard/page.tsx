@@ -9,6 +9,7 @@ import React from 'react'
 export default function page() {
     const userContext = useUserContext();
     const user = userContext.user
+    console.log(user?.enrolledClasses)
     return (
         <div className='h-screen overflow-auto'>
             <BaseComponent>

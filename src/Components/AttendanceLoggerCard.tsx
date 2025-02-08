@@ -19,7 +19,7 @@ const AttendanceLoggerCard:React.FC<AttendanceLoggerCardProps> = ({member}) => {
         }
     }
     return (
-        <div onClick={handleAttendanceStatusChange} className={`flex items-center justify-between p-3 rounded-md bg-${attendanceStatus == 1?"lushgreen":attendanceStatus == 2?"lushred":"lushorange"} mt-1 cursor-pointer`}>
+        <div onClick={handleAttendanceStatusChange} className={`flex items-center justify-between p-3 rounded-md ${attendanceStatus == 1?"bg-lushgreen":attendanceStatus == 2?"bg-lushred":"bg-lushorange"} mt-1 cursor-pointer`}>
             <div className='flex gap-3 items-center'>
                 <Avatar {...stringAvatar(`${member?.firstname} ${member?.lastname}`)}/>
                 <span style={{fontWeight:'bold'}}>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</span>

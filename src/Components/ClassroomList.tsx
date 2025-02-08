@@ -7,7 +7,7 @@ interface ClassroomListProps{
 }
 
 const ClassroomList:React.FC<ClassroomListProps> = ({classrooms}) => {
-    const classes = classrooms? [...classrooms] : [];
+    const classes = classrooms? Array.from(classrooms) : [];
     return (
         <div className='border-2 border-black mt-5 rounded-xl relative bg-white p-10 flex flex-wrap gap-16'>
             {classes.map((classs)=>(

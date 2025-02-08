@@ -7,16 +7,12 @@ import LetThemInModal from '@/Components/LetThemInModal'
 import MeetingBoard from '@/Components/MeetingBoard'
 import QueueingList from '@/Components/QueueingList'
 import StopQueueingButton from '@/Components/StopQueueingButton'
-import { faculty, queueingManager1, teams } from '@/Sample_Data/SampleData1'
+import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Utils/AuthContext'
 import { UserType } from '@/Utils/Global_variables'
 import { isPastTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
-
-
-
-
 
 const page = () => {
     const user = useUserContext().user
@@ -48,7 +44,7 @@ const page = () => {
       }
     }
     return (
-      <BaseComponent opacity={0.25} ovf={"flex flex-col pb-5"}>
+      <BaseComponent opacity={0.25}>
         {!isQueueingOpen && user?.role == UserType.FACULTY?
 
           <LetThemInModal open={open} setOpen={setOpen} openQueueing={openQueueing} setIsQueueing={setIsQueueingOpen} setQueueingFilter={setQueueingFilter} setQueueingLimit={setQueueingLimit} setTimeStop={setTimeStop}/>
