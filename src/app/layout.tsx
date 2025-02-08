@@ -5,6 +5,7 @@ import favico from '../../public/favicon.ico'
 import { UserProvider } from "@/Utils/AuthContext";
 import { ToastContainer } from "react-toastify";
 import { ClassroomProvider } from "@/Utils/ClassroomContext";
+import { TeamProvider } from "@/Utils/TeamContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,8 +38,10 @@ export default function RootLayout({
         
           <UserProvider>
             <ClassroomProvider>
-              {children}
-              <ToastContainer/>
+              <TeamProvider>
+                {children}
+                <ToastContainer/>
+              </TeamProvider>
             </ClassroomProvider>
           </UserProvider>
       </body>

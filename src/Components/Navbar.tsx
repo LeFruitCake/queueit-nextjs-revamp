@@ -33,7 +33,7 @@ const Navbar = () => {
     }
     
     return (
-        <div className='w-full flex p items-center justify-end md:justify-between lg:justify-between xl:justify-between py-5 relative' style={{height:'100px', zIndex:1}}>
+        <div className='w-full flex p items-center justify-end md:justify-between lg:justify-between xl:justify-between py-5 relative' style={{height:'100px', zIndex:3}}>
             <img onClick={()=>{router.replace('/dashboard')}} className='hidden md:block lg:block xl:block cursor-pointer' src={logo.src} alt="logo" style={{height:'100%'}} />
             {userContext.user?.role == UserType.FACULTY?
                 <>

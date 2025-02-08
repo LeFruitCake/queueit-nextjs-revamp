@@ -49,7 +49,7 @@ const page = () => {
 
           <LetThemInModal open={open} setOpen={setOpen} openQueueing={openQueueing} setIsQueueing={setIsQueueingOpen} setQueueingFilter={setQueueingFilter} setQueueingLimit={setQueueingLimit} setTimeStop={setTimeStop}/>
           :
-          <div className='relative pt-5 flex-grow min-h-full flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
+          <div className='relative pt-5 flex-grow flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
             <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 flex-grow flex flex-col gap-3' style={{minWidth:'300px'}}>
               <StopQueueingButton isQueueingOpen={isQueueingOpen} timeStop={timeStop} setIsQueueingOpen={setIsQueueingOpen}/>
               <QueueingList teams={manager.queueingGroups}/>

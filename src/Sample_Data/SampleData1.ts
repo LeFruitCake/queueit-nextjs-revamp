@@ -167,10 +167,10 @@ const team2:Team = {
 }
 
 export const sampleGroupMembers:Array<User> = [user1, user2, student,user1, user2, student]
-export const sampleTeams:Array<Team> = [team1, team2]
+export const sampleTeams:Array<Team> = [team1,team2, team1, team2, team1, team2,team1,team2, team1, team2, team1, team2]
 
 //this is supposed to be QueueingList class from Queueit backend
-const teams = new Set([team1,team2])
+const teams = [team1,team2, team1, team2, team1, team2, team1,team2, team1, team2, team1, team2,team1,team2, team1, team2, team1, team2, team1,team2, team1, team2, team1, team2]
 
 export const queueingManager1:QueueingManager ={
   queueID:1,

@@ -62,7 +62,7 @@ export interface ProjectProposal{
 export interface QueueingManager{
     queueID:number
     adviserID:number
-    queueingGroups:Set<Team>
+    queueingGroups:Array<Team>
     onHoldgroups:Set<Team>
     tendingGroup:Team
     timeEnds:Date
