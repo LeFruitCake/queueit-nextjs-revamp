@@ -6,6 +6,8 @@ import { Avatar, Button, Modal, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import person from '../../../../public/images/pointingUpwardPerson.png'
+import whiteStar from '../../../../public/images/star-white.png'
+import whiteSquiggly from '../../../../public/images/squiggly-white.png'
 import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1'
 import GroupBar from '@/Components/GroupBar'
 import { dpurple } from '@/Utils/Global_variables'
@@ -31,7 +33,9 @@ const page = () => {
   return (
     <BaseComponent opacity={1}>
       <div className='bg-dpurple flex flex-col flex-grow w-full h-full relative mt-5 rounded-md'>
-        <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 bottom-0' style={{height:'70%'}} />
+        <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 bottom-0' style={{height:'70%', zIndex:2}} />
+        <img className='hidden lg:block xl:block' src={whiteSquiggly.src} alt="conductor" style={{position:'absolute', height:'25%', bottom:190, left:350, zIndex:1}}/>
+        <img className='hidden lg:block xl:block' src={whiteStar.src} alt="conductor" style={{position:'absolute', height:'10%', bottom:350, left:50}}/>
         <div className='p-3'>
           <BackButton/>
         </div>
@@ -55,7 +59,7 @@ const page = () => {
             <Button onClick={closeViewEnrolleesModal} sx={{backgroundColor:dpurple, color:'white', width:'fit-content', padding:'1em 1.5em', alignSelf:'center'}}>Close</Button>
           </div>
         </Modal>
-        <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 h-full overflow-auto' style={{alignSelf:'end'}}>
+        <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 h-full overflow-auto' style={{alignSelf:'end'}}> 
           {teams.map((team,index)=>(
             <GroupBar key={index} team={team} index={index}/>
           ))}

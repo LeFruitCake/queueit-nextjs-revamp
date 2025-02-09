@@ -166,12 +166,11 @@ const team2:Team = {
   "isDeleted":false
 }
 
-export const sampleGroupMembers:Array<User> = [user1, user2, student,user1, user2, student]
+export const sampleGroupMembers:Array<User> = [user1, user2, student,user1, user2, student,student, user1, user2,student, user1, user2,user1, user2, student,user1, user2, student,student, user1, user2,student, user1, user2,]
 export const sampleTeams:Array<Team> = [team1,team2, team1, team2, team1, team2,team1,team2, team1, team2, team1, team2]
 
 //this is supposed to be QueueingList class from Queueit backend
 const teams = [team1,team2, team1, team2, team1, team2, team1,team2, team1, team2, team1, team2,team1,team2, team1, team2, team1, team2, team1,team2, team1, team2, team1, team2]
-
 export const queueingManager1:QueueingManager ={
   queueID:1,
   adviserID:1,
