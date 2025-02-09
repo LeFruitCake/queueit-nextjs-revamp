@@ -10,12 +10,14 @@ import MemberProfile from '@/Components/MemberProfile'
 import { sampleGroupMembers } from '@/Sample_Data/SampleData1'
 import '../group/group.css'
 import catLoader from '../../../../../public/loaders/catLoader-blackbg.gif'
-import { randomQuotes } from '@/Utils/Utility_functions'
+import { capitalizeFirstLetter, randomQuotes } from '@/Utils/Utility_functions'
+import mentor from '../../../../../public/images/mentor.png'
 
 const page = () => {
     const team = useTeamContext().Team
     const [meetings, setMeetings] = useState(1)
     const quote = randomQuotes()
+    console.log(team?.project?.adviser)
     return (
         <BaseComponent>
             <div className='flex-grow relative pb-5 rounded-xl bg-black mt-5'>
@@ -53,16 +55,19 @@ const page = () => {
                     <div className='relative z-50 px-5'>
                         <div className='bg-lgreen w-full md:w-1/2 lg:w-1/2 xl:w-1/2 rounded-full h-44 z-50 relative flex items-center justify-center' style={{marginTop:'-90px', justifySelf:'center'}}>
                             {team?.project?.adviser?
-                                // <>
-                                //     <Typography></Typography>
-                                //     {/* <img src="" alt="" /> */}
-                                // </>
+                                <div className='w-full h-full p-5 flex justify-start items-center relative'>
+                                    <span className='w-1/2 md:text-center lg:text-center xl:text-center1'>
+                                        <Typography variant='h6' fontWeight='bold'>{`${capitalizeFirstLetter(team.project.adviser.firstname)} ${capitalizeFirstLetter(team.project.adviser.lastname)}`}</Typography>
+                                        <Typography variant='subtitle2'>Mentor</Typography>
+                                    </span>
+                                    <img src={mentor.src} alt="mentor" style={{height:'200%', position:'absolute', right:0,bottom:0, marginBottom:'-86px', marginRight:'-50px'}} />
+                                </div>
+                                
+                                :
                                 <div className='flex flex-col gap-3 p-5 text-center'>
                                     <Typography variant='h6'>{`"${quote.quote}"`}</Typography>
                                     <Typography variant='caption' fontWeight='bold'>{`-${quote.author}`}</Typography>
                                 </div>
-                                :
-                                <></>
                             }
                         </div>
                     </div>
@@ -73,7 +78,7 @@ const page = () => {
                         
                         {meetings?
                             <div>
-                                <div className='flex justify-between items-center'>
+                                <div className='flex flex-col md:flex-row justify-between items-center'>
                                     <Typography variant='h4' color='white' fontWeight='bold'>Consultation History</Typography>
                                     <Button sx={{backgroundColor:lgreen, color:'black', fontWeight:'bold'}}>Generate Report</Button>
                                 </div>

@@ -158,7 +158,7 @@ const team2Proposal:ProjectProposal = {
 const team2:Team = {
   "tid":2,
   "groupName":'Queueit',
-  "project":team2Proposal,
+  // "project":team2Proposal,
   "leader":student,
   "classRef":c1,
   "members": new Set().add(student) as Set<User>,
