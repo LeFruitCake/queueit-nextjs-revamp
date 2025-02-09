@@ -10,12 +10,12 @@ export default function page() {
     const userContext = useUserContext();
     const user = userContext.user
     console.log(user?.enrolledClasses)
-    return (
-        <div className='h-screen overflow-auto'>
-            <BaseComponent>
+    return ( 
+        <BaseComponent opacity={1}>
+            <div className="flex flex-col items-center justify-start w-full px-6 mt-3 min-h-screen">
                 <GreetingBar name={user?.role == UserType.FACULTY?`Teacher ${user?.firstname}`:user?.firstname}/>
                 <ClassroomList classrooms={user?.enrolledClasses}/>
-            </BaseComponent>
-        </div>
+            </div> 
+        </BaseComponent> 
     )
 }

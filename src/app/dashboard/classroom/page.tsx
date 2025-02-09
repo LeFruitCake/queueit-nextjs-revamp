@@ -30,13 +30,13 @@ const page = () => {
   },[classroomContext,router])
   return (
     <BaseComponent opacity={1}>
-      <div className='bg-dpurple flex flex-col flex-grow w-full h-full relative mt-5 rounded-md'>
-        <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 bottom-0' style={{height:'70%'}} />
+      <div className='bg-dpurple flex flex-col flex-grow w-full h-full relative overflow-hidden mt-0 rounded-md'>
+        <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 top-20' style={{height:'50%'}} />
         <div className='p-3'>
           <BackButton/>
         </div>
-        <Typography variant='h4' className='text-white text-center text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
-        <Typography variant='h2' className='text-white text-center text-lg font-bold'>{classroom?.courseDescription}</Typography>
+        <Typography variant='h5' className='text-white text-center text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
+        <Typography variant='h4' className='text-white text-center text-lg font-bold'>{classroom?.courseDescription}</Typography>
         <a onClick={openViewEnrolleesModal} className='text-white text-center text-lg cursor-pointer' style={{textDecoration:'underline'}}>View enrolled students</a>
         <Modal open={viewEnrolleesModalOpen} onClose={closeViewEnrolleesModal}>
           <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)'}} className='p-5 w-2/3 md:w-1/2 lg:w-1/2 xl:w-1/2 bg-white rounded-md flex flex-col gap-10'>
