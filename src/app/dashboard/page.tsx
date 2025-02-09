@@ -13,8 +13,18 @@ export default function page() {
     return ( 
         <BaseComponent opacity={1}>
             <div className="flex flex-col items-center justify-start w-full px-6 mt-3 min-h-screen">
-                <GreetingBar name={user?.role == UserType.FACULTY?`Teacher ${user?.firstname}`:user?.firstname}/>
-                <ClassroomList classrooms={user?.enrolledClasses}/>
+                {userContext.user?.role == UserType.FACULTY?
+                    <>
+                        <GreetingBar name={'Teacher ' + user.firstname}/>
+                        <ClassroomList classrooms={user?.enrolledClasses}/>
+                    </>
+                    :
+                    <>
+                        <GreetingBar name={user.firstname}/>
+                        <ClassroomList classrooms={user?.enrolledClasses}/>
+                    </>
+                }
+                
             </div> 
         </BaseComponent> 
     )

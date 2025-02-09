@@ -2,23 +2,46 @@ import { special_characters } from "./Global_variables"
 import Person1 from '../../public/images/Person1.png'
 import Person2 from '../../public/images/Person2.png'
 import Person3 from '../../public/images/Person3.png'
-import Person4 from '../../public/images/Person4.png'
-import Person5 from '../../public/images/Person5.png'
-import Person6 from '../../public/images/Person6.png'
+import Person4 from '../../public/images/person4.png'
+import Person5 from '../../public/images/person5.png'
+import Person6 from '../../public/images/pointingUpwardPerson.png'
 import Group1 from '../../public/images/group1.png'
 import Group2 from '../../public/images/group2.png'
 import Group3 from '../../public/images/group3.png'
 import Group4 from '../../public/images/group4.png'
 import Group5 from '../../public/images/group5.png'
+import Avatar1 from '../../public/images/avatar1.png'
+import Avatar2 from '../../public/images/avatar2.png'
+import Avatar3 from '../../public/images/avatar3.png'
+import Avatar4 from '../../public/images/avatar4.png'
+import Avatar5 from '../../public/images/avatar5.png'
+import Avatar6 from '../../public/images/avatar6.png'
+import Avatar7 from '../../public/images/avatar7.png'
+import Avatar8 from '../../public/images/avatar8.png'
+import Avatar9 from '../../public/images/avatar9.png'
+import Avatar10 from '../../public/images/avatar10.png'
+import { quotes } from "@/Sample_Data/Quotes"
 
 let PersonArray = [Person1, Person2, Person3, Person4, Person5, Person6];
-
+let AvatarArray = [Avatar1, Avatar2, Avatar3, Avatar4, Avatar5, Avatar6, Avatar7, Avatar8, Avatar9, Avatar10]
 let GroupArray = [Group1, Group2, Group3, Group4, Group5]
+
+const learning_quotes = quotes
+
+export function randomQuotes(){
+  const randomNumber = Math.floor(Math.random() * quotes.length);
+  return learning_quotes[randomNumber]
+}
 
 export function randomPerson() {
     // Generate a random index between 0 and the length of the array - 1
     const randomNumber = Math.floor(Math.random() * PersonArray.length);
     return PersonArray[randomNumber].src;
+}
+
+export function randomAvatar(){
+    const randomNumber = Math.floor(Math.random() * AvatarArray.length);
+    return AvatarArray[randomNumber].src;
 }
 
 export function groupImage(index:number) {

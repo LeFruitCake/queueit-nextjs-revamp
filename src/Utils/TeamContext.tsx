@@ -22,7 +22,8 @@ export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   useEffect(() => {
     // Store Team in localStorage whenever it changes
     if (Team) {
-      localStorage.setItem('Team', JSON.stringify(Team));
+      const teamWithMembers = {...Team, members:Array.from(Team.members)}
+      localStorage.setItem('Team', JSON.stringify(teamWithMembers));
     } else {
       localStorage.removeItem('Team'); // Clear if undefined
     }
