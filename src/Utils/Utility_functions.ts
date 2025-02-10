@@ -64,6 +64,15 @@ export const validateRegex = (string: string) => {
   return chars.some(char => special_characters.includes(char));
 }
 
+export const extractFirstnameLastnameFromEmail = (email:string)=>{
+  let splitted_email = email.split('@')
+  let full_name = splitted_email[0]
+  let splitted_fullname = full_name.split('.')
+  let firstname = splitted_fullname[0]
+  let lastname = splitted_fullname[1]
+  return [firstname,lastname]
+}
+
 
 //capitalizes the first letter of a given string
 export const capitalizeFirstLetter = (text:string) =>{

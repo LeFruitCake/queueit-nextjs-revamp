@@ -23,6 +23,7 @@ const Navbar = () => {
         setAvatarAnchorEl(event.currentTarget);
     };
     const handleAvatarClose = () => {
+        userContext.logout()
         setAvatarAnchorEl(null);
     };
     const handleNotificationClick = (event: React.MouseEvent<HTMLButtonElement>) => {

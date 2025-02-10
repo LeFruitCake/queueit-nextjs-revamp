@@ -4,16 +4,32 @@ export const special_characters = ['"',"'",';','-','/','=','(',')','\\','%','/',
 export const lgreen = "#CCFC57"
 export const dpurple = "#7D57FC"
 
+export const SPEAR_URL = "http://localhost:8080"
+export const QUEUEIT_URL = "http://localhost:8081"
+
+// export interface User{
+//     uid:number
+//     firstname:string
+//     lastname:string
+//     email:string
+//     password:string
+//     role:string
+//     isDeleted:boolean
+//     interests:string
+//     enrolledClasses:Set<Classes>
+// }
+
 export interface User{
+    deleted:boolean
+    expirationTime:string
+    message:string
+    refreshToken:string
+    role:string
+    statusCode:number
+    token:string
     uid:number
     firstname:string
     lastname:string
-    email:string
-    password:string
-    role:string
-    isDeleted:boolean
-    interests:string
-    enrolledClasses:Set<Classes>
 }
 
 export interface Classes{
