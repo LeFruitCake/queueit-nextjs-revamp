@@ -3,19 +3,27 @@ import BaseComponent from '@/Components/BaseComponent'
 import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
 import { useUserContext } from '@/Utils/AuthContext'
+import { useClassroomContext } from '@/Utils/ClassroomContext';
 import { UserType } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react'
 
 export default function page() {
     const userContext = useUserContext();
+    const classContext = useClassroomContext();
     const user = userContext.user
     const router = useRouter()
+
     useEffect(()=>{
-        if(!userContext.user){
-            router.push('/login')
-        }
-    },[userContext])
+        fetch
+        classContext.setClassroom()
+        
+    })
+    // useEffect(()=>{
+    //     if(!userContext.user){
+    //         router.push('/login')
+    //     }
+    // },[userContext])
     return (
         <div className='h-screen overflow-auto'>
             {userContext.user?
