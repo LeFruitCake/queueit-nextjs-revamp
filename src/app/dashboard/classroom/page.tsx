@@ -21,7 +21,7 @@ const page = () => {
   const classroomContext = useClassroomContext().classroom
   const router = useRouter()
   return (
-    <BaseComponent opacity={1}>
+    <BaseComponent opacity={0.25}>
       {user?.role == UserType.STUDENT?
         <GroupDetailStudentView/>
         :

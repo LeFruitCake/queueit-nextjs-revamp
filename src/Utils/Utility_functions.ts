@@ -25,12 +25,12 @@ import { quotes } from "@/Sample_Data/Quotes"
 import winter from '../../public/images/winter-season.png'
 import sunny from '../../public/images/sunny-season.png'
 import fall from '../../public/images/fall-season.png'
-import rainy from '../../public/images/rainy-season.png'
+// import rainy from '../../public/images/rainy-season.png'
 
 let PersonArray = [Person1, Person2, Person3, Person4, Person5, Person6];
 let AvatarArray = [Avatar1, Avatar2, Avatar3, Avatar4, Avatar5, Avatar6, Avatar7, Avatar8, Avatar9, Avatar10]
 let GroupArray = [Group1, Group2, Group3, Group4, Group5]
-let SeasonArray = [winter, sunny, fall, rainy]
+let SeasonArray = [winter, sunny, fall]
 
 export function randomSeason(){
   const randomNumber = Math.floor(Math.random() * SeasonArray.length);

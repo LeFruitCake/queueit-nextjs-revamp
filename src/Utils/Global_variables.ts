@@ -7,17 +7,17 @@ export const dpurple = "#7D57FC"
 export const SPEAR_URL = "http://localhost:8080"
 export const QUEUEIT_URL = "http://localhost:8081"
 
-// export interface User{
-//     uid:number
-//     firstname:string
-//     lastname:string
-//     email:string
-//     password:string
-//     role:string
-//     isDeleted:boolean
-//     interests:string
-//     enrolledClasses:Set<Classes>
-// }
+export interface UserRetrieved{
+    uid:number
+    firstname:string
+    lastname:string
+    email:string
+    password:string
+    role:string
+    isDeleted:boolean
+    interests:string
+    enrolledClasses:Set<Classes>
+}
 
 export interface User{
     deleted:boolean
@@ -34,7 +34,6 @@ export interface User{
 
 export interface Classes{
     cid:number
-    createdBy:User
     courseType:string
     courseCode:string
     section:string
@@ -43,11 +42,14 @@ export interface Classes{
     courseDescription:string
     classKey:string
     createdDate: Date
-    isDeleted:boolean
+    deleted:boolean
+    firstname:string
+    lastname:string
+    role:string
 }
 
 export enum UserType{
-    FACULTY = "ADVISER",
+    FACULTY = "TEACHER",
     STUDENT = "STUDENT"
 }
 
@@ -55,24 +57,26 @@ export enum UserType{
 export interface Team{
     tid:number
     groupName:string
-    project:ProjectProposal
-    leader:User
-    classRef:Classes
-    members:Set<User>
-    isRecruitmentOpen:boolean
-    isDeleted:boolean
+    projectName:string
+    projectId:number
+    leaderId:number
+    classId:number
+    memberIds:Array<number>
+    features:null
+    projectDescription:string
+    recruitmentOpen:boolean
 }
 
 export interface ProjectProposal{
     pid:number
-    proposedBy:User
+    proposedById:number
     projectName:string
-    classProposal:Classes
+    classId:Classes
     description:string
     status:string
     reason:string
-    adviser:User
-    isDeleted:boolean
+    adviserId:number
+    courseCode:string
 }
 
 export interface QueueingManager{
