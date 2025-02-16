@@ -2,7 +2,7 @@
 import BaseComponent from '@/Components/BaseComponent'
 import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
-import { useUserContext } from '@/Utils/AuthContext'
+import { useUserContext } from '@/Contexts/AuthContext'
 import { Classes, SPEAR_URL, UserType } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'

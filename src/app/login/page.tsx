@@ -7,7 +7,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { SPEAR_URL, User } from '@/Utils/Global_variables'
 import { toast } from 'react-toastify'
-import { useUserContext } from '@/Utils/AuthContext'
+import { useUserContext } from '@/Contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
 import { extractFirstnameLastnameFromEmail } from '@/Utils/Utility_functions'

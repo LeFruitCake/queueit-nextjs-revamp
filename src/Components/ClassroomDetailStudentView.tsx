@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react'
 import BackButton from './BackButton'
 import { Button, Typography } from '@mui/material'
 import { randomAvatar, randomGroupImage, randomSeason } from '@/Utils/Utility_functions'
-import { useClassroomContext } from '@/Utils/ClassroomContext'
+import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import FacultyAvailabilityCard from './FacultyAvailabilityCard'
 import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import { dpurple, ProjectProposal, SPEAR_URL, UserRetrieved } from '@/Utils/Global_variables'
-import { useUserContext } from '@/Utils/AuthContext'
+import { useUserContext } from '@/Contexts/AuthContext'
 import PersonIcon from '@mui/icons-material/Person';
-import { useTeamContext } from '@/Utils/TeamContext'
+import { useTeamContext } from '@/Contexts/TeamContext'
 import { toast } from 'react-toastify'
 
 

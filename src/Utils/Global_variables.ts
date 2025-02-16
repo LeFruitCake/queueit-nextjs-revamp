@@ -58,6 +58,12 @@ export enum UserType{
     STUDENT = "STUDENT"
 }
 
+export interface Faculty{
+    firstname:string|undefined
+    lastname:string|undefined
+    uid:number|undefined
+}
+
 
 export interface Team{
     tid:number
@@ -84,15 +90,45 @@ export interface ProjectProposal{
     courseCode:string
 }
 
+export interface ChatDTO{
+    userID:number
+    adviserID:number
+    message:string
+    firstname:string
+    lastname:string
+}
+
 export interface QueueingManager{
     queueID:number
-    adviserID:number
-    queueingGroups:Array<Team>
-    onHoldgroups:Set<Team>
-    tendingGroup:Team
-    timeEnds:Date
-    isActive:Boolean
+    facultyID:number
+    timeEnds:string
+    isActive:boolean
     cateringLimit:number
+    queueingEntries:Array<QueueingEntry>
+    cateredClassrooms:Array<Classroomv2>
+}
+
+interface Classroomv2{
+    classroomID:number
+    facultyID:number
+    queueingManager:QueueingManager
+}
+
+interface QueueingEntry{
+    queueingEntryID:number
+    team:QueueingEntryTeam
+    queueingManager:QueueingManager
+    dateTimeQueued:Date
+    isOnHold:boolean
+}
+
+interface QueueingEntryTeam{
+    teamID:number
+    teamName:string
+    courseCode:string
+    section:string
+    memberIds:Array<number>
+    queueingEntry:QueueingEntry
 }
 
 export interface MeetingEdition{

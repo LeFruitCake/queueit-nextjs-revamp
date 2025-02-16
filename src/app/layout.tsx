@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import favico from '../../public/favicon.ico'
-import { UserProvider } from "@/Utils/AuthContext";
+import { UserProvider } from "@/Contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
-import { ClassroomProvider } from "@/Utils/ClassroomContext";
-import { TeamProvider } from "@/Utils/TeamContext";
+import { ClassroomProvider } from "@/Contexts/ClassroomContext";
+import { TeamProvider } from "@/Contexts/TeamContext";
 import { WebSocketProvider } from "@/WebSocket/WebSocketContext";
+import { FacultyProvider } from "@/Contexts/FacultyContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,8 +42,10 @@ export default function RootLayout({
           <WebSocketProvider>
             <ClassroomProvider>
               <TeamProvider>
-                {children}
-                <ToastContainer/>
+                <FacultyProvider>
+                  {children}
+                  <ToastContainer/>
+                </FacultyProvider>
               </TeamProvider>
             </ClassroomProvider>
           </WebSocketProvider>

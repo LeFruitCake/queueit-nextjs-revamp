@@ -6,7 +6,7 @@ import { Avatar, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
-import { useUserContext } from '@/Utils/AuthContext';
+import { useUserContext } from '@/Contexts/AuthContext';
 import { stringAvatar } from '@/Utils/Utility_functions';
 import { UserType } from '@/Utils/Global_variables';
 

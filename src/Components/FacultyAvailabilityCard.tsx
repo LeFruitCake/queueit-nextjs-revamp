@@ -1,8 +1,10 @@
 "use client"
-import { dpurple, QUEUEIT_URL } from '@/Utils/Global_variables'
+import { useFacultyContext } from '@/Contexts/FacultyContext'
+import { dpurple, Faculty, QUEUEIT_URL } from '@/Utils/Global_variables'
 import { capitalizeFirstLetter, randomAvatar, randomSeason } from '@/Utils/Utility_functions'
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
 import { Button, Typography } from '@mui/material'
+import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 
@@ -22,10 +24,10 @@ interface queueingManagerStatus{
 
 const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({facultyFirstname, facultyLastname, facultyDesignation, facultyID}) => {
     const client = useWebSocket()
-
-
     const [isFacultyActive, setIsFacultyActive] = useState<queueingManagerStatus|null>()
     const [avatar, setAvatar] = useState<string>()
+    const facultyContext = useFacultyContext()
+    const router = useRouter();
 
     useEffect(()=>{
         const fetchFacultyStatus = async ()=>{
@@ -67,6 +69,15 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
         }
     }, [client, facultyID]);
     
+    const handleClickQueueButton = ()=>{
+        const faculty:Faculty = {
+            "firstname":facultyFirstname,
+            "lastname":facultyLastname,
+            "uid":facultyID
+        }
+        facultyContext.setFaculty(faculty);
+        router.push("/queue")
+    }
     
     return (
         <div className='bg-white h-full w-full flex flex-col relative items-center justify-around border-2 border-black rounded-lg py-5'>
@@ -84,7 +95,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                     <div className='gap-3 w-full flex justify-center flex-col items-center'>
                         <Typography variant='h5' fontWeight='bold' textAlign='center'>Available</Typography>
                         <Typography>{`${isFacultyActive.queueSize === 0 ? 'No one' : isFacultyActive.queueSize} ${isFacultyActive.queueSize === 0 ? '' : isFacultyActive.queueSize > 1 ? 'groups' : 'group'} in queue.`}</Typography>
-                        <Button sx={{backgroundColor:dpurple, color:'white', padding:'0.5em 3em'}}>Queue</Button>
+                        <Button sx={{backgroundColor:dpurple, color:'white', padding:'0.5em 3em'}} onClick={()=>{handleClickQueueButton()}}>Queue</Button>
                     </div>
                     :
                     <Typography variant='h5' fontWeight='bold' textAlign='center'>Unavailable</Typography>

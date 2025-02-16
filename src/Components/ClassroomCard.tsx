@@ -1,4 +1,4 @@
-import { useClassroomContext } from '@/Utils/ClassroomContext';
+import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import { Classes } from '@/Utils/Global_variables';
 import { randomPerson } from '@/Utils/Utility_functions';
 import { Typography } from '@mui/material';

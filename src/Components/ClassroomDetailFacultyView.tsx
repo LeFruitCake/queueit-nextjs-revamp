@@ -6,7 +6,7 @@ import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
 import { dpurple, lgreen } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
-import { useClassroomContext } from '@/Utils/ClassroomContext';
+import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import person from '../../public/images/pointingUpwardPerson.png'
 import whiteStar from '../../public/images/star-white.png'
 import whiteSquiggly from '../../public/images/squiggly-white.png'

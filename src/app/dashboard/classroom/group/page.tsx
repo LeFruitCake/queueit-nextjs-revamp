@@ -1,7 +1,7 @@
 "use client"
 import BackButton from '@/Components/BackButton'
 import BaseComponent from '@/Components/BaseComponent'
-import { useTeamContext } from '@/Utils/TeamContext'
+import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, IconButton, Typography } from '@mui/material'
 import React, { useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
@@ -12,9 +12,9 @@ import '../group/group.css'
 import catLoader from '../../../../../public/loaders/catLoader-blackbg.gif'
 import { capitalizeFirstLetter, randomQuotes } from '@/Utils/Utility_functions'
 import mentor from '../../../../../public/images/mentor.png'
-import { useUserContext } from '@/Utils/AuthContext'
-import GroupDetailAdviserView from '@/Components/GroupDetailAdviserView'
-import GroupDetailStudentView from '@/Components/GroupDetailStudentView'
+import { useUserContext } from '@/Contexts/AuthContext'
+import GroupDetailAdviserView from '@/Components/ClassroomDetailFacultyView'
+import GroupDetailStudentView from '@/Components/ClassroomDetailStudentView'
 
 const page = () => {
     const user = useUserContext().user

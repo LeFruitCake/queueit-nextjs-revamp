@@ -1,8 +1,8 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from './Global_variables';
+import { User } from '../Utils/Global_variables';
 import { faculty, student, user2 } from '@/Sample_Data/SampleData1';
-import { extractFirstnameLastnameFromEmail } from './Utility_functions';
+import { extractFirstnameLastnameFromEmail } from '../Utils/Utility_functions';
 import { jwtDecode } from 'jwt-decode';
 import { useRouter } from 'next/navigation';
 

@@ -1,5 +1,5 @@
 import { Team } from '@/Utils/Global_variables'
-import { useTeamContext } from '@/Utils/TeamContext'
+import { useTeamContext } from '@/Contexts/TeamContext'
 import { useRouter } from 'next/navigation'
 import React from 'react'
 

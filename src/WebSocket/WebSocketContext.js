@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import { QUEUEIT_URL } from '@/Utils/Global_variables';
-import { useUserContext } from '@/Utils/AuthContext';
+import { useUserContext } from '@/Contexts/AuthContext';
 
 const WebSocketContext = createContext(null);
 
