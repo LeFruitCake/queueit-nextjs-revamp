@@ -7,6 +7,8 @@ export const dpurple = "#7D57FC"
 export const SPEAR_URL = "http://localhost:8080"
 export const QUEUEIT_URL = "http://localhost:8081"
 
+
+//user given when querying to spear db using id.
 export interface UserRetrieved{
     uid:number
     firstname:string
@@ -19,6 +21,8 @@ export interface UserRetrieved{
     enrolledClasses:Set<Classes>
 }
 
+
+//user on log in
 export interface User{
     deleted:boolean
     expirationTime:string
@@ -46,6 +50,7 @@ export interface Classes{
     firstname:string
     lastname:string
     role:string
+    uid:number
 }
 
 export enum UserType{

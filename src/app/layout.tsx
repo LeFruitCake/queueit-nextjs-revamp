@@ -6,6 +6,7 @@ import { UserProvider } from "@/Utils/AuthContext";
 import { ToastContainer } from "react-toastify";
 import { ClassroomProvider } from "@/Utils/ClassroomContext";
 import { TeamProvider } from "@/Utils/TeamContext";
+import { WebSocketProvider } from "@/WebSocket/WebSocketContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,14 +37,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         
-          <UserProvider>
+        <UserProvider>
+          <WebSocketProvider>
             <ClassroomProvider>
               <TeamProvider>
                 {children}
                 <ToastContainer/>
               </TeamProvider>
             </ClassroomProvider>
-          </UserProvider>
+          </WebSocketProvider>
+        </UserProvider>
       </body>
     </html>
   );

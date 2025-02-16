@@ -5,7 +5,7 @@ import { Team } from './Global_variables';
 // Define the context type
 interface TeamContextType {
   Team: Team | undefined;
-  setTeam: (Team: Team) => void;
+  setTeam: (Team: Team | undefined) => void;
 }
 
 // Create the context

@@ -42,11 +42,11 @@ export default function page() {
             )
 
             const user_data:User = await response.json()
-            const [firstname,lastname] = extractFirstnameLastnameFromEmail(jwtDecode(user_data.token).sub)
-            user_data.firstname = firstname
-            user_data.lastname = lastname
             switch(user_data.statusCode){
                 case 200:
+                    const [firstname,lastname] = extractFirstnameLastnameFromEmail(jwtDecode(user_data.token).sub)
+                    user_data.firstname = firstname
+                    user_data.lastname = lastname
                     authContext.login(user_data)
                     toast.success(user_data.message)
                     router.push('dashboard')

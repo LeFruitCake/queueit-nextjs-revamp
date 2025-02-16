@@ -38,7 +38,6 @@ export default function Page() {
             }
 
             const data = await response?.json();
-            console.log(data)
             setClasses(data);
             localStorage.setItem('classroom', JSON.stringify(data)); // Store in localStorage
         };
@@ -50,7 +49,6 @@ export default function Page() {
         // Store classroom in localStorage whenever it changes
         if (classes) {
             localStorage.setItem('classroom', JSON.stringify(classes));
-            console.log(classes);
         } else {
             localStorage.removeItem('classroom'); // Clear if undefined
         }
