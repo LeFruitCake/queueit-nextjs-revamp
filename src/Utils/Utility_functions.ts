@@ -61,6 +61,11 @@ export function groupImage(index:number) {
   return GroupArray[modolus].src;
 }
 
+export function fixedSeriesAvatar(index:number){
+  const modolus = index%AvatarArray.length;
+  return AvatarArray[modolus].src;
+}
+
 export function randomGroupImage() {
   // Generate a random index between 0 and the length of the array - 1
   const randomNumber = Math.floor(Math.random() * GroupArray.length);
