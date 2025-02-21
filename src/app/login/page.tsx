@@ -11,9 +11,11 @@ import { useUserContext } from '@/Contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { jwtDecode } from 'jwt-decode'
 import { extractFirstnameLastnameFromEmail } from '@/Utils/Utility_functions'
+import CatLoader from '@/Components/CatLoader'
 
 export default function page() {
     const authContext = useUserContext()
+    const [loggingIn, setLoggingIn] = useState(false)
     const router = useRouter()
     useEffect(()=>{
         if(authContext.user){
@@ -23,9 +25,11 @@ export default function page() {
     const [passwordHidden, setPasswordHidden] = useState(false)
     const handleLoginClick = async (e:React.FormEvent<HTMLFormElement>)=>{
         e.preventDefault()
+        setLoggingIn(true)
         const emailTextField = document.getElementById('emailTextField') as HTMLInputElement | null
         const passwordTextField = document.getElementById('passwordTextField') as HTMLInputElement | null
         try{
+            
             const response = await fetch(`${SPEAR_URL}/login`,
                 {
                     method:'POST',
@@ -50,12 +54,15 @@ export default function page() {
                     authContext.login(user_data)
                     toast.success(user_data.message)
                     router.push('dashboard')
+                    setLoggingIn(false)
                     break;
                 case 404:
                     toast.error("Invalid username or password")
+                    setLoggingIn(false)
                     break;
                 default:
                     toast.error("Internal Server Error.")
+                    setLoggingIn(false)
             }
             
         }catch(err){
@@ -89,6 +96,7 @@ export default function page() {
                     <Button type='submit' sx={{marginTop:'15px',backgroundColor:'#CCFC57', color:'black', borderRadius:'15px', padding:'0.5em 3em', width:'100%', fontWeight:'bold'}}>Login</Button>
                 </form>
             </div>
+            <CatLoader loading={loggingIn}/>
         </div>
     )
 }

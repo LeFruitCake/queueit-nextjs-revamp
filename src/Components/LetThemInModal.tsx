@@ -64,9 +64,9 @@ const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeSto
         
         <img style={{position:'absolute', height:'8dvw', transform:'translate(-50%,0%)', top:'10%', left:'8%'}} src={star.src} alt="star" className='absolute z-0'/>
         <img style={{position:'absolute', height:'8dvw', transform:'translate(-50%,0%)', top:'0%', right:'0%'}} src={squiggly.src} alt="squiggly" className='absolute z-0'/>
-        <div className='z-1 500 flex justify-end h-full relatives'>
+        <div className='z-1 500 flex justify-end h-full relative'>
             {/* <div className='hidden md:block lg:block xl:block'> */}
-                <img src={floating.src} alt="floating" className='absolute z-0 hidden md:block lg:block xl:block' style={{bottom:0, left:0}} />
+                <img src={floating.src} alt="floating" className='relative z-0 hidden md:block lg:block xl:block' style={{bottom:0, left:0}} />
             {/* </div>s */}
             <div className='flex flex-col text-center gap-3 items-center justify-center w-full lg:w-1/2 relative h-full'>
                 <Typography style={{fontSize:'clamp(3em, 3em + 1dvw, 8em)'}}>Let Them In!</Typography>
