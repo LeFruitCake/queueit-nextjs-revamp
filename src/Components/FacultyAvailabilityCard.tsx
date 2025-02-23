@@ -39,7 +39,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                         setIsFacultyActive(response);
                         break;
                     case 404:
-                        toast.error("Faculty does not exist.")
+                        // toast.error("Faculty does not exist.")
                         break;
                     default:
                         toast.error("Something went wrong while fetching Faculty active status.")
