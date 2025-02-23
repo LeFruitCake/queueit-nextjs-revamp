@@ -30,28 +30,31 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
     const router = useRouter();
 
     useEffect(()=>{
-        const fetchFacultyStatus = async ()=>{
-            fetch(`${QUEUEIT_URL}/faculty/isActive/${facultyID}`)
-            .then(async(data)=>{
-                switch(data.status){
-                    case 200:
-                        const response:queueingManagerStatus = await data.json()
-                        setIsFacultyActive(response);
-                        break;
-                    case 404:
-                        // toast.error("Faculty does not exist.")
-                        break;
-                    default:
-                        toast.error("Something went wrong while fetching Faculty active status.")
-                }
-            })
-            .catch((err)=>{
-                console.log(err)
-                toast.error("Caught an exception while fetching Faculty active status.")
-            })
+        if(facultyID){
+            const fetchFacultyStatus = async ()=>{
+                fetch(`${QUEUEIT_URL}/faculty/isActive/${facultyID}`)
+                .then(async(data)=>{
+                    switch(data.status){
+                        case 200:
+                            const response:queueingManagerStatus = await data.json()
+                            setIsFacultyActive(response);
+                            break;
+                        case 404:
+                            console.log(`Faculty member ${`${facultyFirstname} ${facultyLastname}`} does not exist.`)
+                            // toast.error("Faculty does not exist.")
+                            break;
+                        default:
+                            toast.error("Something went wrong while fetching Faculty active status.")
+                    }
+                })
+                .catch((err)=>{
+                    console.log(err)
+                    toast.error("Caught an exception while fetching Faculty active status.")
+                })
+            }
+            setAvatar(randomAvatar())
+            fetchFacultyStatus()
         }
-        setAvatar(randomAvatar())
-        fetchFacultyStatus()
     },[facultyID])
 
 

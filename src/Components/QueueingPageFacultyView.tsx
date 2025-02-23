@@ -7,15 +7,15 @@ import QueueingList from '@/Components/QueueingList'
 import StopQueueingButton from '@/Components/StopQueueingButton'
 import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Contexts/AuthContext'
-import { UserType } from '@/Utils/Global_variables'
-import { isPastTime } from '@/Utils/Utility_functions'
+import { QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
+import { isPastTime, standardizeTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 
 const QueueingPageFacultyView = () => {
     const user = useUserContext().user
     // const [isQueueingOpen, setIsQueueingOpen] = useState(user?.role == UserType.STUDENT?true:false)
-    const [isQueueingOpen, setIsQueueingOpen] = useState(user?.role == UserType.STUDENT?true:true) // for development
+    const [isQueueingOpen, setIsQueueingOpen] = useState(user?.role == UserType.STUDENT?true:false) // for development
     const [timeStop, setTimeStop] = useState(0)
     const [queueingLimit, setQueueingLimit] = useState(0)
     const [queueingFilter, setQueueingFilter] = useState([-1])
@@ -28,17 +28,39 @@ const QueueingPageFacultyView = () => {
         if(isQueueingOpen){
         toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
         }else{
-        if(isPastTime(timeStop) && timeStop != 0){
-            toast.error("Time limit value is past time.")
-        }else if(queueingLimit < 0){
-            toast.error("Queueing limit is a negative number")
-        }else if(queueingFilter.length <= 0){
-            toast.error("Queueing filter is empty. Atleast select the All classroom option")
-        }else{
-            console.log(`timeStop: ${timeStop} queueingLimit: ${queueingLimit} filter: ${queueingFilter}`)
-            setIsQueueingOpen(true)
-            setOpen(false)
-        }
+            if(isPastTime(timeStop) && timeStop != 0){
+                toast.error("Time limit value is past time.")
+            }else if(queueingLimit < 0){
+                toast.error("Queueing limit is a negative number")
+            }else if(queueingFilter.length <= 0){
+                toast.error("Queueing filter is empty. Atleast select the All classroom option")
+            }else{
+                console.log(`timeStop: ${standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${queueingFilter}`)
+                const response = fetch(`${QUEUEIT_URL}/faculty/openQueueing`,{
+                    body:JSON.stringify({
+                        "facultyID":user?.uid,
+                        "timeEnds":standardizeTime(timeStop),
+                        "cateringLimit":queueingLimit,
+                        "cateredClassrooms":queueingFilter
+                    }),
+                    method:'POST',
+                    headers:{
+                        'Content-Type':'application/json'
+                    }
+                })
+                .then((res)=>{
+                    if(res.ok){
+                        toast.success("Queueing opened.")  
+                        setIsQueueingOpen(true)
+                        setOpen(false)
+                    }
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+                // setIsQueueingOpen(true)
+                // setOpen(false)
+            }
         }
     }
     return (

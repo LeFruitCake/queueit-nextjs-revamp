@@ -9,7 +9,6 @@ import { lgreen, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import { sampleGroupMembers } from '@/Sample_Data/SampleData1'
 import '../group/group.css'
-import catLoader from '../../../../../public/loaders/catLoader-blackbg.gif'
 import { capitalizeFirstLetter, randomQuotes } from '@/Utils/Utility_functions'
 import mentor from '../../../../../public/images/mentor.png'
 import { useUserContext } from '@/Contexts/AuthContext'
@@ -90,7 +89,7 @@ const page = () => {
                                 :
 
                                 <div style={{padding:'2em'}} className='flex items-center flex-col justify-center gap-3'>
-                                    <img src={catLoader.src} alt="catLoader" style={{height:'150px'}}/>
+                                    {/* <img src={catLoader.src} alt="catLoader" style={{height:'150px'}}/> */}
                                     <Typography variant='subtitle2' color={lgreen}>Paw licking cat means this team has yet to conduct meetings nor consultations. </Typography>
                                 </div>
                             }

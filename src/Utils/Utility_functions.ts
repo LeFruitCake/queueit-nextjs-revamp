@@ -44,6 +44,11 @@ export function randomQuotes(){
   return learning_quotes[randomNumber]
 }
 
+export function standardizeTime(time){
+  const fooTime = new Date(time).toTimeString().split(' ')[0];
+  return fooTime
+}
+
 export function randomPerson() {
     // Generate a random index between 0 and the length of the array - 1
     const randomNumber = Math.floor(Math.random() * PersonArray.length);
