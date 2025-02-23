@@ -1,0 +1,57 @@
+import React, { useState } from "react";
+import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+
+export default function RubricCard({ rubric }) {
+  const [open, setOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <div>
+      <div
+        className="relative rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-10 flex flex-col justify-between transition duration-300"
+        style={{ width: "320px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "250px" }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Close Button (X) - Only visible on hover */}
+        {isHovered && (
+          <button
+            onClick={handleOpen}
+            className="absolute top-2 right-2 bg-gray-200 text-black px-2 py-1 rounded-full text-sm font-bold hover:bg-red-500 hover:text-white transition"
+          >
+            ✖
+          </button>
+        )}
+
+        <Typography variant="h5" fontWeight="bold" className="text-center">
+          {rubric.title}
+        </Typography>
+
+        <Typography className="text-center absolute bottom-16" style={{ fontSize: "10px", marginRight: "10px" }}>
+          {rubric.description}
+        </Typography>
+
+        <Typography className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center" style={{ color: "rgba(113, 113, 113, 0.9)", fontSize: "10px" }}>
+          {rubric.createdBy}
+        </Typography>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={open} onClose={handleClose} className="m-10">
+        <DialogTitle className="text-center" style={{color:'rgba(125,87,252,0.9)', fontWeight:'bold' }}>Delete Rubric</DialogTitle>
+        <DialogContent className="text-center">Are you sure you want to delete this rubric template?</DialogContent>
+        <DialogActions style={{ display: "flex", justifyContent: "center", fontWeight:'bold' }}>
+          <Button onClick={handleClose} style={{color:'#000', fontWeight:'bold'}} >
+            Cancel
+          </Button>
+          <Button style={{background:'rgba(125,87,252,0.9)', color:'#fff', fontWeight:'bold'}} onClick={() => console.log("Rubric deleted")}>
+            Delete
+          </Button>
+        </DialogActions>                                                        
+      </Dialog> 
+    </div>
+  );
+}
