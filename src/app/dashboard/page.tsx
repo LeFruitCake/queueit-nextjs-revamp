@@ -4,6 +4,7 @@ import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
 import { useUserContext } from '@/Contexts/AuthContext'
 import { Classes, SPEAR_URL, UserType } from '@/Utils/Global_variables';
+import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 
@@ -39,7 +40,7 @@ export default function Page() {
 
             const data = await response?.json();
             setClasses(data);
-            localStorage.setItem('classroom', JSON.stringify(data)); // Store in localStorage
+            localStorage.setItem('classrooms', JSON.stringify(data)); // Store in localStorage
         };
 
         fetchClasses();
@@ -48,9 +49,9 @@ export default function Page() {
     useEffect(() => {
         // Store classroom in localStorage whenever it changes
         if (classes) {
-            localStorage.setItem('classroom', JSON.stringify(classes));
+            localStorage.setItem('classrooms', JSON.stringify(classes));
         } else {
-            localStorage.removeItem('classroom'); // Clear if undefined
+            localStorage.removeItem('classrooms'); // Clear if undefined
         }
     }, [classes]);
 
@@ -58,7 +59,7 @@ export default function Page() {
         <div className='h-screen overflow-auto'>
             {userContext.user ? (
                 <BaseComponent>
-                    <GreetingBar name={user?.role === UserType.FACULTY ? `Teacher ${user?.firstname}` : user?.firstname} />
+                    <GreetingBar name={user?.role === UserType.FACULTY ? `Teacher ${capitalizeFirstLetter(user?.firstname)}` : capitalizeFirstLetter(user?.firstname)} />
                     <ClassroomList classrooms={classes} />
                 </BaseComponent>
             ) : (

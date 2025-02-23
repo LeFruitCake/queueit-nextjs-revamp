@@ -1,14 +1,15 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import star from '../../public/images/star.png'
 import squiggly from '../../public/images/squiggly.png'
 import floating from '../../public/images/3.png'
-import { Button, MenuItem, Modal, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
-import { isPastTime, setMinTime } from '@/Utils/Utility_functions'
-import { dpurple } from '@/Utils/Global_variables'
+import { Button, Chip, Divider, MenuItem, Modal, Select, SelectChangeEvent, TextField, Typography } from '@mui/material'
+import { capitalizeFirstLetter, isPastTime, setMinTime } from '@/Utils/Utility_functions'
+import { Classes, dpurple } from '@/Utils/Global_variables'
 import { toast } from 'react-toastify'
 
 interface LetThemInModalProps{
+    queueingFilter: Array<Classes>
     setIsQueueing: Function
     setTimeStop: Function
     setQueueingLimit: Function
@@ -18,11 +19,22 @@ interface LetThemInModalProps{
     setOpen: Function
 }
 
-const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeStop, setQueueingLimit, setQueueingFilter, open, setOpen, openQueueing}) => {
+const LetThemInModal:React.FC<LetThemInModalProps> = ({setTimeStop, setQueueingLimit, setQueueingFilter, open, setOpen, openQueueing, queueingFilter}) => {
     
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const date = new Date().toDateString()
+
+    const [classroomChoices, setClassroomChoices] = useState<Classes[]>([]);
+
+    useEffect(() => {
+        // Retrieve and parse the classroom data from local storage
+        const storedClassrooms = localStorage.getItem('classrooms');
+        if (storedClassrooms) {
+            const parsedClassrooms = JSON.parse(storedClassrooms);
+            setClassroomChoices(parsedClassrooms);
+        }
+    }, []);
 
     const handleTimeLimitChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
     
@@ -39,15 +51,6 @@ const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeSto
             toast.warning("Warning! you chose a past time.", {autoClose:2000, style:{fontWeight:'bold'}});
         }
         setTimeStop(inputDate.getTime())
-    }
-
-    const handleClassroomFilterSelectChange = (e:SelectChangeEvent)=>{
-        let classrooms = [... e.target.value]
-        if (classrooms.some(num => Number(num) == -1)){
-            setQueueingFilter([-1])
-        }else{
-            setQueueingFilter(classrooms)
-        }
     }
 
     const handleClassroomLimitChange = (e:React.ChangeEvent<HTMLInputElement>)=>{
@@ -85,9 +88,34 @@ const LetThemInModal:React.FC<LetThemInModalProps> = ({setIsQueueing, setTimeSto
                     <Typography fontWeight='bold'>{date}</Typography>
                     <input onChange={handleTimeLimitChange} className='border-2 border-silver p-3 rounded-xl' type="time" name="endTime" min={setMinTime()} />
                 </div>
-                <div className='w-full flex flex-col md:flex-row lg:flex-row xl:flex-row justify-between items-center'>
-                    <Select multiple defaultValue={[-1]} sx={{width:'100%'}} onChange={handleClassroomFilterSelectChange}>
-                        <MenuItem value={-1} defaultChecked>All Classrooms</MenuItem>
+                <div className='w-full md:flex-row lg:flex-row xl:flex-row justify-between items-center'>
+                    <Select 
+                        className='max-h-40 overflow-auto' 
+                        multiple value={queueingFilter} sx={{width:'100%'}} 
+                        onChange={(e)=>{setQueueingFilter(e.target.value); console.log(e.target.value)}}
+                        renderValue={(classrooms:Array<Classes>)=>(
+                            <>
+                                {classrooms.map((classroom)=>(
+                                    <Chip key={classroom.cid} label={`${classroom?.courseCode?.toUpperCase()} - ${classroom?.section?.toUpperCase()}`}/>
+                                ))}
+                            </>
+                        )}
+                        MenuProps={{
+                            PaperProps:{
+                                style:{
+                                    maxHeight: 48 * 4.5 + 8,
+                                }
+                            }
+                        }}
+                        >
+                            {classroomChoices.map((choice, index)=>(
+                                <MenuItem key={choice.cid} value={choice}>
+                                    <div className={`flex flex-col gap-3 w-full p-3 rounded-sm`}>
+                                        <Typography variant='subtitle2'>{choice.courseDescription}</Typography>
+                                        <Typography variant='caption'>{`${choice.courseCode.toUpperCase()} - ${choice.section.toUpperCase()}`}</Typography>
+                                    </div>
+                                </MenuItem>
+                            ))}
                     </Select>
                 </div>
                 <div className='w-full flex flex-col lg:flex-row xl:flex-row'>

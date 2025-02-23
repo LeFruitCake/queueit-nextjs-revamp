@@ -1,6 +1,6 @@
 "use client"
-import { Chat, ChatDTO, Faculty, QUEUEIT_URL, User } from '@/Utils/Global_variables'
-import { capitalizeFirstLetter, randomAvatar } from '@/Utils/Utility_functions'
+import { Chat, ChatDTO, QUEUEIT_URL, User, UserType } from '@/Utils/Global_variables'
+import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
 import { IconButton, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import SendIcon from '@mui/icons-material/Send'
@@ -9,19 +9,19 @@ import { useWebSocket } from '@/WebSocket/WebSocketContext'
 import ChatEntry from './ChatEntry'
 
 interface ChatProps {
-  faculty: Faculty | null
+  faculty: User | undefined
 }
 
 const Chat: React.FC<ChatProps> = ({ faculty }) => {
-    const user = useUserContext().user
+    const user:User = useUserContext().user
     const inputRef = useRef<HTMLInputElement>(null) // Use useRef for the input field
     const chatContainerRef = useRef<HTMLDivElement>(null) // Ref for the chat container
     const client = useWebSocket()
     const [chats, setChats] = useState([]);
 
     useEffect(() => {
-        if (client && faculty) {
-            const subscription = client.subscribe(`/topic/chat/adviser/${faculty.uid}`, (message) => {
+        if (client) {
+            const subscription = client.subscribe(`/topic/chat/adviser/${user?.role == UserType.FACULTY?user.uid:faculty.uid}`, (message) => {
                 const receivedMessage: ChatDTO = JSON.parse(message.body);
                 console.log(receivedMessage)
                 setChats((prev) => [...prev, receivedMessage])
@@ -36,7 +36,13 @@ const Chat: React.FC<ChatProps> = ({ faculty }) => {
 
     const sendMessage = async () => {
         // Check if the input field is available and the user and faculty exist
-        if (!inputRef.current || !user || !faculty) {
+        if(user.role !== UserType.FACULTY){
+            if ( !user || !faculty ) {
+                return
+            }
+        }
+        
+        if(!inputRef.current){
             return
         }
 
@@ -53,7 +59,7 @@ const Chat: React.FC<ChatProps> = ({ faculty }) => {
                 },
                 body: JSON.stringify({
                     userID: user.uid,
-                    adviserID: faculty.uid,
+                    adviserID: faculty?faculty.uid:user.uid,
                     message,
                     firstname: user.firstname,
                     lastname: user.lastname,
@@ -81,7 +87,9 @@ const Chat: React.FC<ChatProps> = ({ faculty }) => {
                         Welcome to {capitalizeFirstLetter(faculty.firstname)} {`${capitalizeFirstLetter(faculty.lastname)}'s chat.`}
                     </Typography>
                 ) : (
-                    <></>
+                    <Typography variant='subtitle2' fontWeight={'bold'} className='text-center'>
+                        Welcome to {capitalizeFirstLetter(user?.firstname)} {`${capitalizeFirstLetter(user?.lastname)}'s chat.`}
+                    </Typography>
                 )}
                 <div className='flex flex-col gap-3'>
                     {chats.map((chat: ChatDTO, index) => (

@@ -1,5 +1,5 @@
 "use client"
-import { dpurple, Team } from '@/Utils/Global_variables'
+import { dpurple, QueueingEntry, Team } from '@/Utils/Global_variables'
 import React, { useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import HistoryBoard from './HistoryBoard'
@@ -7,17 +7,17 @@ import { Button } from '@mui/material'
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
 
 interface MeetingBoardProps{
-    team:Team
+    queueingEntry: QueueingEntry
 }
 
-const MeetingBoard:React.FC<MeetingBoardProps> = ({team}) => {
+const MeetingBoard:React.FC<MeetingBoardProps> = ({queueingEntry}) => {
     const [rubric, setRubric] = useState(undefined)
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
             <p>Consultation Note</p>
             <div className='w-full flex flex-col lg:flex-row xl:flex-row gap-3'>
                 <div className='flex-1'>
-                    <AttendanceLogger members={team.members}/>
+                    <AttendanceLogger members={null}/>
                 </div>
                 <div className='flex-1'>
                     <HistoryBoard/>
@@ -55,12 +55,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({team}) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {Array.from(team.members).map((member,index)=>(
+                                {/* {Array.from(team.members).map((member,index)=>(
                                     <tr key={index} className='border-b-2'>
                                         <td className='py-4'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</td>
                                         <td className='flex justify-center items-center py-4'>0</td>
                                     </tr>
-                                ))}
+                                ))} */}
                             </tbody>
                         </table>
                         <div className='w-full lg:w-1/4 xl:w-1/4 flex flex-col items-center justify-center gap-5'>

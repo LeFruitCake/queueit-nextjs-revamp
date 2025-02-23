@@ -12,7 +12,7 @@ interface CurrentlyTendingProps{
 const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({team}) => {
     const user = useUserContext().user
     return (
-        <div className='border-2 border-black w-full h-fit md:h-36 lg:h-36 xl:h-36 p-3 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
+        <div className='border-2 border-black w-full h-fit md:h-40 lg:h-40 xl:h-40 p-3 pb-6 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
             <div className='h-full flex-1 flex flex-col'>
                 <Typography variant='h6'>Currently Tending</Typography>
                 <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center gap-3'>

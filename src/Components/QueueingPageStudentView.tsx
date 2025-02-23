@@ -7,18 +7,19 @@ import React, { useEffect, useState } from 'react'
 import CurrentlyTending from './CurrentlyTending';
 import Chat from './Chat';
 import QueueingList from './QueueingList';
+import StudentEnqueueModal from './TeamEnqueueModal';
+import { useTeamContext } from '@/Contexts/TeamContext';
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
+import { toast } from 'react-toastify';
 
 const QueueingPageStudentView = () => {
     const faculty = useFacultyContext().Faculty;
-    const [queueingManager, setQueueingManager] = useState<QueueingManager>()
-
-    // const fetchQueueingManagerForFaculty = ()=>{
-    //     const response = fetch(`${QUEUEIT_URL}`)
-    // }
+    const queueingManager = useQueueingManagerContext().QueueingManager
+    const [modalToggle, setModalToggle] = useState(false)
     const [avatar, setAvatar] = useState<string>()
     const [currentTime, setCurrentTime] = useState<string>()
     const [groupAvatar, setGroupAvatar] = useState<string>()
-
+    const team = useTeamContext().Team
     useEffect(() => {
         // Set the avatar when the component mounts
         setAvatar(randomAvatar())
@@ -42,8 +43,131 @@ const QueueingPageStudentView = () => {
         // Cleanup interval on component unmount
         return () => {
             clearInterval(intervalId);
+            
         }
     }, []);
+
+    //logic for when the queue button is clicked.
+    const handleQueueClick=()=>{
+        setModalToggle(true)
+    }
+
+    const dequeue = ()=>{
+        const queueingEntryID = queueingManager?.queueingEntries?.find(entry => entry.teamID == team?.tid)?.queueingEntryID
+
+        if(queueingEntryID){
+            fetch(`${QUEUEIT_URL}/queue/dequeue`,{
+                body:JSON.stringify({
+                    "queueingEntryID":queueingEntryID
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                method:'POST'
+            })
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        toast.success("Dequeued from the line.")
+                        break;
+                    case 404:
+                        const text = await res.text()
+                        toast.error(text)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Something went wrong while dequeueing.")
+                console.log(err)
+            })
+        }else{
+            toast.error("Your team is not in the line.")
+        }
+    }
+
+    const goOnHold = ()=>{
+        const queueingEntryID = queueingManager?.queueingEntries?.find(entry => entry.teamID == team?.tid)?.queueingEntryID
+
+        if(queueingEntryID){
+            fetch(`${QUEUEIT_URL}/queue/goOnHold`,{
+                body:JSON.stringify({
+                    "queueingEntryID":queueingEntryID
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                method:'POST'
+            })
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        const success_message = await res.text()
+                        toast.success(success_message)
+                        break;
+                    case 404:
+                        const text = await res.text()
+                        toast.error(text)
+                        break;
+                    case 400:
+                        const text400 = await res.text()
+                        toast.error(text400)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Something went wrong while dequeueing.")
+                console.log(err)
+            })
+        }else{
+            toast.error("Your team is not in the line.")
+        }
+    }
+
+    const requeue = ()=>{
+        const queueingEntryID = queueingManager?.queueingEntries?.find(entry => entry.teamID == team?.tid)?.queueingEntryID
+
+        if(queueingEntryID){
+            fetch(`${QUEUEIT_URL}/queue/requeue`,{
+                body:JSON.stringify({
+                    "queueingEntryID":queueingEntryID
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                method:'POST'
+            })
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        const success_message = await res.text()
+                        toast.success(success_message)
+                        break;
+                    case 404:
+                        const text = await res.text()
+                        toast.error(text)
+                        break;
+                    case 400:
+                        const text400 = await res.text()
+                        toast.error(text400)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Something went wrong while requeueing.")
+                console.log(err)
+            })
+        }else{
+            toast.error("Your team is not in the line.")
+        }
+    }
+    
+
 
     return (
         <div className='relative w-full h-full flex gap-3'>
@@ -58,7 +182,7 @@ const QueueingPageStudentView = () => {
                     <Typography variant='h6'>Current Time</Typography>
                     <Typography variant='h3' fontWeight='bold'>{currentTime}</Typography>
                 </div>
-                <QueueingList teams={undefined}/>
+                <QueueingList requeue={requeue} goOnHold={goOnHold} dequeue={dequeue} handleQueueClick={handleQueueClick} teams={queueingManager?.queueingEntries}/>
             </div>
 
             {/* right side */}
@@ -66,6 +190,7 @@ const QueueingPageStudentView = () => {
                 <CurrentlyTending team={null}/>
                 <Chat faculty={faculty}/>
             </div>
+            <StudentEnqueueModal modalToggle={modalToggle} setModalToggle={setModalToggle}/>
         </div>
     )
 }

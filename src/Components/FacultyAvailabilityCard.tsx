@@ -1,6 +1,9 @@
 "use client"
+import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import { useFacultyContext } from '@/Contexts/FacultyContext'
-import { dpurple, Faculty, QUEUEIT_URL } from '@/Utils/Global_variables'
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
+import { useTeamContext } from '@/Contexts/TeamContext'
+import { dpurple, Faculty, QueueingManager, QUEUEIT_URL } from '@/Utils/Global_variables'
 import { capitalizeFirstLetter, randomAvatar, randomSeason } from '@/Utils/Utility_functions'
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
 import { Button, Typography } from '@mui/material'
@@ -15,29 +18,32 @@ interface FacultyAvailabilityCardProps{
     facultyID: number | undefined
 }
 
-interface queueingManagerStatus{
-    cateringClasses: Array<number>
-    isActive: boolean
-    queueSize: number
-}
-
 
 const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({facultyFirstname, facultyLastname, facultyDesignation, facultyID}) => {
     const client = useWebSocket()
-    const [isFacultyActive, setIsFacultyActive] = useState<queueingManagerStatus|null>()
+    const queueingManager = useQueueingManagerContext().QueueingManager
+    const setQueueingManager = useQueueingManagerContext().setQueueingManager
     const [avatar, setAvatar] = useState<string>()
     const facultyContext = useFacultyContext()
+    const team = useTeamContext().Team
+    const classroom = useClassroomContext().classroom
     const router = useRouter();
+
+    useEffect(()=>{
+        if(!queueingManager?.isActive){
+            router.push('/dashboard/classroom')
+        }
+    },[queueingManager])
 
     useEffect(()=>{
         if(facultyID){
             const fetchFacultyStatus = async ()=>{
-                fetch(`${QUEUEIT_URL}/faculty/isActive/${facultyID}`)
+                fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${facultyID}`)
                 .then(async(data)=>{
                     switch(data.status){
                         case 200:
-                            const response:queueingManagerStatus = await data.json()
-                            setIsFacultyActive(response);
+                            const response:QueueingManager = await data.json()
+                            setQueueingManager(response);
                             break;
                         case 404:
                             console.log(`Faculty member ${`${facultyFirstname} ${facultyLastname}`} does not exist.`)
@@ -60,9 +66,10 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
 
     useEffect(() => {
         if (client && facultyID) {
-            const subscription = client.subscribe(`/topic/queueStatus/adviser/${facultyID}`, (message) => {
-                const receivedMessage:queueingManagerStatus = JSON.parse(message.body);
-                setIsFacultyActive(receivedMessage)
+            const subscription = client.subscribe(`/topic/facultyActivity/adviser/${facultyID}`, (message) => {
+                const receivedMessage:QueueingManager = JSON.parse(message.body);
+                console.log(receivedMessage)
+                setQueueingManager(receivedMessage)
             });
     
             return () => {
@@ -93,15 +100,20 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
             </div>
             <div className='w-2/3 p-5 h-fit flex items-center justify-center rounded-xl border-2 border-black' style={{backgroundColor:'#E9E3FF'}}>
                 {
-                    isFacultyActive?.isActive?
+                    queueingManager?.isActive?
 
                     <div className='gap-3 w-full flex justify-center flex-col items-center'>
-                        <Typography variant='h5' fontWeight='bold' textAlign='center'>Available</Typography>
-                        <Typography>{`${isFacultyActive.queueSize === 0 ? 'No one' : isFacultyActive.queueSize} ${isFacultyActive.queueSize === 0 ? '' : isFacultyActive.queueSize > 1 ? 'groups' : 'group'} in queue.`}</Typography>
-                        <Button sx={{backgroundColor:dpurple, color:'white', padding:'0.5em 3em'}} onClick={()=>{handleClickQueueButton()}}>Queue</Button>
+                        <Typography variant='h5' fontWeight='bold' textAlign='center' color='success'>Available</Typography>
+                        <Typography>{`${queueingManager.queueLength === 0 ? 'No one' : queueingManager.queueLength} ${queueingManager.queueLength === 0 ? '' : queueingManager.queueLength > 1 ? 'groups' : 'group'} in queue.`}</Typography>
+                        {
+                            queueingManager?.cateredClassrooms?.some(e => e.classroomID === classroom?.cid) || queueingManager?.cateredClassrooms?.length == 0?
+                            <Button disabled={team?false:true} sx={{backgroundColor:dpurple, color:'white', padding:'0.5em 3em'}} onClick={()=>{handleClickQueueButton()}}>Queue</Button>
+                            :
+                            <Typography variant='caption' fontWeight='bold' color='error' textAlign='center'>{`${capitalizeFirstLetter(facultyFirstname?facultyFirstname:'')} is not expecting any students from this class right now.`}</Typography>
+                        }
                     </div>
                     :
-                    <Typography variant='h5' fontWeight='bold' textAlign='center'>Unavailable</Typography>
+                    <Typography variant='h5' fontWeight='bold' textAlign='center' color='error'>Unavailable</Typography>
                 }
             </div>
         </div>

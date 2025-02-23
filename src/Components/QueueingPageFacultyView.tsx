@@ -7,41 +7,43 @@ import QueueingList from '@/Components/QueueingList'
 import StopQueueingButton from '@/Components/StopQueueingButton'
 import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Contexts/AuthContext'
-import { QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
+import { Classes, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { isPastTime, standardizeTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
+import { useRouter } from 'next/navigation'
 
 const QueueingPageFacultyView = () => {
     const user = useUserContext().user
-    // const [isQueueingOpen, setIsQueueingOpen] = useState(user?.role == UserType.STUDENT?true:false)
-    const [isQueueingOpen, setIsQueueingOpen] = useState(user?.role == UserType.STUDENT?true:false) // for development
-    const [timeStop, setTimeStop] = useState(0)
     const [queueingLimit, setQueueingLimit] = useState(0)
-    const [queueingFilter, setQueueingFilter] = useState([-1])
+    const [queueingFilter, setQueueingFilter] = useState<Array<Classes>>([])
     const [open, setOpen] = useState(false);
-
-    const manager = queueingManager1;
-    const adviser = faculty;
-
+    const router = useRouter()
+    const [timeStop, setTimeStop] = useState(0)
+    const queueingManager = useQueueingManagerContext().QueueingManager
+    const setQueueingManager = useQueueingManagerContext().setQueueingManager
     const openQueueing = ()=>{
-        if(isQueueingOpen){
-        toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
+        if(queueingManager?.isActive){
+            toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
         }else{
             if(isPastTime(timeStop) && timeStop != 0){
                 toast.error("Time limit value is past time.")
             }else if(queueingLimit < 0){
                 toast.error("Queueing limit is a negative number")
-            }else if(queueingFilter.length <= 0){
-                toast.error("Queueing filter is empty. Atleast select the All classroom option")
             }else{
-                console.log(`timeStop: ${standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${queueingFilter}`)
-                const response = fetch(`${QUEUEIT_URL}/faculty/openQueueing`,{
+
+                const cateredClassrooms:Array<number> = []
+                queueingFilter.map((classroom)=>{
+                    cateredClassrooms.push(classroom.cid)
+                })
+                console.log(`timeStop: ${standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${cateredClassrooms}`)
+                fetch(`${QUEUEIT_URL}/faculty/openQueueing`,{
                     body:JSON.stringify({
                         "facultyID":user?.uid,
                         "timeEnds":standardizeTime(timeStop),
                         "cateringLimit":queueingLimit,
-                        "cateredClassrooms":queueingFilter
+                        "cateredClassrooms":cateredClassrooms
                     }),
                     method:'POST',
                     headers:{
@@ -50,41 +52,97 @@ const QueueingPageFacultyView = () => {
                 })
                 .then((res)=>{
                     if(res.ok){
-                        toast.success("Queueing opened.")  
-                        setIsQueueingOpen(true)
+                        
+                        fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:classroom?.uid}`)
+                        .then(async(res)=>{
+                            const response = await res.json()
+                            setQueueingManager(response)
+                            toast.success("Queueing opened.")  
+                        })
+                        .catch((err)=>{
+                        console.log(`Fetching queueing manager error ${err}`)
+                        })
                         setOpen(false)
                     }
                 })
                 .catch((err)=>{
                     console.log(err)
                 })
-                // setIsQueueingOpen(true)
-                // setOpen(false)
             }
         }
     }
+
+    const closeQueueing = ()=>{
+        fetch(`${QUEUEIT_URL}/faculty/closeQueueing/${user?.uid}`,{
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            }
+        })
+        .then((res)=>{
+            if(res.ok){
+                toast.success(`Queueing closed.`)
+                setQueueingManager(null)
+                setQueueingFilter([])
+            }
+        })
+    }
+
+    const removeTeamFromQueue = (queueingEntryID:number) =>{
+        if(queueingEntryID){
+                    fetch(`${QUEUEIT_URL}/queue/dequeue`,{
+                        body:JSON.stringify({
+                            "queueingEntryID":queueingEntryID
+                        }),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        method:'POST'
+                    })
+                    .then( async (res)=>{
+                        switch(res.status){
+                            case 200:
+                                toast.success("Dequeued from the line.")
+                                break;
+                            case 404:
+                                const text = await res.text()
+                                toast.error(text)
+                                break;
+                            default:
+                                toast.error("Server error")
+                        }
+                    })
+                    .catch((err)=>{
+                        toast.error("Something went wrong while dequeueing.")
+                        console.log(err)
+                    })
+                }else{
+                    toast.error("Queueing Entry you're trying to remove is not found in the line.")
+                }
+    }
+
     return (
         <div>
-            {!isQueueingOpen && user?.role == UserType.FACULTY?
-
-                <LetThemInModal open={open} setOpen={setOpen} openQueueing={openQueueing} setIsQueueing={setIsQueueingOpen} setQueueingFilter={setQueueingFilter} setQueueingLimit={setQueueingLimit} setTimeStop={setTimeStop}/>
-                :
-                <div className='relative pt-5 flex-grow flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
-                    <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 flex-grow flex flex-col gap-3' style={{minWidth:'300px'}}>
-                        <StopQueueingButton isQueueingOpen={isQueueingOpen} timeStop={timeStop} setIsQueueingOpen={setIsQueueingOpen}/>
-                        <QueueingList teams={manager.queueingGroups}/>
+            {queueingManager?.isActive && user?.role == UserType.FACULTY?
+                <div className='relative min-h-screen pt-5 flex-grow flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
+                    <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 flex-grow flex flex-col gap-3' style={{minWidth:'350px'}}>
+                        <StopQueueingButton closeQueueing={closeQueueing} />
+                        <QueueingList dequeue={removeTeamFromQueue} teams={queueingManager?.queueingEntries}/>
                     </div>
                     <div className='flex flex-col w-full gap-3' style={{minWidth:'300px'}}>
-                        <CurrentlyTending team={manager.tendingGroup} />
-                        {(user?.role == UserType.STUDENT && manager.tendingGroup.members.has(user))
-                        ||
-                        (user?.role == UserType.FACULTY)
-                        ?
-                        <MeetingBoard team={manager.tendingGroup}/>
-                        :<Chat adviser={faculty} chat={null}/>
+                        <CurrentlyTending team={queueingManager.tendingGroup} />
+                        {
+                            queueingManager.tendingEntry?
+                            <MeetingBoard team={queueingManager.tendingEntry}/>
+                            :
+                            <Chat adviser={user} chat={null}/>
                         }
+                        
+                        
                     </div>
                 </div>
+                :
+                <LetThemInModal open={open} setOpen={setOpen} openQueueing={openQueueing} queueingFilter={queueingFilter} setIsQueueing={queueingManager?.isActive} setQueueingFilter={setQueueingFilter} setQueueingLimit={setQueueingLimit} setTimeStop={setTimeStop}/>
             }
         </div>
     )

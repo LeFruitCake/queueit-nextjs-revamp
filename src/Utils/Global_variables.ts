@@ -58,6 +58,12 @@ export enum UserType{
     STUDENT = "STUDENT"
 }
 
+export enum AttendanceStatus{
+    PRESENT = "PRESENT",
+    LATE = "LATE",
+    ABSENT = "ABSENT"
+}
+
 export interface Faculty{
     firstname:string|undefined
     lastname:string|undefined
@@ -68,14 +74,32 @@ export interface Faculty{
 export interface Team{
     tid:number
     groupName:string
-    projectName:string
+    // projectName:string
     projectId:number
     leaderId:number
     classId:number
     memberIds:Array<number>
     features:null
     projectDescription:string
+    adviserId:number
+    scheduleId:number
     recruitmentOpen:boolean
+}
+
+export interface TeamQueueitDTO{
+    teamID:number
+    teamName:string
+    courseCode:string
+    section:string
+    memberIds:Array<number>
+}
+
+export interface Schedule{
+    schedid:number
+    day:string
+    time:string
+    teacherId:number
+    teacherName:string
 }
 
 export interface ProjectProposal{
@@ -99,36 +123,25 @@ export interface ChatDTO{
 }
 
 export interface QueueingManager{
-    queueID:number
+    queueingManagerID:number
     facultyID:number
     timeEnds:string
     isActive:boolean
     cateringLimit:number
-    queueingEntries:Array<QueueingEntry>
-    cateredClassrooms:Array<Classroomv2>
+    queueingEntries:Array<QueueingEntry> | null
+    tendingEntry: QueueingEntry | null
+    cateredClassrooms:Array<number | null>
 }
 
-interface Classroomv2{
-    classroomID:number
-    facultyID:number
-    queueingManager:QueueingManager
-}
-
-interface QueueingEntry{
+export interface QueueingEntry{
     queueingEntryID:number
-    team:QueueingEntryTeam
-    queueingManager:QueueingManager
-    dateTimeQueued:Date
-    isOnHold:boolean
-}
-
-interface QueueingEntryTeam{
     teamID:number
     teamName:string
-    courseCode:string
-    section:string
-    memberIds:Array<number>
-    queueingEntry:QueueingEntry
+    classReference:string
+    queueingManager:QueueingManager
+    dateTimeQueued:Date
+    onHold:boolean
+    attendanceList:Array<Attendance>
 }
 
 export interface MeetingEdition{
@@ -159,6 +172,11 @@ export interface Meeting{
     defaultedLog:string
 }
 
+export interface AttendanceDTO{
+    studentID:number
+    attendanceStatus:AttendanceStatus
+}
+
 export interface Criterion{
     criterionID:number
     rubric:Rubric
@@ -180,5 +198,13 @@ export interface Chat{
     firstname:string
     lastname:string
     message:string
+}
+
+export interface Attendance{
+    // studentID:number
+    studentEmail:string
+    firstname:string
+    lastname:string
+    attendanceStatus:AttendanceStatus
 }
 

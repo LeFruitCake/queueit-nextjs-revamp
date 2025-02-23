@@ -98,11 +98,12 @@ const GroupDetailStudentView = () => {
                 }
                 <div className='flex-1 flex flex-col gap-3'>
                     <div className='flex-1 border-2 border-black bg-white rounded-lg flex flex-col justify-around p-5'>
-                        <Typography variant='h5' fontWeight='bold' textAlign='center'>{groupContext.Team?<>{groupContext.Team.groupName}</>:<>Groups</>}</Typography>
+                        <Typography variant='h5' fontWeight='bold' textAlign='center'>{groupContext.Team?<>Team {groupContext.Team.groupName}</>:<>Groups</>}</Typography>
                         <div className='flex flex-col w-1/2 items-center justify-center mx-auto relative'>
                             {groupContext.Team?<img src={randomGroupImage()} alt="groupIcon" style={{height:'50%'}} />:<PersonSearchIcon sx={{fontSize:'5em'}}/>}
                             {groupContext.Team?
-                                <Typography variant='h6' fontWeight='bold' textAlign='center'>{`[${groupContext.Team.projectName}]`}</Typography>
+                                // <Typography variant='h6' fontWeight='bold' textAlign='center'>{`[${groupContext.Team.projectName}]`}</Typography>
+                                <></>
                                 :
                                 <Typography variant='caption' color='gray' textAlign='center'>You have yet to find any group. Connect with others.</Typography>
                             }

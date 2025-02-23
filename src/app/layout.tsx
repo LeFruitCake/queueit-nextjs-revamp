@@ -8,6 +8,7 @@ import { ClassroomProvider } from "@/Contexts/ClassroomContext";
 import { TeamProvider } from "@/Contexts/TeamContext";
 import { WebSocketProvider } from "@/WebSocket/WebSocketContext";
 import { FacultyProvider } from "@/Contexts/FacultyContext";
+import { QueueingManagerProvider } from "@/Contexts/QueueingManagerContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,7 +44,9 @@ export default function RootLayout({
             <ClassroomProvider>
               <TeamProvider>
                 <FacultyProvider>
-                  {children}
+                  <QueueingManagerProvider>
+                    {children}
+                  </QueueingManagerProvider>
                   <ToastContainer/>
                 </FacultyProvider>
               </TeamProvider>
