@@ -16,7 +16,7 @@ export default function RubricHeader() {
            <h2 className="text-lg font-bold mb-0">{selected}<span>{isOpen ? "▲" : "▼"}</span></h2>
           </button>
           {isOpen && (
-            <div className="absolute mt-2 w-48 bg-white border border-gray-200 rounded-sm shadow-lg">
+            <div className="absolute mt-2 w-48 bg-white border border-gray-200 rounded-sm shadow-lg z-50">
               {options.map((option) => (
                 <button
                   key={option}

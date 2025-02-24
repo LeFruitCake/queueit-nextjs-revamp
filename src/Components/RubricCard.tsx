@@ -1,18 +1,28 @@
 import React, { useState } from "react";
 import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";  
 
 export default function RubricCard({ rubric }) {
   const [open, setOpen] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const handleDelete = () => {
+    setOpen(false); // Close delete confirmation
+    setSuccessOpen(true); // Show success message
+    console.log("Rubric deleted");
+  };
+
+  const handleSuccessClose = () => setSuccessOpen(false);
+
   return (
     <div>
       <div
-        className="relative rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-10 flex flex-col justify-between transition duration-300"
-        style={{ width: "320px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "250px" }}
+        className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-10 flex flex-col justify-between transition duration-300"
+        style={{ width: "280px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
@@ -40,18 +50,53 @@ export default function RubricCard({ rubric }) {
       </div>
 
       {/* Delete Confirmation Modal */}
-      <Dialog open={open} onClose={handleClose} className="m-10">
-        <DialogTitle className="text-center" style={{color:'rgba(125,87,252,0.9)', fontWeight:'bold' }}>Delete Rubric</DialogTitle>
-        <DialogContent className="text-center">Are you sure you want to delete this rubric template?</DialogContent>
-        <DialogActions style={{ display: "flex", justifyContent: "center", fontWeight:'bold' }}>
-          <Button onClick={handleClose} style={{color:'#000', fontWeight:'bold'}} >
+      <Dialog 
+        open={open} 
+        onClose={handleClose} 
+        PaperProps={{ style: { width: "450px", height: "190px", padding:"10px"} }}
+      >
+        <DialogTitle className="text-center" variant="h5" style={{ color: "rgba(125,87,252,0.9)", fontWeight: "bold"}}>
+          Delete Rubric
+        </DialogTitle>
+        <DialogContent className="text-center">
+          Are you sure you want to delete this rubric template?
+        </DialogContent>
+        <DialogActions style={{ display: "flex", justifyContent: "center", fontWeight: "bold" }}>
+          <Button onClick={handleClose} style={{ color: "#000", fontWeight: "bold" }}>
             Cancel
           </Button>
-          <Button style={{background:'rgba(125,87,252,0.9)', color:'#fff', fontWeight:'bold'}} onClick={() => console.log("Rubric deleted")}>
+          <Button
+            style={{ background: "rgba(125,87,252,0.9)", color: "#fff", fontWeight: "bold" }}
+            onClick={handleDelete}
+          >
             Delete
           </Button>
-        </DialogActions>                                                        
-      </Dialog> 
+        </DialogActions>
+      </Dialog>
+
+      {/* Success Message Dialog */}
+      <Dialog 
+        open={successOpen} 
+        onClose={handleSuccessClose} 
+        PaperProps={{ style: { width: "450px", height: "200px" } }}
+      >
+        <DialogTitle className="flex justify-center">
+          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-white">
+            <CheckCircleIcon style={{ fontSize: "60px", color: "rgba(125,87,252,0.9)" }} />
+          </div>
+        </DialogTitle>
+        <DialogContent className="text-center">
+          Deleted Successfully
+        </DialogContent>
+        <DialogActions style={{ display: "flex", justifyContent: "center", fontWeight: "bold" }}>
+          <Button
+            style={{ background: "rgba(125,87,252,0.9)", color: "#fff", fontWeight: "bold" }}
+            onClick={handleSuccessClose}
+          >
+            Okay
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }

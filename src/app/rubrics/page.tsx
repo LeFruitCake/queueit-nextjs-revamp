@@ -29,7 +29,7 @@ const rubricData = [
   },
   {
     id: 4,
-    title: "Another Rubric4",
+    title: "Another Rubric4ss",
     description: "A Lorem Ipsum is simply dummy text of the printing.",
     createdBy: "Admin",
   },
@@ -40,14 +40,12 @@ export default function Page() {
   return ( 
     <BaseComponent> 
       <div className="bg-white w-full min-h-screen flex flex-col relative rounded-md px-10 py-6 border-2 border-black">
-
-        {/* Header and Button */}
+ 
         <div className="flex justify-between items-center w-full">
           <RubricHeader />
           <CreateRubricButton />
         </div> 
-        
-        {/* RubricCard below with margin for spacing */}
+         
         <div className="w-full mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"> 
           {rubricData.map((rubric, index) => (
               <RubricCard key={index} rubric={rubric} />
