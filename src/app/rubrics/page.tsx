@@ -8,7 +8,7 @@ import RubricCard from "@/Components/RubricCard";
 const rubricData = [
   {
     id: 1,
-    title: "Rubric Title",
+    title: "Consultation Rubric",
     description:
       "Lorem Ipsum is simply dummy text of the printing and typese been the industry's standard.",
     createdBy: "Create by the system",
@@ -18,7 +18,7 @@ const rubricData = [
     title: "Another Rubric2",
     description:
       "A second rubric example Lorem Ipsum is simply dummy text.",
-    createdBy: "Admin",
+    createdBy: "Create by the system",
   },
   {
     id: 3,
@@ -29,7 +29,7 @@ const rubricData = [
   },
   {
     id: 4,
-    title: "Another Rubric4ss",
+    title: "Another Rubric4",
     description: "A Lorem Ipsum is simply dummy text of the printing.",
     createdBy: "Admin",
   },

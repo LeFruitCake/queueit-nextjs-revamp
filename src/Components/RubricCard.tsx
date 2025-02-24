@@ -1,18 +1,25 @@
 import React, { useState } from "react";
 import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { useRouter } from 'next/navigation';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";  
 
-export default function RubricCard({ rubric }) {
+export default function page({ rubric }) {
   const [open, setOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const router = useRouter();  
 
+  const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+    event.preventDefault();   
+    router.push(`/rubrics/${encodeURIComponent(rubric.title)}`); 
+  };
+   
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const handleDelete = () => {
-    setOpen(false); // Close delete confirmation
-    setSuccessOpen(true); // Show success message
+    setOpen(false);  
+    setSuccessOpen(true);  
     console.log("Rubric deleted");
   };
 
@@ -21,6 +28,7 @@ export default function RubricCard({ rubric }) {
   return (
     <div>
       <div
+        onClick={handleClick} 
         className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-10 flex flex-col justify-between transition duration-300"
         style={{ width: "280px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
         onMouseEnter={() => setIsHovered(true)}
@@ -29,11 +37,15 @@ export default function RubricCard({ rubric }) {
         {/* Close Button (X) - Only visible on hover */}
         {isHovered && (
           <button
-            onClick={handleOpen}
-            className="absolute top-2 right-2 bg-gray-200 text-black px-2 py-1 rounded-full text-sm font-bold hover:bg-red-500 hover:text-white transition"
-          >
-            ✖
-          </button>
+          onClick={(event) => {
+            event.stopPropagation(); 
+            handleOpen();
+          }}
+          className="absolute top-2 right-2 bg-gray-200 text-black px-2 py-1 rounded-full text-sm font-bold hover:bg-red-500 hover:text-white transition"
+        >
+          ✖
+        </button>
+        
         )}
 
         <Typography variant="h5" fontWeight="bold" className="text-center">
