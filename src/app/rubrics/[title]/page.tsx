@@ -136,6 +136,11 @@ export default function page() {
             variant="standard"
             multiline
             InputProps={{ disableUnderline: true }}
+            sx={{
+              "& .MuiInputBase-input": {
+                paddingLeft: "48px",  
+              } 
+            }}
             className="text-gray-500 ml-12"
           />
         ) : (
@@ -155,6 +160,7 @@ export default function page() {
                     fullWidth
                     variant="standard"
                     InputProps={{ disableUnderline: true }}
+                    placeholder="Criterion Title"
                     className="font-semibold"
                   />
                   <TextField
@@ -164,6 +170,7 @@ export default function page() {
                     multiline
                     variant="standard"
                     InputProps={{ disableUnderline: true }}
+                    placeholder="Criterion Description"
                     className="text-gray-600"
                   />
                 </>
