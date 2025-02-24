@@ -17,9 +17,10 @@ interface QueueingTeamProps{
     dequeue:Function
     goOnHold:Function
     requeue:Function
+    admitQueueingEntry:Function
 }
 
-const QueueingTeam:React.FC<QueueingTeamProps> = ({team, index,dequeue,goOnHold,requeue}) => {
+const QueueingTeam:React.FC<QueueingTeamProps> = ({team, index,dequeue,goOnHold,requeue, admitQueueingEntry}) => {
   const user = useUserContext().user
   const myTeam = useTeamContext().Team
   const queueingManager = useQueueingManagerContext().QueueingManager
@@ -46,7 +47,7 @@ const QueueingTeam:React.FC<QueueingTeamProps> = ({team, index,dequeue,goOnHold,
           <ButtonGroup>
             <Tooltip title='Remove' color='error'><IconButton onClick={()=>{dequeue(team.queueingEntryID)}}><CloseIcon/></IconButton></Tooltip>
             {!team.onHold?
-              <Tooltip title='Admit' color='success'><IconButton><CheckIcon/></IconButton></Tooltip>
+              <Tooltip title='Admit' color='success'><IconButton onClick={()=>{admitQueueingEntry(team.queueingEntryID)}}><CheckIcon/></IconButton></Tooltip>
               :
               <></>
             }

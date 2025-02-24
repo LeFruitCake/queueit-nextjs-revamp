@@ -1,5 +1,5 @@
 "use client"
-import { dpurple, QueueingEntry, Team } from '@/Utils/Global_variables'
+import { dpurple, Meeting, QueueingEntry, Team } from '@/Utils/Global_variables'
 import React, { useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import HistoryBoard from './HistoryBoard'
@@ -7,17 +7,18 @@ import { Button } from '@mui/material'
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
 
 interface MeetingBoardProps{
-    queueingEntry: QueueingEntry
+    meeting: Meeting
+    updateAttendanceStatus: Function
 }
 
-const MeetingBoard:React.FC<MeetingBoardProps> = ({queueingEntry}) => {
+const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus}) => {
     const [rubric, setRubric] = useState(undefined)
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
             <p>Consultation Note</p>
             <div className='w-full flex flex-col lg:flex-row xl:flex-row gap-3'>
                 <div className='flex-1'>
-                    <AttendanceLogger members={null}/>
+                    <AttendanceLogger updateAttendanceStatus={updateAttendanceStatus} attendanceList={meeting?.queueingEntry.attendanceList}/>
                 </div>
                 <div className='flex-1'>
                     <HistoryBoard/>

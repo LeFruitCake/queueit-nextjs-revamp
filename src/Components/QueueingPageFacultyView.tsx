@@ -7,7 +7,7 @@ import QueueingList from '@/Components/QueueingList'
 import StopQueueingButton from '@/Components/StopQueueingButton'
 import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Contexts/AuthContext'
-import { Classes, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
+import { AttendanceStatus, Classes, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { isPastTime, standardizeTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
@@ -58,6 +58,9 @@ const QueueingPageFacultyView = () => {
                             const response = await res.json()
                             setQueueingManager(response)
                             toast.success("Queueing opened.")  
+                            setQueueingLimit(0)
+                            setQueueingFilter([])
+                            setTimeStop(0)
                         })
                         .catch((err)=>{
                         console.log(`Fetching queueing manager error ${err}`)
@@ -121,19 +124,88 @@ const QueueingPageFacultyView = () => {
                 }
     }
 
+    const admitQueueingEntry = (queueingEntryID:number) =>{
+        if(queueingEntryID){
+            fetch(`${QUEUEIT_URL}/faculty/admitQueueingEntry`,{
+                body:JSON.stringify({
+                    "queueingEntryID":queueingEntryID
+                }),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                method:'POST'
+            })
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        toast.success("Meeting started.")
+                        break;
+                    case 404:
+                        const text = await res.text()
+                        toast.error(text)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Something went wrong during admittance.")
+                console.log(err)
+            })
+        }else{
+            toast.error("Queueing Entry you're trying to admit is not found in the line.")
+        }
+    }
+
+    const updateAttendanceStatus = (studentEmail: string) => {
+        if (queueingManager?.meeting?.queueingEntry?.attendanceList) {
+            // Create a new attendance list without mutating the original
+            const updatedAttendanceList = queueingManager.meeting.queueingEntry.attendanceList.map((attendance) => 
+                attendance.studentEmail === studentEmail
+                    ? {
+                        ...attendance,
+                        attendanceStatus: 
+                            attendance.attendanceStatus === AttendanceStatus.PRESENT
+                                ? AttendanceStatus.ABSENT
+                                : attendance.attendanceStatus === AttendanceStatus.ABSENT
+                                ? AttendanceStatus.LATE
+                                : AttendanceStatus.PRESENT
+                    }
+                    : attendance
+            );
+    
+            // Create a new queueingManager object to avoid mutation
+            const updatedQueueingManager = {
+                ...queueingManager,
+                meeting: {
+                    ...queueingManager.meeting,
+                    queueingEntry: {
+                        ...queueingManager.meeting.queueingEntry,
+                        attendanceList: updatedAttendanceList
+                    }
+                }
+            };
+    
+            // Update the context with the new queueingManager
+            setQueueingManager(updatedQueueingManager);
+        } else {
+            console.error('Attendance list not found');
+        }
+    };
+
     return (
         <div>
             {queueingManager?.isActive && user?.role == UserType.FACULTY?
                 <div className='relative min-h-screen pt-5 flex-grow flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
                     <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 flex-grow flex flex-col gap-3' style={{minWidth:'350px'}}>
                         <StopQueueingButton closeQueueing={closeQueueing} />
-                        <QueueingList dequeue={removeTeamFromQueue} teams={queueingManager?.queueingEntries}/>
+                        <QueueingList admitQueueingEntry={admitQueueingEntry} dequeue={removeTeamFromQueue} teams={queueingManager?.queueingEntries}/>
                     </div>
                     <div className='flex flex-col w-full gap-3' style={{minWidth:'300px'}}>
-                        <CurrentlyTending team={queueingManager.tendingGroup} />
+                        <CurrentlyTending meeting={queueingManager.meeting} />
                         {
-                            queueingManager.tendingEntry?
-                            <MeetingBoard team={queueingManager.tendingEntry}/>
+                            queueingManager.meeting?
+                            <MeetingBoard updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
                             :
                             <Chat adviser={user} chat={null}/>
                         }

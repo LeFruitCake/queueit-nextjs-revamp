@@ -187,7 +187,7 @@ const QueueingPageStudentView = () => {
 
             {/* right side */}
             <div className='flex flex-col w-full md:w-1/2 lg:w-1/2 xl:w-1/2 gap-3'>
-                <CurrentlyTending team={null}/>
+                <CurrentlyTending meeting={queueingManager?.meeting}/>
                 <Chat faculty={faculty}/>
             </div>
             <StudentEnqueueModal modalToggle={modalToggle} setModalToggle={setModalToggle}/>

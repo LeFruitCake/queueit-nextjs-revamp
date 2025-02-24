@@ -129,7 +129,7 @@ export interface QueueingManager{
     isActive:boolean
     cateringLimit:number
     queueingEntries:Array<QueueingEntry> | null
-    tendingEntry: QueueingEntry | null
+    meeting: Meeting | null | undefined
     cateredClassrooms:Array<number | null>
 }
 
@@ -158,18 +158,21 @@ export interface Grade{
     grade:number
 }
 
+export enum MeetingStatus{
+    TEAM_NO_SHOW = "TEAM_NO_SHOW",
+    FACULTY_NO_SHOW = "FACULTY_NO_SHOW",
+    FACULTY_CONDUCTED = "FACULTY_CONDUCTED",
+    QUEUEING_CONDUCTED = "QUEUEING_CONDUCTED",
+    DEFAULTED = "DEFAULTED"
+}
+
 export interface Meeting{
     meetingID:number
-    adviserID:number
-    groupID:number
-    start:Date
-    end:Date
-    meetingDate:Date
-    attendance:Set<Number>
-    editedAttendance:Set<MeetingEdition>
-    grades:Set<Grade>
-    isDefaulted:boolean
-    defaultedLog:string
+    start:string
+    end:string
+    grades:Array<Grade>
+    meetingStatus:MeetingStatus
+    queueingEntry:QueueingEntry
 }
 
 export interface AttendanceDTO{
