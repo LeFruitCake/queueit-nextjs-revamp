@@ -5,7 +5,6 @@ import { Attendance, AttendanceStatus, dpurple, QUEUEIT_URL, SPEAR_URL, User, Us
 import { Button, Modal, Stack, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
-import CircleIcon from '@mui/icons-material/Circle';
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import { toast } from 'react-toastify'
 
@@ -126,11 +125,6 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
                 <Typography sx={{ textAlign: 'center' }} variant='subtitle1' fontWeight='bold'>{`Hello Team ${team?.groupName}`}</Typography>
                 <Typography sx={{ width: '75%', textAlign: 'center' }} variant='caption' color='gray'>Prior to adding your team to the queue, please toggle your individual attendance for this consultation.</Typography>
                 <div className='w-2/3 flex flex-col gap-3 h-80 overflow-auto'>
-                    <Stack gap={1} direction='row' alignItems='center'>
-                        <CircleIcon fontSize='small' className='text-lushgreen'/> <Typography variant='caption'>Present</Typography>
-                        <CircleIcon fontSize='small' className='text-lushred'/> <Typography variant='caption'>Absent</Typography>
-                        <CircleIcon fontSize='small' className='text-lushorange'/> <Typography variant='caption'>Late</Typography>
-                    </Stack>
                     <AttendanceLogger updateAttendanceStatus={updateAttendanceStatus} attendanceList={attendanceList} />
                     <Button disabled={attendanceList.length == 0} onClick={getInLine} sx={{backgroundColor:dpurple, color:'white', marginTop:'1em'}}>Get in line</Button>
                 </div>

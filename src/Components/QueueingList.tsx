@@ -13,9 +13,10 @@ interface QueueingListProps{
     dequeue:Function
     goOnHold:Function
     requeue:Function
+    admitQueueingEntry:Function
 }
 
-const QueueingList:React.FC<QueueingListProps> = ({teams, handleQueueClick, dequeue, goOnHold, requeue}) => {
+const QueueingList:React.FC<QueueingListProps> = ({teams, handleQueueClick, dequeue, goOnHold, requeue, admitQueueingEntry}) => {
     const user = useUserContext().user
     const team = useTeamContext().Team
     return (
@@ -35,7 +36,7 @@ const QueueingList:React.FC<QueueingListProps> = ({teams, handleQueueClick, dequ
                 </div>
                 <div>
                     {teams.map((team,index)=>(
-                        <QueueingTeam requeue={requeue} goOnHold={goOnHold} key={index} index={index} team={team} dequeue={dequeue}/>
+                        <QueueingTeam admitQueueingEntry={admitQueueingEntry} requeue={requeue} goOnHold={goOnHold} key={index} index={index} team={team} dequeue={dequeue}/>
                     ))}
                 </div>
             </div>

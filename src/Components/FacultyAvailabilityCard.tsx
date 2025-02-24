@@ -66,7 +66,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
 
     useEffect(() => {
         if (client && facultyID) {
-            const subscription = client.subscribe(`/topic/facultyActivity/adviser/${facultyID}`, (message) => {
+            const facultyStatusSubscription = client.subscribe(`/topic/facultyActivity/adviser/${facultyID}`, (message) => {
                 const receivedMessage:QueueingManager = JSON.parse(message.body);
                 console.log(receivedMessage)
                 setQueueingManager(receivedMessage)
@@ -74,7 +74,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
     
             return () => {
                 console.log('Unsubscribing');
-                subscription.unsubscribe();
+                facultyStatusSubscription.unsubscribe();
             };
         }
     }, [client, facultyID]);
