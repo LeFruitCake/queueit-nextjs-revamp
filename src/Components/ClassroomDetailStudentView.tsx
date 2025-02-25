@@ -22,7 +22,7 @@ const GroupDetailStudentView = () => {
     const [season, setSeason] = useState<string>()
 
     const fetchCurrentStudentTeam = async ()=>{
-        const response = fetch(`${SPEAR_URL}/team/my/${classroom?.cid}?userId=${user?.uid}`)
+        const response = fetch(`${SPEAR_URL}/team/my/${classroom?.cid}/${user?.uid}`)
                         .then(async (data)=>{
                             if(data.ok){
                                 const team_data = await data.json()

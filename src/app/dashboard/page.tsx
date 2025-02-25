@@ -28,19 +28,28 @@ export default function Page() {
                     headers: {
                         'Content-Type': 'application/json'
                     }
-                });
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
             } else if (user?.role === UserType.FACULTY) {
                 response = await fetch(`${SPEAR_URL}/teacher/classes-created/${user.uid}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json'
                     }
-                });
+                })
+                .catch((err)=>{
+                    console.log(err)
+                })
+                
             }
 
-            const data = await response?.json();
-            setClasses(data);
-            localStorage.setItem('classrooms', JSON.stringify(data)); // Store in localStorage
+            if(response?.ok){
+                const data = await response?.json();
+                setClasses(data);
+                localStorage.setItem('classrooms', JSON.stringify(data)); // Store in localStorage
+            }
         };
 
         fetchClasses();

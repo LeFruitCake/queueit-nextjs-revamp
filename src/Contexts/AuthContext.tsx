@@ -20,13 +20,13 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter()
   // Initialize user state from localStorage if available
-  // const [user, setUser ] = useState<User | null>(() => {
-  //   const storedUser  = localStorage.getItem('user');
-  //   return storedUser  ? JSON.parse(storedUser ) : null; // Parse the stored user or return default student
-  // });
+  const [user, setUser ] = useState<User | null>(() => {
+    const storedUser  = localStorage.getItem('user');
+    return storedUser  ? JSON.parse(storedUser ) : null; // Parse the stored user or return default student
+  });
 
   //for development
-  const [user, setUser ] = useState<User | null>(faculty);
+  // const [user, setUser ] = useState<User | null>(faculty);
   // const [user, setUser ] = useState<User | null>(student);
   // const [user, setUser ] = useState<User | null>(user2);
 
