@@ -22,7 +22,7 @@ const ClassroomCard: React.FC<ClassroomCardProps> = ({ classroom }) => {
     return (
         <div 
             onClick={handleClick} 
-            className={`rounded-lg border-2 border-black hover:border-2 hover:border-lgreen cursor-pointer relative px-5 py-10`} 
+            className={`rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer relative px-5 py-10`} 
             style={{ width: '320px', boxShadow: '15px 15px 0px 0.1px rgba(0, 0, 0,1)', height: '250px' }}
         >
             <Typography variant='h5' fontWeight='bold' style={{ zIndex: 1, position: 'relative' }}>

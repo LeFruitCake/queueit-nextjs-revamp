@@ -14,92 +14,23 @@ import {
   FormControlLabel 
 } from "@mui/material";
 
-  
 const rubricData = [
-  {
-    id: 1,
-    title: "Consultation Rubric",
-    description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations.",
-    createdBy: "Created by the system",
-    criteria: [
-      { title: "Preparation", description: "Student comes to the consultation well-prepared with assigned tasks completed or progress to report." },
-      { title: "Active Participation", description: "Student actively engages in the discussion, asks relevant questions, and provides meaningful input." },
-      { title: "Quality of Contributions", description: "Suggestions and insights are clear, relevant, and contribute to the group's overall progress." },
-      { title: "Collaboration and Communication", description: "Demonstrates good teamwork by respecting peers’ opinions and communicating effectively within the group." },
-    ],
-  },
-  {
-    id: 2,
-    title: "Another Rubric2",
-    description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations.",
-    createdBy: "Created by the system",
-    criteria: [
-      { title: "Preparation", description: "Student comes to the consultation well-prepared with assigned tasks completed or progress to report." },
-      { title: "Active Participation", description: "Student actively engages in the discussion, asks relevant questions, and provides meaningful input." },
-      { title: "Quality of Contributions", description: "Suggestions and insights are clear, relevant, and contribute to the group's overall progress." },
-      { title: "Collaboration and Communication", description: "Demonstrates good teamwork by respecting peers’ opinions and communicating effectively within the group." },
-    ],
-  },
-  {
-    id: 3,
-    title: "Another Rubric3",
-    description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations.",
-    createdBy: "Created by the system",
-    criteria: [
-      { title: "Preparation", description: "Student comes to the consultation well-prepared with assigned tasks completed or progress to report." },
-      { title: "Active Participation", description: "Student actively engages in the discussion, asks relevant questions, and provides meaningful input." },
-      { title: "Quality of Contributions", description: "Suggestions and insights are clear, relevant, and contribute to the group's overall progress." },
-      { title: "Collaboration and Communication", description: "Demonstrates good teamwork by respecting peers’ opinions and communicating effectively within the group." },
-    ],
-  },
-  {
-    id: 4,
-    title: "Another Rubric4",
-    description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations.",
-    createdBy: "Created by the system",
-    criteria: [
-      { title: "Preparation", description: "Student comes to the consultation well-prepared with assigned tasks completed or progress to report." },
-      { title: "Active Participation", description: "Student actively engages in the discussion, asks relevant questions, and provides meaningful input." },
-      { title: "Quality of Contributions", description: "Suggestions and insights are clear, relevant, and contribute to the group's overall progress." },
-      { title: "Collaboration and Communication", description: "Demonstrates good teamwork by respecting peers’ opinions and communicating effectively within the group." },
-    ],
-  },
+  { id: 1, title: "Consultation Rubric", description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations." },
+  { id: 2, title: "Another Rubric2", description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations." },
+  { id: 3, title: "Another Rubric3", description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations." },
+  { id: 4, title: "Another Rubric4", description: "Evaluates individual preparedness, participation, contribution quality, responsiveness to feedback, and collaboration during weekly consultations." },
 ];
 
 export default function page() {
-  const { title } = useParams();
-  const rubric = rubricData.find(r => r.title === decodeURIComponent(title));
+  const { id } = useParams();  
+  const rubric = rubricData.find(r => r.id === Number(id)); // ✅ Find rubric by ID
 
   const [isEditing, setIsEditing] = useState(false);
   const [editedRubric, setEditedRubric] = useState({ ...rubric });
-  const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
-  const [isPublic, setIsPublic] = useState(false);
 
   if (!rubric) {
     return <p>Rubric not found.</p>;
   }
-
-  const handleChange = (field, value) => {
-    setEditedRubric(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleCriteriaChange = (index, field, value) => {
-    const updatedCriteria = [...editedRubric.criteria];
-    updatedCriteria[index][field] = value;
-    setEditedRubric(prev => ({ ...prev, criteria: updatedCriteria }));
-  };
-
-  const toggleEditMode = () => setIsEditing(!isEditing);
-  const handleAddCriterion = () => {
-    setEditedRubric(prev => ({
-      ...prev,
-      criteria: [...prev.criteria, { title: "", description: "" }],
-    }));
-  };
-
-  const handleSaveTemplateOpen = () => setSaveTemplateOpen(true);
-  const handleSaveTemplateClose = () => setSaveTemplateOpen(false);
-  const handleEditClose = () => setIsEditing(false);
 
   return (
     <BaseComponent>
