@@ -96,7 +96,7 @@ export const extractFirstnameLastnameFromEmail = (email:string)=>{
 
 
 //capitalizes the first letter of a given string
-export const capitalizeFirstLetter = (text:string) =>{
+export const capitalizeFirstLetter = (text:string|undefined|null) =>{
   return `${text?.charAt(0).toUpperCase()}${text?.slice(1)}`
 }
 

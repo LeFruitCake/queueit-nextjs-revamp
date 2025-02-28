@@ -187,13 +187,26 @@ export interface Criterion{
     description:string
 }
 
+export interface CriterionDTO{
+    title:string|null|undefined
+    description:string|null|undefined
+}
+
 export interface Rubric{
-    rubricID:number
+    id:number
     title:string
     description:string
-    criteria:Set<Criterion>
+    criteria:Array<Criterion>
     isPrivate:boolean
-    creator:User
+    userID:number
+    facultyName:string
+}
+
+export interface RubricDTO{
+    title:string|null|undefined
+    description:string|null|undefined
+    criteria:Array<CriterionDTO>
+    isPrivate:boolean
 }
 
 export interface Chat{

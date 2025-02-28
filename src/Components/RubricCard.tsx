@@ -1,55 +1,62 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle } from "@mui/material";
+import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip } from "@mui/material";
 import { useRouter } from 'next/navigation';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";  
+import { useUserContext } from "@/Contexts/AuthContext";
+import { useRubricContext } from "@/Contexts/RubricContext";
+import { QUEUEIT_URL, Rubric } from "@/Utils/Global_variables";
+import { toast } from "react-toastify";
+import { useRubricsContext } from "@/Contexts/RubricsContext";
 
-export default function RubricCard({ rubric, currentUserID }) { 
+interface RubricCardProps{
+  rubric:Rubric
+}
+
+const RubricCard:React.FC<RubricCardProps> = ({ rubric }) => { 
   const [open, setOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [creatorName, setCreatorName] = useState("Created by the system");
   const router = useRouter();
+  const user = useUserContext().user
+  const setRubric = useRubricContext().setRubric
 
-  useEffect(() => {
-    if (rubric.userID === null) {
-      setCreatorName("the system");
-    } else if (rubric.userID === currentUserID) {
-      setCreatorName("You");
-    } else { 
-      fetch(`http://localhost:8080/get-teacher/${rubric.userID}`) 
-        .then(response => response.json())
-        .then(data => {
-          setCreatorName(data.firstname +" " + data.lastname || "Unknown User"); 
-        })
-        .catch(error => {
-          console.error("Error fetching user data:", error);
-          setCreatorName("Unknown User");
-        });
-    }
-  }, [rubric.userID, currentUserID]);  
+  const setRubrics = useRubricsContext().setRubrics
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   
   const handleDelete = () => {
     setOpen(false);  
-    setSuccessOpen(true);  
-    console.log("Rubric deleted");
+   
+    fetch(`${QUEUEIT_URL}/rubrics/delete/${rubric.id}`,{
+      method:'DELETE'
+    })
+    .then((res)=>{
+      setSuccessOpen(true);  
+      toast.success("rubric deleted")
+      setRubrics((prevRubrics) => 
+          prevRubrics.filter((r) => r.id !== rubric.id)
+      );
+    })
+    .catch((err)=>{
+      toast.error("Caught an error")
+      console.log(err)
+    })
   };
 
   const handleSuccessClose = () => setSuccessOpen(false);
 
   return (
-    <div>
+    <>
       <div
-        onClick={() => router.push(`/rubrics/rubricdetails/${rubric.id}`)} // ✅ Route by ID
-        className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-10 flex flex-col justify-between transition duration-300"
+        onClick={() => {setRubric(rubric); router.push('/rubrics/details')}} // ✅ Route by ID
+        className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-3 flex flex-col gap-3 justify-between h-full transition duration-300"
         style={{ width: "280px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
         {/* Close Button (X) - Only visible on hover */}
-        {isHovered && (
+        {isHovered && rubric.userID == user?.uid && (
           <button
             onClick={(event) => {
               event.stopPropagation(); 
@@ -61,16 +68,16 @@ export default function RubricCard({ rubric, currentUserID }) {
           </button>
         )}
 
-        <Typography variant="h5" fontWeight="bold" className="text-center">
+        <Tooltip title={rubric.title}><Typography variant="h5" fontWeight="bold" className="text-center pt-5 overflow-hidden">
           {rubric.title}
-        </Typography>
+        </Typography></Tooltip>
 
-        <Typography className="text-center absolute bottom-16" style={{ fontSize: "10px", marginRight: "40px" }}>
+        <Typography className="w-full overflow-hidden" style={{ fontSize: "10px", textAlign:'center' }}>
           {rubric.description}
         </Typography>
 
-        <Typography className="absolute bottom-4 left-1/2 transform -translate-x-1/2 text-center" style={{ fontSize: "10px", color: "gray" }}>
-          Created by {creatorName}
+        <Typography className=" text-center" style={{ fontSize: "10px", color: "gray" }}>
+          Created by {rubric.facultyName}
         </Typography>
       </div>
 
@@ -114,6 +121,9 @@ export default function RubricCard({ rubric, currentUserID }) {
           </Button>
         </DialogActions>
       </Dialog>
-    </div>
+    </>
   );
 }
+
+
+export default RubricCard

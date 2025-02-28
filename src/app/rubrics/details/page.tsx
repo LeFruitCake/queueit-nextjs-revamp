@@ -18,25 +18,21 @@ import {
   colors,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { dpurple, QUEUEIT_URL, RubricDTO } from "@/Utils/Global_variables";
+import { dpurple, QUEUEIT_URL, Rubric, RubricDTO } from "@/Utils/Global_variables";
 import WestIcon from '@mui/icons-material/West';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import { toast } from "react-toastify";
 import IndexEnumerator from "@/Components/IndexEnumerator";
 import { useUserContext } from "@/Contexts/AuthContext";
 import { capitalizeFirstLetter } from "@/Utils/Utility_functions";
+import { useRubricContext } from "@/Contexts/RubricContext";
 
 export default function page() {
   const user = useUserContext().user
   const router = useRouter();
-  const [rubric, setRubric] = useState<RubricDTO|null>({
-    title: "",
-    description: "",
-    criteria: [],
-    isPrivate:true,
-  });
-
-  const [isPrivate, setIsPrivate] = useState(true);
+  const [rubric, setRubric] = useState<Rubric|null|undefined>(useRubricContext().Rubric);
+  console.log(`rubric line 34: ${rubric?.isPrivate}`)
+  const [isPrivate, setisPrivate] = useState(rubric?.isPrivate);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
   const handleChange = (field, value) => {
@@ -71,7 +67,7 @@ export default function page() {
   const handleSaveTemplateOpen = () => setSaveTemplateOpen(true);
   const handleSaveTemplateClose = () => setSaveTemplateOpen(false);
 
-  const handleSaveRubric = () => {
+  const handleUpdateRubric = () => {
     if(rubric?.title == "" || rubric?.title == null || rubric?.title == undefined){
       toast.error("Rubric title must not be empty.")
     }else if(rubric.criteria.length == 0){
@@ -81,12 +77,14 @@ export default function page() {
     }
     else{
       console.log("Rubric Saved:", rubric);
+      console.log(`isprivate: ${isPrivate}`)
       // toast.success("Rubric saved.")
       
 
-      fetch(`${QUEUEIT_URL}/rubrics/create`,{
-        method:'POST',
+      fetch(`${QUEUEIT_URL}/rubrics/update`,{
+        method:'PUT',
         body:JSON.stringify({
+          "id":rubric.id,
           "title":rubric.title,
           "description":rubric.description,
           "criteria":rubric.criteria,
@@ -119,7 +117,7 @@ export default function page() {
           <div className="flex items-start h-full">
             <IconButton onClick={()=>{router.back()}} sx={{backgroundColor:'black','&:hover':{backgroundColor:'#333'}}}><WestIcon sx={{color:'white'}}/></IconButton>
           </div>
-          <div className="flex flex-col h-full gap-3 items-start justify-start w-full">
+          <div className="flex flex-col h-full max-h-72 overflow-auto gap-3 items-start justify-start w-full">
             <input
               value={rubric.title}
               onChange={(e) => handleChange("title", e.target.value)}
@@ -141,7 +139,7 @@ export default function page() {
 
         
 
-        <div className="p-6 rounded-lg mt-10">
+        <div className="p-6 rounded-lg mt-10 flex-1 overflow-auto">
           <Typography variant="h5" fontWeight={"bold"}>Criteria</Typography>
           {/* <Divider/> */}
           {rubric.criteria.map((criterion, index) => (
@@ -166,38 +164,57 @@ export default function page() {
                   className="text-gray-600"
                 />
               </div>
-              <div>
-                <IconButton onClick={()=>{handleRemoveCriterion(index)}}><RemoveCircleIcon sx={{color:'red'}}/></IconButton>
-              </div>
+              {rubric?.userID == user?.uid?
+                <div>
+                  <IconButton onClick={()=>{handleRemoveCriterion(index)}}><RemoveCircleIcon sx={{color:'red'}}/></IconButton>
+                </div>
+                :
+                <></>
+              }
             </div>
           ))}
 
-          <button
-            onClick={handleAddCriterion}
-            className="mt-4 px-4 py-2 bg-[black] text-white rounded-md hover:bg-[#353535] transition flex gap-3"
-          >
-            <AddCircleIcon/> Add Criterion
-          </button>
+          {rubric?.userID == user?.uid?
+            <button
+              onClick={handleAddCriterion}
+              className="mt-4 px-4 py-2 bg-[black] text-white rounded-md hover:bg-[#353535] transition flex gap-3"
+            >
+              <AddCircleIcon/> Add Criterion
+            </button>
+            :<></>
+          }
         </div>
 
-        <div className="flex justify-center w-full gap-5 mt-6">
-          <Button sx={{textTransform:'none'}} onClick={() => router.push("/rubrics")} style={{ color: "#000" }}>
-            Cancel
-          </Button>
-          <Button sx={{textTransform:'none'}}
-            onClick={handleSaveTemplateOpen}
-            style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
-          >
-            Save
-          </Button>
-        </div>
+        {
+          rubric?.userID == user?.uid?
+          <div className="flex justify-center w-full gap-5 mt-6">
+            <Button sx={{textTransform:'none'}} onClick={() => router.push("/rubrics")} style={{ color: "#000" }}>
+              Cancel
+            </Button>
+            <Button sx={{textTransform:'none'}}
+              onClick={handleSaveTemplateOpen}
+              style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
+            >
+              Save
+            </Button>
+          </div>
+          :
+          <div className="flex justify-center w-full gap-5 mt-6">
+            <Button sx={{textTransform:'none'}}
+              
+              style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
+            >
+              Create a copy
+            </Button>
+          </div>
+        }
 
         <Dialog open={saveTemplateOpen} onClose={handleSaveTemplateClose} fullWidth maxWidth="sm">
           <DialogTitle className="text-[#7D57FC] font-bold">Save New Rubric</DialogTitle>
           <DialogContent>
             <p className="text-gray-600">Would you like to make this rubric template public?</p>
             <FormControlLabel
-              control={<Checkbox checked={!isPrivate} onChange={(e) => setIsPrivate(false)} />}
+              control={<Checkbox checked={!isPrivate} onChange={(e) => setisPrivate(!isPrivate)} />}
               label="Make this template public"
             />
           </DialogContent>
@@ -206,7 +223,7 @@ export default function page() {
               Cancel
             </Button>
             <Button
-              onClick={handleSaveRubric}
+              onClick={handleUpdateRubric}
               style={{ background: "rgba(125,87,252,0.9)", color: "#fff", fontWeight: "bold" }}
             >
               Save Rubric

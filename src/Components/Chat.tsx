@@ -21,7 +21,7 @@ const Chat: React.FC<ChatProps> = ({ faculty }) => {
 
     useEffect(() => {
         if (client) {
-            const subscription = client.subscribe(`/topic/chat/adviser/${user?.role == UserType.FACULTY?user.uid:faculty.uid}`, (message) => {
+            const subscription = client.subscribe(`/topic/chat/adviser/${user?.role == UserType.FACULTY?user?.uid:faculty?.uid}`, (message) => {
                 const receivedMessage: ChatDTO = JSON.parse(message.body);
                 console.log(receivedMessage)
                 setChats((prev) => [...prev, receivedMessage])
