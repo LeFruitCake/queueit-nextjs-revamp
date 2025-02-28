@@ -6,7 +6,7 @@ import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import listPlugin from "@fullcalendar/list";
 import interactionPlugin from "@fullcalendar/interaction";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
@@ -43,6 +43,30 @@ export default function Page() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    // Hardcoded array of scheduled meetings
+    const scheduledMeetings = [
+        {
+            title: "Team Sync",
+            start: new Date(2025, 1, 15, 10, 0), // Example: October 15, 2023, 10:00 AM
+            end: new Date(2025, 1, 15, 11, 0),   // Example: October 15, 2023, 11:00 AM
+            backgroundColor: '#7D57FC',
+        },
+        {
+            title: "Project Kickoff",
+            start: new Date(2025, 1, 16, 14, 0), // Example: October 16, 2023, 2:00 PM
+            end: new Date(2025, 1, 16, 15, 0),   // Example: October 16, 2023, 3:00 PM
+            backgroundColor: '#7D57FC',
+        },
+    ];
+
+    useEffect(() => {
+        // Set initial events including scheduled meetings
+        setEvents(prevEvents => [
+            ...prevEvents,
+            ...scheduledMeetings,
+        ]);
+    }, []);
+
     const handleDateSelect = (selectInfo: any) => {
         const dates = [];
         let currentDate = selectInfo.start;
@@ -62,6 +86,15 @@ export default function Page() {
         console.log(dates); // Log the selected dates
         setSelectedDates(dates);
         setOpen(true);
+        
+        // Set the start and end time based on the selected range
+        const startHour = selectInfo.start.getHours().toString().padStart(2, '0');
+        const startMinute = selectInfo.start.getMinutes().toString().padStart(2, '0');
+        const endHour = selectInfo.end.getHours().toString().padStart(2, '0');
+        const endMinute = selectInfo.end.getMinutes().toString().padStart(2, '0');
+
+        setStartTime(`${startHour}:${startMinute}`);
+        setEndTime(`${endHour}:${endMinute}`);
     };
 
     const handleClose = () => {
@@ -92,8 +125,9 @@ export default function Page() {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
     
-            // Check if the new event overlaps with existing events
+            // Check if the new event overlaps with existing events on the same day
             if (
+                eventStart.toDateString() === startDate.toDateString() && // Same day
                 (startDate < eventEnd && endDate > eventStart) // Overlap condition
             ) {
                 setErrorMessage("Time conflict with your other schedule. Please modify the time.");
@@ -124,9 +158,11 @@ export default function Page() {
         setSuccessModalOpen(true);
         handleClose();
     };
+
     const handleSuccessClose = () => {
         setSuccessModalOpen(false);
     };
+
     const isFormValid = () => {
         return startTime !== '' && endTime !== '' && groupName !== '' && sessionType !== '';
     };
@@ -191,6 +227,34 @@ export default function Page() {
                                     background-color: #D8FF78 !important;
                                     padding: 2px;
                                     margin-bottom: 1%;
+                                }
+                                .fc-event-main {
+                                    overflow-y: scroll;
+                                }
+                                ::-webkit-scrollbar {
+                                    width: 8px; /* Width of the scrollbar */
+                                    height: 8px; /* Height of the scrollbar */
+                                }
+
+                                ::-webkit-scrollbar-thumb {
+                                    background-color: #7d57fc; /* Color of the scrollbar thumb */
+                                    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
+                                }
+
+                                ::-webkit-scrollbar-track {
+                                    background: #f1f1f1; /* Background color of the scrollbar track */
+                                    border-radius: 10px; /* Rounded corners for the scrollbar track */
+                                }
+
+                                /* Hide the scrollbar arrows */
+                                ::-webkit-scrollbar-button {
+                                    display: none; /* Hides the arrows */
+                                }
+
+                                /* Thin scroll bars for Firefox */
+                                * {
+                                    scrollbar-width: thin; /* Use thin scrollbars */
+                                    scrollbar-color: #7d57fc #f1f1f1; /* Thumb color and track color */
                                 }
                             `}
                         </style>
