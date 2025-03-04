@@ -8,11 +8,15 @@ import { Rubric } from "@/Utils/Global_variables";
 import { useUserContext } from "@/Contexts/AuthContext";
 import { useRubricsContext } from "@/Contexts/RubricsContext";
 import { useQueueingManagerContext } from "@/Contexts/QueueingManagerContext";
+import { useRubricContext } from "@/Contexts/RubricContext";
+import { useRouter } from "next/navigation";
 
 export default function Page() {
   const rubrics = useRubricsContext().Rubrics
   const setRubrics = useRubricsContext().setRubrics
   const user = useUserContext().user
+  const setRubric = useRubricContext().setRubric
+  const router = useRouter();
 
   useEffect(() => {
     const fetchRubrics = async () => {
@@ -32,6 +36,11 @@ export default function Page() {
     fetchRubrics();
   }, []);
 
+  const RubricCardAction = (rubric:Rubric)=>{
+    setRubric(rubric);
+    router.push('/rubrics/details')
+  }
+
   return (
     <BaseComponent>
       <div className="bg-white w-full min-h-screen flex flex-col relative rounded-md px-10 py-6 border-2 border-black">
@@ -43,7 +52,7 @@ export default function Page() {
         <div className="w-full mt-6 flex flex-wrap justify-evenly  gap-4">
           {rubrics?.length > 0 ? (
             rubrics?.map((rubric) => ( 
-              <RubricCard key={rubric.id} rubric={rubric} /> 
+              <RubricCard key={rubric.id} onClickAction={RubricCardAction} rubric={rubric} /> 
             ))
           ) : (
             <p>No rubric found</p>

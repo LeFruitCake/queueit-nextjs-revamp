@@ -1,10 +1,14 @@
 "use client"
-import { dpurple, Meeting, QueueingEntry, Team } from '@/Utils/Global_variables'
-import React, { useState } from 'react'
+import { dpurple, Grade, Meeting, QueueingEntry, Team } from '@/Utils/Global_variables'
+import React, { useEffect, useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import HistoryBoard from './HistoryBoard'
-import { Button } from '@mui/material'
+import { Button, Typography } from '@mui/material'
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
+import { useRubricContext } from '@/Contexts/RubricContext'
+import SelectRubricModal from './SelectRubricModal'
+import EvaluationModal from './EvaluationModal'
+import { useGradesContext } from '@/Contexts/GradesContext'
 
 interface MeetingBoardProps{
     meeting: Meeting
@@ -12,7 +16,28 @@ interface MeetingBoardProps{
 }
 
 const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus}) => {
-    const [rubric, setRubric] = useState(undefined)
+    const {Rubric, setRubric} = useRubricContext()
+    const [selectRubricModalOpen, setSelectRubricModalOpen] = useState(false);
+    const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
+    const {Grades, setGrades} = useGradesContext();
+    useEffect(()=>{
+        if(!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID){
+            let tempGrades:Array<Grade> = []
+            Rubric.criteria.forEach(criterion => {
+                console.log(criterion.title)
+                meeting.queueingEntry.attendanceList.forEach(attendance => {
+                    tempGrades.push({
+                        studentName:`${capitalizeFirstLetter(attendance.firstname)} ${capitalizeFirstLetter(attendance.lastname)}`,
+                        criterionID:criterion.criterionID,
+                        meetingID:meeting.meetingID,
+                        editionNote:null,
+                        grade:0
+                    })
+                })
+            });
+            setGrades(tempGrades);
+        }
+    },[Rubric])
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
             <p>Consultation Note</p>
@@ -56,22 +81,24 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* {Array.from(team.members).map((member,index)=>(
+                                {meeting.queueingEntry.attendanceList.map((member,index)=>(
                                     <tr key={index} className='border-b-2'>
                                         <td className='py-4'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</td>
                                         <td className='flex justify-center items-center py-4'>0</td>
                                     </tr>
-                                ))} */}
+                                ))}
                             </tbody>
                         </table>
                         <div className='w-full lg:w-1/4 xl:w-1/4 flex flex-col items-center justify-center gap-5'>
-                            <div className='text-center'>{rubric?<>naay rubric</>:<>No Rubric selected</>}</div>
-                            <Button sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
-                            <p className='text-center cursor-pointer' style={{color:dpurple, textDecoration:'underline'}}>{rubric?<>Change Rubric</>:<>Choose Rubric Now</>}</p>
+                            <div className='text-center'>{Rubric?<Typography variant='h6' fontWeight={"bold"}>{Rubric.title}</Typography>:<>No Rubric selected</>}</div>
+                            <Button onClick={()=>{setEvaluationModalOpen(true)}} disabled={Rubric?false:true} sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
+                            <p onClick={()=>{setSelectRubricModalOpen(true)}} className='text-center cursor-pointer' style={{color:dpurple, textDecoration:'underline'}}>{Rubric?<>Change Rubric</>:<>Choose Rubric Now</>}</p>
                         </div>
                     </div>
                 </div>
             </div>
+            <SelectRubricModal open={selectRubricModalOpen} setOpen={setSelectRubricModalOpen}/>
+            <EvaluationModal open={evaluationModalOpen} setOpen={setEvaluationModalOpen}/> 
         </div>
     )
 }

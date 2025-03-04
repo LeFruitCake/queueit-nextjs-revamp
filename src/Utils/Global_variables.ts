@@ -151,10 +151,10 @@ export interface MeetingEdition{
 }
 
 export interface Grade{
-    userID:number
     meetingID:number
     criterionID:number
-    editionNote:string
+    editionNote:string|null
+    studentName:string
     grade:number
 }
 

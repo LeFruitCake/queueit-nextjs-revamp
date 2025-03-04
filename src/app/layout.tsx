@@ -11,6 +11,7 @@ import { FacultyProvider } from "@/Contexts/FacultyContext";
 import { QueueingManagerProvider } from "@/Contexts/QueueingManagerContext";
 import { RubricProvider } from "@/Contexts/RubricContext";
 import { RubricsProvider } from "@/Contexts/RubricsContext";
+import { GradesProvider } from "@/Contexts/GradesContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -49,7 +50,9 @@ export default function RootLayout({
                   <QueueingManagerProvider>
                     <RubricsProvider>
                       <RubricProvider>
-                        {children}
+                        <GradesProvider>
+                          {children}
+                        </GradesProvider>
                       </RubricProvider>
                     </RubricsProvider>
                   </QueueingManagerProvider>

@@ -29,7 +29,7 @@ const ClassroomCard: React.FC<ClassroomCardProps> = ({ classroom }) => {
                 {classroom.courseDescription}
             </Typography>
             <Typography style={{color:'rgba(125,87,252,0.9)', fontWeight:'bold', zIndex:1, position:'relative'}}>{`${classroom.courseCode.toUpperCase()} - ${classroom.section.toUpperCase()}`}</Typography>
-            <img className='hidden md:block lg:block xl:block' src={randomPerson()} alt="person" style={{ position: 'absolute', bottom: 0, right: 0, height: '90%', zIndex: 0 }} />
+            <img className='hidden md:block lg:block xl:block rounded-full ' src={randomPerson()} alt="person" style={{ position: 'absolute', bottom: 0, right: 0, height: '90%', zIndex: 0 }} />
         </div>
     );
 };

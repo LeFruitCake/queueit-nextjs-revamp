@@ -7,12 +7,13 @@ import QueueingList from '@/Components/QueueingList'
 import StopQueueingButton from '@/Components/StopQueueingButton'
 import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Contexts/AuthContext'
-import { AttendanceStatus, Classes, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
+import { AttendanceStatus, Classes, Grade, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { isPastTime, standardizeTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
 import { useRouter } from 'next/navigation'
+import { useGradesContext } from '@/Contexts/GradesContext'
 
 const QueueingPageFacultyView = () => {
     const user = useUserContext().user
@@ -23,6 +24,7 @@ const QueueingPageFacultyView = () => {
     const [timeStop, setTimeStop] = useState(0)
     const queueingManager = useQueueingManagerContext().QueueingManager
     const setQueueingManager = useQueueingManagerContext().setQueueingManager
+    const grades = useGradesContext().Grades
     const openQueueing = ()=>{
         if(queueingManager?.isActive){
             toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
@@ -193,6 +195,34 @@ const QueueingPageFacultyView = () => {
         }
     };
 
+    const concludeMeeting = ()=>{
+        console.log(grades)
+        fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
+            body:JSON.stringify(grades),
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            }
+        })
+        .then( async (res)=>{
+            switch(res.status){
+                case 200:
+                    toast.success("Meeting concluded.")
+                    break;
+                case 400:
+                    const text = await res.text()
+                    toast.error(text)
+                    break;
+                default:
+                    toast.error("Server error")
+            }
+        })
+        .catch((err)=>{
+            toast.error("Something went wrong during admittance.")
+            console.log(err)
+        })
+    }
+
     return (
         <div>
             {queueingManager?.isActive && user?.role == UserType.FACULTY?
@@ -202,7 +232,7 @@ const QueueingPageFacultyView = () => {
                         <QueueingList admitQueueingEntry={admitQueueingEntry} dequeue={removeTeamFromQueue} teams={queueingManager?.queueingEntries}/>
                     </div>
                     <div className='flex flex-col w-full gap-3' style={{minWidth:'300px'}}>
-                        <CurrentlyTending meeting={queueingManager.meeting} />
+                        <CurrentlyTending concludeMeeting={concludeMeeting} meeting={queueingManager.meeting} />
                         {
                             queueingManager.meeting?
                             <MeetingBoard updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>

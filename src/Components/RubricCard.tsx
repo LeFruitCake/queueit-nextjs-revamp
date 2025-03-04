@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Button, Dialog, DialogActions, DialogContent, DialogTitle, Tooltip } from "@mui/material";
-import { useRouter } from 'next/navigation';
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";  
 import { useUserContext } from "@/Contexts/AuthContext";
-import { useRubricContext } from "@/Contexts/RubricContext";
 import { QUEUEIT_URL, Rubric } from "@/Utils/Global_variables";
 import { toast } from "react-toastify";
 import { useRubricsContext } from "@/Contexts/RubricsContext";
 
 interface RubricCardProps{
   rubric:Rubric
+  onClickAction:Function
 }
 
-const RubricCard:React.FC<RubricCardProps> = ({ rubric }) => { 
+const RubricCard:React.FC<RubricCardProps> = ({ rubric,onClickAction }) => { 
   const [open, setOpen] = useState(false);
   const [successOpen, setSuccessOpen] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
+  
   const user = useUserContext().user
-  const setRubric = useRubricContext().setRubric
 
   const setRubrics = useRubricsContext().setRubrics
 
@@ -49,7 +47,7 @@ const RubricCard:React.FC<RubricCardProps> = ({ rubric }) => {
   return (
     <>
       <div
-        onClick={() => {setRubric(rubric); router.push('/rubrics/details')}} // ✅ Route by ID
+        onClick={() => {onClickAction(rubric);}} // ✅ Route by ID
         className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-3 flex flex-col gap-3 justify-between h-full transition duration-300"
         style={{ width: "280px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
         onMouseEnter={() => setIsHovered(true)}

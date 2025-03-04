@@ -6,9 +6,10 @@ import React, { useEffect, useState } from 'react'
 
 interface CurrentlyTendingProps{
     meeting: Meeting | null | undefined
+    concludeMeeting:Function
 }
-const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting}) => {
-    console.log(meeting)
+const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeeting}) => {
+    // console.log(meeting)
     const user = useUserContext().user
     const [elapsedTime, setElapsedTime] = useState<string>('')
     const [groupImage, setGroupImage] = useState<string | null>(null)
@@ -50,7 +51,7 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting}) => {
             </div>
             {user?.role == UserType.FACULTY?
                 <div>
-                    <Button sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
+                    <Button onClick={()=>{concludeMeeting()}} sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
                         Conclude Meeting
                     </Button>
                 </div>
