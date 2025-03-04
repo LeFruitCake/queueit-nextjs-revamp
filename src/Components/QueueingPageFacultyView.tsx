@@ -25,6 +25,7 @@ const QueueingPageFacultyView = () => {
     const queueingManager = useQueueingManagerContext().QueueingManager
     const setQueueingManager = useQueueingManagerContext().setQueueingManager
     const grades = useGradesContext().Grades
+    const setGrades = useGradesContext().setGrades
     const openQueueing = ()=>{
         if(queueingManager?.isActive){
             toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
@@ -207,6 +208,7 @@ const QueueingPageFacultyView = () => {
         .then( async (res)=>{
             switch(res.status){
                 case 200:
+                    setGrades(undefined);
                     toast.success("Meeting concluded.")
                     break;
                 case 400:

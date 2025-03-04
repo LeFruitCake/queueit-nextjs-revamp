@@ -23,7 +23,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
     useEffect(()=>{
         if(!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID){
             let tempGrades:Array<Grade> = []
-            Rubric.criteria.forEach(criterion => {
+            Rubric?.criteria.forEach(criterion => {
                 console.log(criterion.title)
                 meeting.queueingEntry.attendanceList.forEach(attendance => {
                     tempGrades.push({
