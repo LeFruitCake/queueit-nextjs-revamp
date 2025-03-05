@@ -1,37 +1,66 @@
-import { useUserContext } from '@/Utils/AuthContext'
-import { dpurple, Team, UserType } from '@/Utils/Global_variables'
+import { useUserContext } from '@/Contexts/AuthContext'
+import { dpurple, Meeting, UserType } from '@/Utils/Global_variables'
 import { randomGroupImage } from '@/Utils/Utility_functions'
-import { Button, Typography } from '@mui/material'
-import React from 'react'
+import { Button, Skeleton, Typography } from '@mui/material'
+import React, { useEffect, useState } from 'react'
+import ConfirmationModal from './ConfirmationModal'
 
 interface CurrentlyTendingProps{
-    team: Team
+    meeting: Meeting | null | undefined
+    concludeMeeting:Function
 }
-
-const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({team}) => {
+const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeeting}) => {
+    // console.log(meeting)
     const user = useUserContext().user
+    const [elapsedTime, setElapsedTime] = useState<string>('')
+    const [groupImage, setGroupImage] = useState<string | null>(null)
+    const [open,setOpen] = useState<boolean>(false)
+
+    useEffect(()=>{
+        setGroupImage(randomGroupImage());
+    },[])
+
+    useEffect(() => {
+        if (meeting) {
+            const meetingStart = new Date(meeting.start);
+            const interval = setInterval(() => {
+                const now = new Date();
+                const elapsedSeconds = Math.floor((now.getTime() - meetingStart.getTime()) / 1000);
+                const hours = Math.floor(elapsedSeconds / 3600);
+                const minutes = Math.floor((elapsedSeconds % 3600) / 60); // Calculate remaining minutes
+                const seconds = elapsedSeconds % 60; // Calculate remaining seconds
+    
+                setElapsedTime(`${hours > 0 ? `${hours} ${hours > 1 ? 'hours' : 'hour'} ` : ''}${minutes} ${minutes !== 1 ? 'minutes' : 'minute'} and ${seconds} ${seconds !== 1 ? 'seconds' : 'second'}`);
+            }, 1000);
+    
+            // Cleanup interval on component unmount
+            return () => clearInterval(interval);
+        }
+    }, [meeting]);
+
     return (
-        <div className='border-2 border-black w-full h-fit md:h-36 lg:h-36 xl:h-36 p-3 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
+        <div className='border-2 border-black w-full h-fit md:h-40 lg:h-40 xl:h-40 p-3 pb-6 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
             <div className='h-full flex-1 flex flex-col'>
-                <Typography>Currently Tending</Typography>
-                <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center'>
-                    <img src={randomGroupImage()} alt="group vector" className='block h-full' />
+                <Typography variant='h6'>Currently Tending</Typography>
+                <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center gap-3 overflow-hidden'>
+                    {meeting?<img src={groupImage} alt="group vector" className='block h-full' />:<Skeleton sx={{height:'100%',aspectRatio:1}} variant='rectangular'/>}
                     <div className='flex flex-col'>
-                        <span style={{fontWeight:'bold'}}>{team.groupName}</span>
-                        <Typography variant='caption' color='gray'>{team.classRef.section}</Typography>
-                        <Typography variant='caption' color={dpurple}>Time elapsed: 29 minutes</Typography>
+                        {meeting?<span style={{fontWeight:'bold'}}>{meeting?.queueingEntry.teamName}</span>:<Skeleton variant='text' width={300}/>}
+                        {/* {meeting?<Typography variant='caption' color='gray'>{classroom?.section}</Typography>: <Skeleton variant='text' width={300}/>} */}
+                        {meeting?<Typography variant='caption' color={dpurple}>Time elapsed: {elapsedTime}</Typography>:<Skeleton variant='text' width={300}/>}
                     </div>
                 </div>
             </div>
-            {user?.role == UserType.FACULTY && (team.project.adviser.uid == user?.uid || team.classRef.createdBy.uid == user?.uid)?
+            {user?.role == UserType.FACULTY && meeting? 
                 <div>
-                    <Button sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
-                        Save & Continue
+                    <Button onClick={()=>{setOpen(true)}} sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
+                        Conclude Meeting
                     </Button>
                 </div>
                 :
                 <></>
             }
+            <ConfirmationModal open={open} setOpen={setOpen} action={concludeMeeting} headerMessage='Meeting Conclusion Confirmation' bodyMessage='Please ensure you have reviewed the grading'/>
         </div>
     )
 }

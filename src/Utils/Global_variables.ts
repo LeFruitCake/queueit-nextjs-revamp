@@ -4,7 +4,12 @@ export const special_characters = ['"',"'",';','-','/','=','(',')','\\','%','/',
 export const lgreen = "#CCFC57"
 export const dpurple = "#7D57FC"
 
-export interface User{
+export const SPEAR_URL = "http://localhost:8080"
+export const QUEUEIT_URL = "http://localhost:8081"
+
+
+//user given when querying to spear db using id.
+export interface UserRetrieved{
     uid:number
     firstname:string
     lastname:string
@@ -16,9 +21,23 @@ export interface User{
     enrolledClasses:Set<Classes>
 }
 
+
+//user on log in
+export interface User{
+    deleted:boolean
+    expirationTime:string
+    message:string
+    refreshToken:string
+    role:string
+    statusCode:number
+    token:string
+    uid:number
+    firstname:string
+    lastname:string
+}
+
 export interface Classes{
     cid:number
-    createdBy:User
     courseType:string
     courseCode:string
     section:string
@@ -27,34 +46,181 @@ export interface Classes{
     courseDescription:string
     classKey:string
     createdDate: Date
-    isDeleted:boolean
+    deleted:boolean
+    firstname:string
+    lastname:string
+    role:string
+    uid:number
 }
 
 export enum UserType{
-    FACULTY = "ADVISER",
+    FACULTY = "TEACHER",
     STUDENT = "STUDENT"
+}
+
+export enum AttendanceStatus{
+    PRESENT = "PRESENT",
+    LATE = "LATE",
+    ABSENT = "ABSENT"
+}
+
+export interface Faculty{
+    firstname:string|undefined
+    lastname:string|undefined
+    uid:number|undefined
 }
 
 
 export interface Team{
     tid:number
     groupName:string
-    project:ProjectProposal
-    leader:User
-    classRef:Classes
-    members:Set<User>
-    isRecruitmentOpen:boolean
-    isDeleted:boolean
+    // projectName:string
+    projectId:number
+    leaderId:number
+    classId:number
+    memberIds:Array<number>
+    features:null
+    projectDescription:string
+    adviserId:number
+    scheduleId:number
+    recruitmentOpen:boolean
+}
+
+export interface TeamQueueitDTO{
+    teamID:number
+    teamName:string
+    courseCode:string
+    section:string
+    memberIds:Array<number>
+}
+
+export interface Schedule{
+    schedid:number
+    day:string
+    time:string
+    teacherId:number
+    teacherName:string
 }
 
 export interface ProjectProposal{
     pid:number
-    proposedBy:User
+    proposedById:number
     projectName:string
-    classProposal:Classes
+    classId:Classes
     description:string
     status:string
     reason:string
-    adviser:User
-    isDeleted:boolean
+    adviserId:number
+    courseCode:string
 }
+
+export interface ChatDTO{
+    userID:number
+    adviserID:number
+    message:string
+    firstname:string
+    lastname:string
+}
+
+export interface QueueingManager{
+    queueingManagerID:number
+    facultyID:number
+    timeEnds:string
+    isActive:boolean
+    cateringLimit:number
+    queueingEntries:Array<QueueingEntry> | null
+    meeting: Meeting | null | undefined
+    cateredClassrooms:Array<number | null>
+}
+
+export interface QueueingEntry{
+    queueingEntryID:number
+    teamID:number
+    teamName:string
+    classReference:string
+    queueingManager:QueueingManager
+    dateTimeQueued:Date
+    onHold:boolean
+    attendanceList:Array<Attendance>
+}
+
+export interface MeetingEdition{
+    userID:number
+    edition:Date
+    editionNote:String
+}
+
+export interface Grade{
+    meetingID:number
+    criterionID:number
+    editionNote:string|null
+    studentName:string
+    grade:number
+}
+
+export enum MeetingStatus{
+    TEAM_NO_SHOW = "TEAM_NO_SHOW",
+    FACULTY_NO_SHOW = "FACULTY_NO_SHOW",
+    FACULTY_CONDUCTED = "FACULTY_CONDUCTED",
+    QUEUEING_CONDUCTED = "QUEUEING_CONDUCTED",
+    DEFAULTED = "DEFAULTED"
+}
+
+export interface Meeting{
+    meetingID:number
+    start:string
+    end:string
+    grades:Array<Grade>
+    meetingStatus:MeetingStatus
+    queueingEntry:QueueingEntry
+}
+
+export interface AttendanceDTO{
+    studentID:number
+    attendanceStatus:AttendanceStatus
+}
+
+export interface Criterion{
+    criterionID:number
+    rubric:Rubric
+    title:string
+    description:string
+}
+
+export interface CriterionDTO{
+    title:string|null|undefined
+    description:string|null|undefined
+}
+
+export interface Rubric{
+    id:number
+    title:string
+    description:string
+    criteria:Array<Criterion>
+    isPrivate:boolean
+    userID:number
+    facultyName:string
+}
+
+export interface RubricDTO{
+    title:string|null|undefined
+    description:string|null|undefined
+    criteria:Array<CriterionDTO>
+    isPrivate:boolean
+}
+
+export interface Chat{
+    userID:number
+    firstname:string
+    lastname:string
+    message:string
+}
+
+export interface Attendance{
+    // studentID:number
+    studentEmail:string
+    firstname:string
+    lastname:string
+    attendanceStatus:AttendanceStatus
+}
+

@@ -1,42 +1,60 @@
-import { dpurple } from '@/Utils/Global_variables'
-import { millisecondsToHMS } from '@/Utils/Utility_functions'
-import { Button } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
+import { dpurple } from '@/Utils/Global_variables';
+import { millisecondsToHMS } from '@/Utils/Utility_functions';
+import { Button } from '@mui/material';
+import React, { useEffect, useState } from 'react';
 
-interface StopQueueingButtonProps{
-    timeStop: number|null
-    isQueueingOpen: boolean
-    setIsQueueingOpen: Function
+interface StopQueueingButtonProps {
+    closeQueueing: Function;
 }
 
-const StopQueueingButton:React.FC<StopQueueingButtonProps> = ({timeStop, isQueueingOpen, setIsQueueingOpen}) => {
-    const endTime = timeStop
-    const timeNow = new Date().getTime()
-    const [difference, setDifference] = useState(null);
-    useEffect(()=>{
-        // console.log(`timeStop: ${timeStop} and timeNow: ${timeNow} difference: ${difference}`)
-        if(endTime && endTime > timeNow && isQueueingOpen){
-            const intervalID = setInterval(()=>{
-                millisecondsToHMS(endTime,setDifference)
-                if (endTime && endTime <= Date.now()){
-                    clearInterval(intervalID);
-                    // closeQueueing();
-                }
-            },1000)
-            return ()=>{
-                clearInterval(intervalID)
-            }
+const StopQueueingButton: React.FC<StopQueueingButtonProps> = ({ closeQueueing }) => {
+    const queueingManager = useQueueingManagerContext().QueueingManager;
+    const [endTime, setEndTime] = useState<Date | null>(null);
+    const timeNow = new Date().getTime();
+    const [difference, setDifference] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (queueingManager) {
+            // Combine the current date with the timeEnds
+            const currentDate = new Date();
+            const timeParts = queueingManager.timeEnds.split(':');
+            const hours = parseInt(timeParts[0], 10);
+            const minutes = parseInt(timeParts[1], 10);
+            const seconds = parseInt(timeParts[2], 10);
+
+            // Set the end time to today at the specified time
+            const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate(), hours, minutes, seconds);
+            setEndTime(endDate);
         }
-      },[endTime, difference])
+    }, [queueingManager]);
+
+    useEffect(() => {
+        if (endTime && endTime.getTime() > timeNow && queueingManager?.isActive) {
+            const intervalID = setInterval(() => {
+                const remainingTime = endTime.getTime() - Date.now();
+                if (remainingTime > 0) {
+                    // setDifference(millisecondsToHMS(remainingTime));
+                    millisecondsToHMS(endTime,setDifference)
+                } else {
+                    clearInterval(intervalID);
+                    closeQueueing(); // Close the queueing when time is up
+                }
+            }, 1000);
+            return () => {
+                clearInterval(intervalID);
+            };
+        }
+    }, [endTime, queueingManager]);
+
     return (
-        <Button onClick={()=>{setIsQueueingOpen(false)}} sx={{position:'relative', backgroundColor:dpurple, color:'white', width:'100%'}} className='h-24'>
-            {isQueueingOpen?
-                difference == null?<>Close Queueing</>:<>{`Queueing ends in ${difference}`}</>
-                :
+        <Button onClick={() => { closeQueueing(); }} sx={{ position: 'relative', backgroundColor: dpurple, color: 'white', width: '100%' }} className='h-24'>
+            {queueingManager?.isActive ?
+                (difference == null ? <>Close Queueing</> : <>{`Queueing ends in ${difference}`}</>) :
                 <></>
             }
         </Button>
-    )
-}
+    );
+};
 
-export default StopQueueingButton
+export default StopQueueingButton;
