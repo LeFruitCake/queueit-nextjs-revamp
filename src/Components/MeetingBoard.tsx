@@ -13,9 +13,11 @@ import { useGradesContext } from '@/Contexts/GradesContext'
 interface MeetingBoardProps{
     meeting: Meeting
     updateAttendanceStatus: Function
+    setImpedimentsEncountered: Function
+    setNotedAssignedTasks: Function
 }
 
-const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus}) => {
+const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus, setImpedimentsEncountered, setNotedAssignedTasks}) => {
     const {Rubric, setRubric} = useRubricContext()
     const [selectRubricModalOpen, setSelectRubricModalOpen] = useState(false);
     const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
@@ -38,6 +40,41 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
             setGrades(tempGrades);
         }
     },[Rubric])
+
+    // Assuming `Grades` is your array of student data
+const getUniqueStudentsWithAveragedGrades = () => {
+    // Create a new object to store the aggregated data
+    const studentGrades = {};
+
+    // Loop through the grades to aggregate the data by student name
+    Grades?.forEach((member) => {
+        if (studentGrades[member.studentName]) {
+            // Add to the existing grades for that student
+            studentGrades[member.studentName].totalGrade += member.grade;
+            studentGrades[member.studentName].count += 1;
+        } else {
+            // Initialize the data for a new student
+            studentGrades[member.studentName] = {
+                totalGrade: member.grade,
+                count: 1
+            };
+        }
+    });
+
+    // Now create a new array of students with averaged grades
+    const averagedGrades = Object.keys(studentGrades).map((studentName) => {
+        const { totalGrade, count } = studentGrades[studentName];
+        return {
+            studentName,
+            grade: totalGrade / count, // Calculate the average grade
+        };
+    });
+
+    return averagedGrades;
+    };
+
+    // Now, in your JSX code, you can use this function to render the table
+    const averagedGrades = getUniqueStudentsWithAveragedGrades();
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
             <p>Consultation Note</p>
@@ -57,13 +94,13 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                     <div className='px-3 font-bold'>
                         Assign student tasks
                     </div>
-                    <textarea rows={5} className='p-3' placeholder='These are the deliverables to be checked in the next consultation.'></textarea>
+                    <textarea onChange={(e)=>{setNotedAssignedTasks(e.target.value)}} rows={5} className='p-3' placeholder='These are the deliverables to be checked in the next consultation.'></textarea>
                 </div>
                 <div className='flex flex-col p-3 border-b-2 border-black'>
                     <div className='px-3 font-bold'>
                         Are there any impediments?
                     </div>
-                    <textarea rows={5} className='p-3' placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.`}></textarea>
+                    <textarea onChange={(e)=>{setImpedimentsEncountered(e.target.value)}} rows={5} className='p-3' placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.`}></textarea>
                 </div>
                 <div className='flex flex-col p-3'>
                     <div className='px-3 font-bold'>
@@ -81,12 +118,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                                 </tr>
                             </thead>
                             <tbody>
-                                {meeting.queueingEntry.attendanceList.map((member,index)=>(
-                                    <tr key={index} className='border-b-2'>
-                                        <td className='py-4'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</td>
-                                        <td className='flex justify-center items-center py-4'>0</td>
-                                    </tr>
-                                ))}
+                            {averagedGrades.map((member, index) => (
+                                <tr key={index} className='border-b-2'>
+                                    <td className='py-4'>{member.studentName}</td>
+                                    <td className='flex justify-center items-center py-4'>{member.grade.toFixed(2)}</td>
+                                </tr>
+                            ))}
                             </tbody>
                         </table>
                         <div className='w-full lg:w-1/4 xl:w-1/4 flex flex-col items-center justify-center gap-5'>

@@ -29,6 +29,20 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
         );
     };
 
+    const marks = [
+        { value: 0, label: '0' },
+        { value: 10, label: '10' },
+        { value: 20, label: '20' },
+        { value: 30, label: '30' },
+        { value: 40, label: '40' },
+        { value: 50, label: '50' },
+        { value: 60, label: '60' },
+        { value: 70, label: '70' },
+        { value: 80, label: '80' },
+        { value: 90, label: '90' },
+        { value: 100, label: '100' },
+    ];
+
     return (
         <Modal open={open} onClose={() => { setOpen(false); }}>
             <div className='bg-white rounded-md absolute w-2/3 flex flex-col p-10 h-2/3 overflow-auto gap-3' style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
@@ -57,8 +71,9 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
                                                 : <></>
                                             }
                                         </div>
-                                        <div className='flex flex-col gap-3 rounded-md py-6 px-10' style={{ border: 'solid 0.1px gray' }}>
+                                        <div className='flex flex-col gap-3 rounded-md py-6 px-10' style={{ border: 'solid 0.1px gray', backgroundColor:'#F9F9F9' }}>
                                             <Slider
+                                                marks={marks}
                                                 disabled={attendance.attendanceStatus === AttendanceStatus.ABSENT}
                                                 size="medium"
                                                 value={currentGrade} // Use the grade from context

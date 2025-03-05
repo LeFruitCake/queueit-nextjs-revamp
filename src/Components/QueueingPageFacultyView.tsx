@@ -26,6 +26,8 @@ const QueueingPageFacultyView = () => {
     const setQueueingManager = useQueueingManagerContext().setQueueingManager
     const grades = useGradesContext().Grades
     const setGrades = useGradesContext().setGrades
+    const [notedAssignedTasks, setNotedAssignedTasks] = useState("")
+    const [impedimentsEncountered, setImpedimentsEncountered] = useState("")
     const openQueueing = ()=>{
         if(queueingManager?.isActive){
             toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
@@ -199,7 +201,11 @@ const QueueingPageFacultyView = () => {
     const concludeMeeting = ()=>{
         console.log(grades)
         fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
-            body:JSON.stringify(grades),
+            body:JSON.stringify({
+                grades:grades,
+                notedAssignedTasks:notedAssignedTasks,
+                impedimentsEncountered:impedimentsEncountered
+            }),
             method:'POST',
             headers:{
                 'Content-Type':'application/json'
@@ -237,7 +243,7 @@ const QueueingPageFacultyView = () => {
                         <CurrentlyTending concludeMeeting={concludeMeeting} meeting={queueingManager.meeting} />
                         {
                             queueingManager.meeting?
-                            <MeetingBoard updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
+                            <MeetingBoard setImpedimentsEncountered={setImpedimentsEncountered} setNotedAssignedTasks={setNotedAssignedTasks} updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
                             :
                             <Chat adviser={user} chat={null}/>
                         }

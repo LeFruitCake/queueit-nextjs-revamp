@@ -3,6 +3,7 @@ import { dpurple, Meeting, UserType } from '@/Utils/Global_variables'
 import { randomGroupImage } from '@/Utils/Utility_functions'
 import { Button, Skeleton, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import ConfirmationModal from './ConfirmationModal'
 
 interface CurrentlyTendingProps{
     meeting: Meeting | null | undefined
@@ -13,6 +14,7 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
     const user = useUserContext().user
     const [elapsedTime, setElapsedTime] = useState<string>('')
     const [groupImage, setGroupImage] = useState<string | null>(null)
+    const [open,setOpen] = useState<boolean>(false)
 
     useEffect(()=>{
         setGroupImage(randomGroupImage());
@@ -40,7 +42,7 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
         <div className='border-2 border-black w-full h-fit md:h-40 lg:h-40 xl:h-40 p-3 pb-6 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
             <div className='h-full flex-1 flex flex-col'>
                 <Typography variant='h6'>Currently Tending</Typography>
-                <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center gap-3'>
+                <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center gap-3 overflow-hidden'>
                     {meeting?<img src={groupImage} alt="group vector" className='block h-full' />:<Skeleton sx={{height:'100%',aspectRatio:1}} variant='rectangular'/>}
                     <div className='flex flex-col'>
                         {meeting?<span style={{fontWeight:'bold'}}>{meeting?.queueingEntry.teamName}</span>:<Skeleton variant='text' width={300}/>}
@@ -49,15 +51,16 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
                     </div>
                 </div>
             </div>
-            {user?.role == UserType.FACULTY?
+            {user?.role == UserType.FACULTY && meeting? 
                 <div>
-                    <Button onClick={()=>{concludeMeeting()}} sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
+                    <Button onClick={()=>{setOpen(true)}} sx={{backgroundColor:dpurple, color:'white', padding:'1em 1.5em'}}>
                         Conclude Meeting
                     </Button>
                 </div>
                 :
                 <></>
             }
+            <ConfirmationModal open={open} setOpen={setOpen} action={concludeMeeting} headerMessage='Meeting Conclusion Confirmation' bodyMessage='Please ensure you have reviewed the grading'/>
         </div>
     )
 }
