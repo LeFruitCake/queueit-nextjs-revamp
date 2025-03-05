@@ -10,6 +10,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal, Box, Typography, TextField, Button, FormControl, InputLabel, Select, MenuItem, InputAdornment } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CampaignIcon from '@mui/icons-material/Campaign';
+import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -27,6 +29,9 @@ interface CalendarEvent {
     start: Date;
     end: Date;
     backgroundColor: string;
+    type: 'scheduledMeeting' | 'upcomingEvent'; // New property for event type
+    groupName?: string;
+    sessionType?: string;
 }
 
 export default function Page() {
@@ -43,19 +48,29 @@ export default function Page() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
 
+    // State for the event details modal
+    const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+    const [eventDetailsModalOpen, setEventDetailsModalOpen] = useState(false);
+
     // Hardcoded array of scheduled meetings
-    const scheduledMeetings = [
+    const scheduledMeetings: CalendarEvent[] = [
         {
             title: "Team Sync",
-            start: new Date(2025, 1, 15, 10, 0), // Example: October 15, 2023, 10:00 AM
-            end: new Date(2025, 1, 15, 11, 0),   // Example: October 15, 2023, 11:00 AM
+            start: new Date(2025, 1, 15, 10, 0),
+            end: new Date(2025, 1, 15, 11, 0),
             backgroundColor: '#7D57FC',
+            type: 'scheduledMeeting', // Set type
+            groupName: "Team A", // Example group name
+            sessionType: "Consultation",
         },
         {
             title: "Project Kickoff",
-            start: new Date(2025, 1, 16, 14, 0), // Example: October 16, 2023, 2:00 PM
-            end: new Date(2025, 1, 16, 15, 0),   // Example: October 16, 2023, 3:00 PM
+            start: new Date(2025, 1, 16, 14, 0),
+            end: new Date(2025, 1, 16, 15, 0),
             backgroundColor: '#7D57FC',
+            type: 'scheduledMeeting', // Set type
+            groupName: "Team B", // Example group name
+            sessionType: "Presentation",
         },
     ];
 
@@ -71,23 +86,19 @@ export default function Page() {
         const dates = [];
         let currentDate = selectInfo.start;
 
-        // Check if the selected range is only one day
         if (selectInfo.start.getTime() === selectInfo.end.getTime()) {
-            // If it's a single day, just add that date
             dates.push(new Date(currentDate));
         } else {
-            // If it's a range, add all dates in the range
             while (currentDate < selectInfo.end) {
                 dates.push(new Date(currentDate));
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         }
 
-        console.log(dates); // Log the selected dates
+        console.log(dates);
         setSelectedDates(dates);
         setOpen(true);
-        
-        // Set the start and end time based on the selected range
+
         const startHour = selectInfo.start.getHours().toString().padStart(2, '0');
         const startMinute = selectInfo.start.getMinutes().toString().padStart(2, '0');
         const endHour = selectInfo.end.getHours().toString().padStart(2, '0');
@@ -109,51 +120,49 @@ export default function Page() {
     const handleSubmit = () => {
         const startDate = new Date();
         const endDate = new Date();
-    
-        // Parse the start and end times
+
         startDate.setHours(parseInt(startTime.split(':')[0]), parseInt(startTime.split(':')[1]), 0);
         endDate.setHours(parseInt(endTime.split(':')[0]), parseInt(endTime.split(':')[1]), 0);
-    
-        // Check if start time is greater than end time
+
         if (startDate >= endDate) {
             setErrorMessage("Start time must be before the end time");
-            return; // Prevent submission
+            return;
         }
-    
-        // Check for time conflicts with existing events
+
         for (const event of events) {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
-    
-            // Check if the new event overlaps with existing events on the same day
+
             if (
-                eventStart.toDateString() === startDate.toDateString() && // Same day
-                (startDate < eventEnd && endDate > eventStart) // Overlap condition
+                eventStart.toDateString() === startDate.toDateString() &&
+                (startDate < eventEnd && endDate > eventStart)
             ) {
                 setErrorMessage("Time conflict with your other schedule. Please modify the time.");
-                return; // Prevent submission
+                return;
             }
         }
-    
-        // Clear the error message if validation passes
+
         setErrorMessage('');
-    
+
         const newEvents = selectedDates.map(date => {
             const eventStartDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), startDate.getHours(), startDate.getMinutes());
             const eventEndDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), endDate.getHours(), endDate.getMinutes());
-    
-            const eventTitle = sessionType === "Consultation" 
-                ? `Consultation Session - ${groupName}` 
+
+            const eventTitle = sessionType === "Consultation"
+                ? `Consultation Session - ${groupName}`
                 : `Presentation Session - ${groupName}`;
-    
+
             return {
                 title: eventTitle,
                 start: eventStartDate,
                 end: eventEndDate,
-                backgroundColor: '#CCFC57',
+                backgroundColor: '#D8FF78', // Color for upcoming events
+                type: 'upcomingEvent', // Set type for upcoming events
+                groupName: groupName, // Store group name
+                sessionType: sessionType,
             };
         });
-    
+
         setEvents([...events, ...newEvents]);
         setSuccessModalOpen(true);
         handleClose();
@@ -163,6 +172,20 @@ export default function Page() {
         setSuccessModalOpen(false);
     };
 
+    const handleEventClick = (eventInfo: any) => {
+        // Set the selected event and open the details modal
+        setSelectedEvent(eventInfo.event);
+        setEventDetailsModalOpen(true);
+    };
+
+    const handleCancelSession = () => {
+        if (selectedEvent) {
+            // Remove the selected event from the events array
+            setEvents(events.filter(event => event.title !== selectedEvent.title || event.start !== selectedEvent.start));
+            setEventDetailsModalOpen(false);
+        }
+    };
+
     const isFormValid = () => {
         return startTime !== '' && endTime !== '' && groupName !== '' && sessionType !== '';
     };
@@ -170,7 +193,7 @@ export default function Page() {
     return (
         <div className='h-screen overflow-auto'>
             <BaseComponent>
-                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full'>
+                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full relative'>
                     <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
                         Your Calendar Schedule
                     </Typography>
@@ -224,7 +247,6 @@ export default function Page() {
                                     background-color: #7d57fc !important;
                                 }
                                 .fc-daygrid-event-harness {
-                                    background-color: #D8FF78 !important;
                                     padding: 2px;
                                     margin-bottom: 1%;
                                 }
@@ -261,9 +283,9 @@ export default function Page() {
                         <FullCalendar
                             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                             initialView="dayGridMonth"
-                            selectable={true} 
-                            select={handleDateSelect} 
-                            events={events} 
+                            selectable={true}
+                            select={handleDateSelect}
+                            events={events}
                             headerToolbar={{
                                 start: 'dayGridMonth,timeGridWeek,timeGridDay',
                                 center: 'title',
@@ -272,13 +294,18 @@ export default function Page() {
                             eventContent={(eventInfo) => {
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                console.log(eventInfo)
                                 return (
-                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: 'black' }}>
+                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: 'black', backgroundColor: eventInfo.event._def.extendedProps.type == "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%' }}>
                                         {startTime} - {endTime} <br />
                                         <strong>{eventInfo.event.title}</strong>
                                     </div>
                                 );
                             }}
+                            // eventClick={(e)=>{
+                            //     console.log(e.event._instance.range)
+                            // }}
+                            eventClick={handleEventClick}
                         />
                     </div>
                 </div>
@@ -286,15 +313,15 @@ export default function Page() {
 
             <Modal open={open} onClose={handleClose}>
                 <Box sx={modalStyle}>
-                    <Typography 
-                        variant="h6" 
-                        component="h2" 
-                        style={{ 
-                            backgroundColor: '#7d57fc', 
-                            color: 'white', 
-                            fontWeight: 'bold', 
-                            padding: '25px', 
-                            borderRadius: '10px 10px 0 0', 
+                    <Typography
+                        variant="h6"
+                        component="h2"
+                        style={{
+                            backgroundColor: '#7d57fc',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            padding: '25px',
+                            borderRadius: '10px 10px 0 0',
                             textAlign: 'center',
                             width: '100%',
                         }}
@@ -307,9 +334,9 @@ export default function Page() {
                                 <Typography variant="body1" style={{ textAlign: 'left' }}>
                                     Date:
                                 </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
-                                    {selectedDates.length > 1 
-                                        ? `Every ${selectedDates.map(date => `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}`).join(', ')}` 
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                    {selectedDates.length > 1
+                                        ? `Every ${selectedDates.map(date => `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}`).join(', ')}`
                                         : `${selectedDates[0].toLocaleString('default', { month: 'long' })} ${selectedDates[0].getDate()}, ${selectedDates[0].getFullYear()}`}
                                 </Typography>
                             </div>
@@ -380,18 +407,18 @@ export default function Page() {
                                     color: 'black',
                                     borderRadius: '10px',
                                     border: 'none',
-                                    flex: 0.2, 
+                                    flex: 0.2,
                                     marginRight: '10px',
-                                    transition: 'background-color 0.3s', 
+                                    transition: 'background-color 0.3s',
                                     textTransform: 'none',
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#5a0c9d'; 
-                                    e.currentTarget.style.color = 'white'; 
+                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
+                                    e.currentTarget.style.color = 'white';
                                 }}
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = 'white';
-                                    e.currentTarget.style.color = 'black'; 
+                                    e.currentTarget.style.color = 'black';
                                 }}
                             >
                                 Cancel
@@ -403,10 +430,10 @@ export default function Page() {
                                     backgroundColor: isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)',
                                     color: 'white',
                                     borderRadius: '10px',
-                                    flex: 0.2, 
+                                    flex: 0.2,
                                     transition: 'background-color 0.3s',
                                     textTransform: 'none',
-                                    
+
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.backgroundColor = isFormValid() ? '#5a0c9d' : 'rgb(222, 213, 252)';
@@ -414,7 +441,7 @@ export default function Page() {
                                 onMouseLeave={(e) => {
                                     e.currentTarget.style.backgroundColor = isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)';
                                 }}
-                                disabled={!isFormValid()} 
+                                disabled={!isFormValid()}
                             >
                                 Set
                             </Button>
@@ -423,37 +450,134 @@ export default function Page() {
                 </Box>
             </Modal>
 
+            {/* Event Details Modal */}
+            <Modal open={eventDetailsModalOpen} onClose={() => setEventDetailsModalOpen(false)}>
+                <Box sx={modalStyle}>
+                    <Box
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center', // Align items vertically centered
+                            justifyContent: 'space-between', // Space between the items
+                            backgroundColor: '#7d57fc',
+                            color: 'white',
+                            fontWeight: 'bold',
+                            borderRadius: '10px 10px 0 0',
+                            padding: '25px', // Add padding to the container
+                            width: '100%',
+                        }}
+                    >
+                        <Typography
+                            variant="h6"
+                            component="h2"
+                            style={{
+                                textAlign: 'left',
+                                fontWeight: 'bold',
+                            }}
+                        >
+                            Details
+                        </Typography>
+                        <Button
+                            variant="contained"
+                            onClick={() => alert('Meeting Started!')} // Replace with actual meeting logic
+                            style={{
+                                backgroundColor: '#CCFC57',
+                                color: 'black',
+                                borderRadius: '5px',
+                                borderWidth: '1px',
+                                borderStyle: 'solid',
+                                borderColor: 'black',
+                                transition: 'background-color 0.3s',
+                                textTransform: 'none',
+                            }}
+                        >
+                            <CampaignIcon style={{ marginRight: '8px' }} />
+                            Meet Now
+                        </Button>
+                    </Box>
+                    {selectedEvent && (
+                        <div style={{ padding: '3% 10% 10% 10%' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <Typography variant="body1">Group Name: </Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>{selectedEvent.groupName}</Typography>
+                            </div><hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <Typography variant="body1">Purpose: </Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>{selectedEvent.sessionType}</Typography>
+                            </div><hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <Typography variant="body1">Date: </Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                    {selectedEvent.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                </Typography>
+                            </div><hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <Typography variant="body1">Start Time: </Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                    {selectedEvent.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </Typography>
+                            </div><hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                <Typography variant="body1">End Time: </Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                    {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </Typography>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
+
+                                <Button
+                                    variant="outlined"
+                                    onClick={handleCancelSession}
+                                    style={{
+                                        backgroundColor: '#7D57FC',
+                                        color: 'white',
+                                        borderRadius: '5px',
+                                        borderWidth: '1px',
+                                        borderStyle: 'solid',
+                                        borderColor: 'black',
+                                        transition: 'background-color 0.3s',
+                                        textTransform: 'none',
+                                    }}
+                                >
+                                    <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em'  }} />
+                                    Cancel Session
+                                </Button>
+                            </div>
+                        </div>
+                    )}
+                </Box>
+            </Modal>
+
             <Modal open={successModalOpen} onClose={handleSuccessClose}>
-                <Box sx={modalStyle}> 
+                <Box sx={modalStyle}>
                     <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
                         <CheckCircleIcon style={{ color: '#7d57fc', fontSize: '50px' }} />
-                        <Typography 
-                            variant="h6" 
-                            component="h2" 
-                            style={{ 
-                                color: 'black',  
-                                padding: '25px', 
-                                borderRadius: '10px 10px 0 0', 
+                        <Typography
+                            variant="h6"
+                            component="h2"
+                            style={{
+                                color: 'black',
+                                padding: '25px',
+                                borderRadius: '10px 10px 0 0',
                                 textAlign: 'center',
                                 width: '100%',
                             }}
-                        > 
+                        >
                             Session Created Successfully
                         </Typography>
-                            <Button
-                                variant="contained"
-                                onClick={handleSuccessClose}
-                                style={{
-                                    backgroundColor: '#7d57fc',
-                                    color: 'white',
-                                    borderRadius: '10px',
-                                    flex: 0.2, 
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
-                                }}
-                            >
-                                Close
-                            </Button>
+                        <Button
+                            variant="contained"
+                            onClick={handleSuccessClose}
+                            style={{
+                                backgroundColor: '#7d57fc',
+                                color: 'white',
+                                borderRadius: '10px',
+                                flex: 0.2,
+                                transition: 'background-color 0.3s',
+                                textTransform: 'none',
+                            }}
+                        >
+                            Close
+                        </Button>
                     </div>
                 </Box>
             </Modal>
