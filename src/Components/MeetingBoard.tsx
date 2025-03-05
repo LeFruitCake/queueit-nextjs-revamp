@@ -78,7 +78,7 @@ const getUniqueStudentsWithAveragedGrades = () => {
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
             <p>Consultation Note</p>
-            <div className='w-full flex flex-col lg:flex-row xl:flex-row gap-3'>
+            <div className='w-full flex flex-col lg:flex-row xl:flex-row gap-3 max-h-80 overflow-hidden'>
                 <div className='flex-1'>
                     <AttendanceLogger updateAttendanceStatus={updateAttendanceStatus} attendanceList={meeting?.queueingEntry.attendanceList}/>
                 </div>
