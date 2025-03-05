@@ -21,6 +21,13 @@ export interface UserRetrieved{
     enrolledClasses:Set<Classes>
 }
 
+export interface MeetingBoardHistoryEntry{
+    notedAssignedTasks:string
+    impedimentsEncountered:string
+    start:Date
+    end:Date
+    attendanceList:Array<Attendance>
+}
 
 //user on log in
 export interface User{

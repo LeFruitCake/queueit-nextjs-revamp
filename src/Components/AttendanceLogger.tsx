@@ -11,7 +11,7 @@ interface AttendanceLoggerProps{
 
 const AttendanceLogger:React.FC<AttendanceLoggerProps> = ({attendanceList, updateAttendanceStatus}) => {
     return (
-        <div className='p-3 bg-gray-100 rounded-md'>
+        <div className='p-3 bg-gray-100 rounded-md h-full'>
             <p style={{fontSize:'1.5em', fontWeight:'bold'}}>Attendance</p>
             <Stack gap={1} direction='row' alignItems='center'>
                 <CircleIcon fontSize='small' className='text-lushgreen'/> <Typography variant='caption'>Present</Typography>

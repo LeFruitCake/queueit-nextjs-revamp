@@ -61,7 +61,7 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
                             {meeting?.queueingEntry.attendanceList.map((attendance, index) => {
                                 const studentName = `${capitalizeFirstLetter(attendance.firstname)} ${capitalizeFirstLetter(attendance.lastname)}`;
                                 const currentGrade = Grades?.find(grade => grade.criterionID === criterion.criterionID && grade.studentName === studentName)?.grade || 0;
-                                console.log(currentGrade)
+                                // console.log(currentGrade)
                                 return (
                                     <div key={index} className='flex flex-col gap-3'>
                                         <div className='flex gap-3 items-center'>
