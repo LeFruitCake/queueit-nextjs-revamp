@@ -14,7 +14,8 @@ import { useUserContext } from '@/Contexts/AuthContext'
 import { toast } from 'react-toastify'
 import { useMeetingsContext } from '@/Contexts/MeetingsContext'
 import catLoader from '../../../../../public/loaders/catloader.gif'
-import SummarizeIcon from '@mui/icons-material/Summarize';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import { useRouter } from 'next/navigation'
 
 const page = () => {
     const user = useUserContext().user
@@ -24,6 +25,7 @@ const page = () => {
     const quote = randomQuotes()
     const [mentor, setMentor] = useState<User>()
     const {Meetings,setMeetings} = useMeetingsContext();
+    const router = useRouter();
 
     useEffect(()=>{
         if(team?.adviserId){
@@ -72,7 +74,7 @@ const page = () => {
                 console.log(err)
             })
         }
-    },[team])
+    },[])
 
     return (
         <BaseComponent>
@@ -129,11 +131,11 @@ const page = () => {
                         </div>
                         <div className='bg-black w-full relative pt-10 p-5'>
                             
-                            {Meetings?
+                            {Meetings?.length?
                                 <div className='flex flex-col gap-6'>
                                     <div className='flex justify-between items-center'>
                                         <Typography variant='h3' fontWeight={"bold"} color='white'>Meeting History</Typography>
-                                        <IconButton sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'center', '&:hover':{backgroundColor:'yellowgreen'}, textTransform:'none'}}><SummarizeIcon fontSize='small'/>Generate Summary</IconButton>
+                                        <IconButton onClick={()=>{router.push("/dashboard/classroom/group/summary")}} sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'center', '&:hover':{backgroundColor:'yellowgreen'}, textTransform:'none'}}><AssessmentIcon fontSize='small'/><p style={{fontSize:'16px'}}>Generate Summary</p></IconButton>
                                     </div>
                                     <div className='flex flex-col gap-12'>
                                         {Meetings.map((historyEntry,index)=>(

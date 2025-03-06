@@ -85,7 +85,7 @@ const GroupDetailAdviserView = () => {
                 <Button onClick={closeViewEnrolleesModal} sx={{backgroundColor:dpurple, color:'white', width:'fit-content', padding:'1em 1.5em', alignSelf:'center'}}>Close</Button>
             </div>
             </Modal>
-            <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 h-full overflow-auto' style={{alignSelf:'end'}}> 
+            <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 overflow-auto' style={{alignSelf:'end'}}> 
             {Teams?.map((team,index)=>(
                 <GroupBar key={index} team={team} index={index}/>
             ))}

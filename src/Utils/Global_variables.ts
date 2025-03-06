@@ -21,6 +21,17 @@ export interface UserRetrieved{
     enrolledClasses:Set<Classes>
 }
 
+export interface ReportSummaryEntry{
+    meetingNumber:number
+    meetingDate:Date
+    gradeAverage:number
+    studentName:string
+}
+
+export interface ReportSummary{
+    reportSummaryEntryList:Array<ReportSummaryEntry>
+}
+
 export interface MeetingBoardHistoryEntry{
     notedAssignedTasks:string
     impedimentsEncountered:string

@@ -70,44 +70,49 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
 
     const getInLine = ()=>{
         console.log(attendanceList)
-        fetch(`${QUEUEIT_URL}/queue/enqueue`,{
-            method:'POST',
-            body:JSON.stringify(
-                {
-                    "facultyID":classroom?.uid,
-                    "teamID":team?.tid,
-                    "teamName":team?.groupName,
-                    "classReference":`${classroom?.courseCode.toLocaleUpperCase()} - ${classroom?.section.toUpperCase()}`,
-                    "attendanceList":attendanceList,
+        if(attendanceList.filter(attendance => attendance.attendanceStatus == AttendanceStatus.PRESENT).length == 0){
+            toast.error("What's the point of getting in line, if everybody is absent right?")
+        }else{
+            fetch(`${QUEUEIT_URL}/queue/enqueue`,{
+                method:'POST',
+                body:JSON.stringify(
+                    {
+                        "facultyID":classroom?.uid,
+                        "teamID":team?.tid,
+                        "teamName":team?.groupName,
+                        "classReference":`${classroom?.courseCode.toLocaleUpperCase()} - ${classroom?.section.toUpperCase()}`,
+                        "attendanceList":attendanceList,
+                    }
+                ),
+                headers:{
+                    'Content-Type': 'application/json',
                 }
-            ),
-            headers:{
-                'Content-Type': 'application/json',
-            }
-        })
-        .then( async (res)=>{
-            console.log(res)
-            switch(res.status){
-                case 200:
-                    toast.success(`Your team is now in the queue.`)
-                    setModalToggle(false)
-                    break;
-                case 400:
-                    const message400 = await res.text();
-                    toast.error(message400)
-                    break;
-                case 404:
-                    const message404 = await res.text();
-                    toast.error(message404)
-                    break;
-                default:
-                    toast.error(`Server error`)
-                    break;
-            }
-        })
-        .catch((err)=>{
-            console.log(`Fetch error: ${err}`)
-        })
+            })
+            .then( async (res)=>{
+                console.log(res)
+                switch(res.status){
+                    case 200:
+                        toast.success(`Your team is now in the queue.`)
+                        setModalToggle(false)
+                        break;
+                    case 400:
+                        const message400 = await res.text();
+                        toast.error(message400)
+                        break;
+                    case 404:
+                        const message404 = await res.text();
+                        toast.error(message404)
+                        break;
+                    default:
+                        toast.error(`Server error`)
+                        break;
+                }
+            })
+            .catch((err)=>{
+                console.log(`Fetch error: ${err}`)
+            })
+        }
+        
     }
 
     useEffect(() => {
