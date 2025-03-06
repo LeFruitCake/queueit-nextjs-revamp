@@ -1,6 +1,5 @@
 "use client";
 import BaseComponent from '@/Components/BaseComponent';
-import { useUserContext } from '@/Utils/AuthContext';
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -12,6 +11,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+// import { useUserContext } from '@/Contexts/AuthContext';
+import { useUserContext } from '@/Utils/AuthContext';
+
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
@@ -206,11 +208,11 @@ export default function Page() {
     return (
         <div className='h-screen overflow-auto'>
             <BaseComponent>
-                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full'>
+            <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full max-h-[80vh] overflow-auto relative'>
                     <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
                         Your Calendar Schedule
                     </Typography>
-                    <div className="w-full overflow-x-auto">
+                    <div className="mx-auto overflow-x-auto" style={{ width: '95%'}} >
                         <style>
                             {`
                                 .fc-button {
@@ -294,6 +296,7 @@ export default function Page() {
                             `}
                         </style>
                         <FullCalendar
+                            height="70vh"
                             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
                             initialView="dayGridMonth"
                             selectable={true}
