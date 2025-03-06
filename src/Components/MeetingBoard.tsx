@@ -61,7 +61,6 @@ const getUniqueStudentsWithAveragedGrades = () => {
         }
     });
 
-    // Now create a new array of students with averaged grades
     const averagedGrades = Object.keys(studentGrades).map((studentName) => {
         const { totalGrade, count } = studentGrades[studentName];
         return {
@@ -73,7 +72,6 @@ const getUniqueStudentsWithAveragedGrades = () => {
     return averagedGrades;
     };
 
-    // Now, in your JSX code, you can use this function to render the table
     const averagedGrades = getUniqueStudentsWithAveragedGrades();
     return (
         <div className='border-2 border-black rounded-md flex flex-col p-3 bg-white gap-3'>
