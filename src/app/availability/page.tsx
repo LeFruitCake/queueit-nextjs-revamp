@@ -24,12 +24,11 @@ const modalStyle = {
     borderRadius: '10px',
 };
 
-interface CalendarEvent {
-    title: string;
+interface CalendarEvent { 
     start: Date;
     end: Date;
     backgroundColor: string;
-    type: 'scheduledMeeting' | 'upcomingEvent'; // New property for event type
+    type: 'scheduledMeeting' | 'upcomingEvent';  
     groupName?: string;
     sessionType?: string;
 }
@@ -55,21 +54,21 @@ export default function Page() {
     // Hardcoded array of scheduled meetings
     const scheduledMeetings: CalendarEvent[] = [
         {
-            title: "Team Sync",
+            // title: "Team Sync",
             start: new Date(2025, 1, 15, 10, 0),
             end: new Date(2025, 1, 15, 11, 0),
             backgroundColor: '#7D57FC',
             type: 'scheduledMeeting', // Set type
-            groupName: "Team A", // Example group name
+            groupName: "Team Sync", // Example group name
             sessionType: "Consultation",
         },
         {
-            title: "Project Kickoff",
+            // title: "Project Kickoff",
             start: new Date(2025, 1, 16, 14, 0),
             end: new Date(2025, 1, 16, 15, 0),
             backgroundColor: '#7D57FC',
             type: 'scheduledMeeting', // Set type
-            groupName: "Team B", // Example group name
+            groupName: "Project Kickoff", // Example group name
             sessionType: "Presentation",
         },
     ];
@@ -147,13 +146,8 @@ export default function Page() {
         const newEvents = selectedDates.map(date => {
             const eventStartDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), startDate.getHours(), startDate.getMinutes());
             const eventEndDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), endDate.getHours(), endDate.getMinutes());
-
-            const eventTitle = sessionType === "Consultation"
-                ? `Consultation Session - ${groupName}`
-                : `Presentation Session - ${groupName}`;
-
-            return {
-                title: eventTitle,
+        
+            const newEvent = {
                 start: eventStartDate,
                 end: eventEndDate,
                 backgroundColor: '#D8FF78', // Color for upcoming events
@@ -161,6 +155,9 @@ export default function Page() {
                 groupName: groupName, // Store group name
                 sessionType: sessionType,
             };
+        
+            console.log("New Event Created:", newEvent); // Log the new event being created
+            return newEvent; // Return the newEvent object
         });
 
         setEvents([...events, ...newEvents]);
@@ -173,16 +170,32 @@ export default function Page() {
     };
 
     const handleEventClick = (eventInfo: any) => {
+        // Log the eventInfo to see what data is being passed
+        console.log("Event Info:", eventInfo);
+        
         // Set the selected event and open the details modal
-        setSelectedEvent(eventInfo.event);
+        const selectedEvent = {
+            start: eventInfo.event.start,
+            end: eventInfo.event.end,
+            backgroundColor: eventInfo.event._def.extendedProps.backgroundColor,
+            type: eventInfo.event._def.extendedProps.type,
+            groupName: eventInfo.event._def.extendedProps.groupName,
+            sessionType: eventInfo.event._def.extendedProps.sessionType,
+        };
+        
+        console.log("Selected Event:", selectedEvent); // Log the selected event
+        setSelectedEvent(selectedEvent);
         setEventDetailsModalOpen(true);
     };
 
     const handleCancelSession = () => {
         if (selectedEvent) {
             // Remove the selected event from the events array
-            setEvents(events.filter(event => event.title !== selectedEvent.title || event.start !== selectedEvent.start));
-            setEventDetailsModalOpen(false);
+            setEvents(events.filter(event => 
+                event.start.getTime() !== selectedEvent.start.getTime() || 
+                event.end.getTime() !== selectedEvent.end.getTime()
+            ));
+            setEventDetailsModalOpen(false); // Close the modal after cancellation
         }
     };
 
@@ -193,7 +206,7 @@ export default function Page() {
     return (
         <div className='h-screen overflow-auto'>
             <BaseComponent>
-                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full relative'>
+                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full'>
                     <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
                         Your Calendar Schedule
                     </Typography>
@@ -251,7 +264,7 @@ export default function Page() {
                                     margin-bottom: 1%;
                                 }
                                 .fc-event-main {
-                                    overflow-y: scroll;
+                                    overflow-y: auto;
                                 }
                                 ::-webkit-scrollbar {
                                     width: 8px; /* Width of the scrollbar */
@@ -294,11 +307,20 @@ export default function Page() {
                             eventContent={(eventInfo) => {
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                console.log(eventInfo)
+                            
+                                // Get sessionType and groupName from extendedProps
+                                const sessionType = eventInfo.event._def.extendedProps.sessionType;
+                                const groupName = eventInfo.event._def.extendedProps.groupName;
+                            
+                                // Construct the display string
+                                const displayTitle = sessionType === "Consultation"
+                                    ? `Consultation Session - ${groupName}`
+                                    : `Presentation Session - ${groupName}`;
+                            
                                 return (
-                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: 'black', backgroundColor: eventInfo.event._def.extendedProps.type == "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%' }}>
+                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? '#000' : '#fff', backgroundColor: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%' }}>
                                         {startTime} - {endTime} <br />
-                                        <strong>{eventInfo.event.title}</strong>
+                                        <strong>{displayTitle}</strong>
                                     </div>
                                 );
                             }}
