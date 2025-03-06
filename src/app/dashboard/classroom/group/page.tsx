@@ -46,7 +46,7 @@ const page = () => {
                         toast.error(`Faculty with ID: ${team.adviserId} not found.`)
                         break;
                     default:
-                        console.log(res.status)
+                        console.log(res)
                         toast.error("Server error.");
                 }
             })
