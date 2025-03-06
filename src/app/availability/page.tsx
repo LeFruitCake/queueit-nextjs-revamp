@@ -26,11 +26,11 @@ const modalStyle = {
     borderRadius: '10px',
 };
 
-interface CalendarEvent { 
+interface CalendarEvent {
     start: Date;
     end: Date;
     backgroundColor: string;
-    type: 'scheduledMeeting' | 'upcomingEvent';  
+    type: 'scheduledMeeting' | 'upcomingEvent';
     groupName?: string;
     sessionType?: string;
 }
@@ -116,6 +116,7 @@ export default function Page() {
         setEndTime('');
         setGroupName('');
         setSessionType('');
+        setErrorMessage(''); 
     };
 
     const handleSubmit = () => {
@@ -130,16 +131,23 @@ export default function Page() {
             return;
         }
 
-        for (const event of events) {
-            const eventStart = new Date(event.start);
-            const eventEnd = new Date(event.end);
+        // Check for conflicts on all selected dates
+        for (const selectedDate of selectedDates) {
+            const eventStartDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), startDate.getHours(), startDate.getMinutes());
+            const eventEndDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), endDate.getHours(), endDate.getMinutes());
 
-            if (
-                eventStart.toDateString() === startDate.toDateString() &&
-                (startDate < eventEnd && endDate > eventStart)
-            ) {
-                setErrorMessage("Time conflict with your other schedule. Please modify the time.");
-                return;
+            for (const event of events) {
+                const eventStart = new Date(event.start);
+                const eventEnd = new Date(event.end);
+
+                // Check if the new event overlaps with an existing event
+                if (
+                    eventStart.toDateString() === eventStartDate.toDateString() &&
+                    eventStartDate < eventEnd && eventEndDate > eventStart
+                ) {
+                    setErrorMessage("Time conflict with your other schedule. Please modify the time.");
+                    return;
+                }
             }
         }
 
@@ -148,7 +156,7 @@ export default function Page() {
         const newEvents = selectedDates.map(date => {
             const eventStartDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), startDate.getHours(), startDate.getMinutes());
             const eventEndDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), endDate.getHours(), endDate.getMinutes());
-        
+
             const newEvent = {
                 start: eventStartDate,
                 end: eventEndDate,
@@ -157,7 +165,7 @@ export default function Page() {
                 groupName: groupName, // Store group name
                 sessionType: sessionType,
             };
-        
+
             console.log("New Event Created:", newEvent); // Log the new event being created
             return newEvent; // Return the newEvent object
         });
@@ -174,7 +182,7 @@ export default function Page() {
     const handleEventClick = (eventInfo: any) => {
         // Log the eventInfo to see what data is being passed
         console.log("Event Info:", eventInfo);
-        
+
         // Set the selected event and open the details modal
         const selectedEvent = {
             start: eventInfo.event.start,
@@ -184,7 +192,7 @@ export default function Page() {
             groupName: eventInfo.event._def.extendedProps.groupName,
             sessionType: eventInfo.event._def.extendedProps.sessionType,
         };
-        
+
         console.log("Selected Event:", selectedEvent); // Log the selected event
         setSelectedEvent(selectedEvent);
         setEventDetailsModalOpen(true);
@@ -193,8 +201,8 @@ export default function Page() {
     const handleCancelSession = () => {
         if (selectedEvent) {
             // Remove the selected event from the events array
-            setEvents(events.filter(event => 
-                event.start.getTime() !== selectedEvent.start.getTime() || 
+            setEvents(events.filter(event =>
+                event.start.getTime() !== selectedEvent.start.getTime() ||
                 event.end.getTime() !== selectedEvent.end.getTime()
             ));
             setEventDetailsModalOpen(false); // Close the modal after cancellation
@@ -208,11 +216,11 @@ export default function Page() {
     return (
         <div className='h-screen overflow-auto'>
             <BaseComponent>
-            <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full max-h-[80vh] overflow-auto relative'>
+                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full max-h-[80vh] overflow-auto relative'>
                     <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
                         Your Calendar Schedule
                     </Typography>
-                    <div className="mx-auto overflow-x-auto" style={{ width: '95%'}} >
+                    <div className="mx-auto overflow-x-auto" style={{ width: '95%' }} >
                         <style>
                             {`
                                 .fc-button {
@@ -310,16 +318,16 @@ export default function Page() {
                             eventContent={(eventInfo) => {
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                            
+
                                 // Get sessionType and groupName from extendedProps
                                 const sessionType = eventInfo.event._def.extendedProps.sessionType;
                                 const groupName = eventInfo.event._def.extendedProps.groupName;
-                            
+
                                 // Construct the display string
                                 const displayTitle = sessionType === "Consultation"
                                     ? `Consultation Session - ${groupName}`
                                     : `Presentation Session - ${groupName}`;
-                            
+
                                 return (
                                     <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? '#000' : '#fff', backgroundColor: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%' }}>
                                         {startTime} - {endTime} <br />
@@ -523,27 +531,27 @@ export default function Page() {
                         <div style={{ padding: '3% 10% 10% 10%' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Group Name: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>{selectedEvent.groupName}</Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.groupName}</Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Purpose: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>{selectedEvent.sessionType}</Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.sessionType}</Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Date: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                     {selectedEvent.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                 </Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Start Time: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                     {selectedEvent.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">End Time: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight:'bold' }}>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
                                     {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Typography>
                             </div>
@@ -563,7 +571,7 @@ export default function Page() {
                                         textTransform: 'none',
                                     }}
                                 >
-                                    <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em'  }} />
+                                    <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
                                     Cancel Session
                                 </Button>
                             </div>
