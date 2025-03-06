@@ -5,6 +5,7 @@ import { useUserContext } from '@/Contexts/AuthContext';
 import { useReportSummaryContext } from '@/Contexts/ReportSummaryContext';
 import { useTeamContext } from '@/Contexts/TeamContext';
 import { Classes, QUEUEIT_URL, ReportSummaryEntry, SPEAR_URL } from '@/Utils/Global_variables';
+import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
@@ -52,7 +53,10 @@ const Page = () => {
             console.log("Fetching classroom data");
             fetchClassroom();
         } else {
-            fetchReportSummary();
+            console.log(classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname))
+            if(team?.adviserId == user?.uid || (classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname))){
+                fetchReportSummary();
+            }
         }
     }, [classroom]);
 
@@ -73,7 +77,7 @@ const Page = () => {
 
     return (
         <BaseComponent>
-            <div className='relative rounded-md bg-dpurple h-full p-12 flex flex-col overflow-hidden gap-10'>
+            <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
                 <div className='flex gap-6 items-center'>
                     <div>
                         <BackButton />
@@ -84,18 +88,18 @@ const Page = () => {
                     </div>
                 </div>
                 <div className='flex-1 bg-white overflow-auto'>
-                    <table style={{ borderCollapse: 'separate', borderSpacing:'0em 0.5em'}} className='h-full w-full overflow-hidden p-6'>
+                    <table style={{ borderCollapse: 'separate', borderSpacing:'0em 0em'}} className='h-full w-full overflow-hidden bg-black'>
                         <thead>
                             <tr className='h-28'>
                                 <th style={{width:'20em'}}>
-                                    <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex justify-center items-center'>
-                                        <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>Names</Typography>
+                                    <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex pl-6 items-center rounded-sm'>
+                                        <Typography variant='h6' fontWeight={"bold"}>Names</Typography>
                                     </div>
                                 </th>
                                 {Array.from(uniqueNames).map((name, index) => (
                                     <th key={index}>
-                                        <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex justify-center items-center border-r-2'>
-                                            <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{name}</Typography>
+                                        <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex justify-center items-center border-r-2 rounded-sm'>
+                                            <Typography variant='caption' textAlign={"center"}>{name}</Typography>
                                         </div>
                                     </th> 
                                 ))}
@@ -109,15 +113,15 @@ const Page = () => {
                                     return (
                                         <tr key={index} className='h-20 '>
                                             <td className='flex items-center justify-center h-full'>
-                                                <div className='flex-1 h-full flex flex-col gap-3 py-3' style={{backgroundColor:'#E9E2FF'}}>
-                                                    <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Meeting #${number}`}</Typography>
-                                                    <Typography variant='caption' color='gray' textAlign={"center"}>{new Date(ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber==number)?.meetingDate)?.toDateString()}</Typography>
+                                                <div className='flex-1 h-full flex flex-col gap-3 py-3 rounded-sm' style={{backgroundColor:'#E9E2FF'}}>
+                                                    <Typography className='pl-6' variant='h6' fontWeight={"bold"}>{`Meeting #${number}`}</Typography>
+                                                    <Typography className='pl-6' variant='caption' color='gray'>{new Date(ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber==number)?.meetingDate)?.toDateString()}</Typography>
                                                 </div>
                                             </td>
                                             {grades.map((entry,index)=>(
                                                 <td key={index} className='items-center justify-center h-full'>
-                                                    <div className='flex-1 h-full flex flex-col gap-3' style={{backgroundColor:'#E9E2FF'}}>
-                                                        <Typography sx={{display:'flex', justifyContent:'center', alignItems:'center', height:'100%'}} variant='h6' fontWeight={"bold"}>{entry.gradeAverage}</Typography>
+                                                    <div className='flex-1 h-full flex flex-col gap-3 rounded-sm' style={{backgroundColor:'white'}} >
+                                                        <Typography sx={{display:'flex', justifyContent:'center', alignItems:'center', height:'100%'}} variant='caption' fontWeight={"bold"}>{entry.gradeAverage}</Typography>
                                                     </div>
                                                 </td>
                                                 
@@ -128,20 +132,25 @@ const Page = () => {
                         </tbody>
                         <tfoot>
                             <tr>
-                                <th>Final Grade</th>
-                                {Array.from(uniqueNames).map((name, index) => 
-                                {
-                                    const grades = ReportSummary?.reportSummaryEntryList.filter(entry=>entry.studentName == name)
+                                <th className='bg-lgreen font-bold py-6' style={{border:'solid 1px black'}}>Final Grade</th>
+                                {Array.from(uniqueNames).map((name, index) => {
+                                    const grades = ReportSummary?.reportSummaryEntryList.filter(entry => entry.studentName === name);
                                     let sumGrades = 0;
-                                    grades?.forEach(grade=>{
-                                        sumGrades+=grade.gradeAverage
-                                    })
-                                    const finalGrade = Math.round(sumGrades / grades?.length)
-                                return (
-                                    <th key={index}>
-                                        <Typography>{finalGrade?finalGrade:<>Calculating</>}</Typography>
-                                    </th> 
-                                )})}
+
+                                    grades?.forEach(grade => {
+                                        sumGrades += grade.gradeAverage;
+                                    });
+
+                                    // Calculate the average and round up to the tenths place
+                                    const average = grades?.length ? sumGrades / grades.length : 0;
+                                    const finalGrade = Math.ceil(average * 10) / 10; // Round up to the tenths place
+
+                                    return (
+                                        <th key={index} className='bg-lgreen font-bold py-6' style={{border:'solid 1px black'}}>
+                                            <Typography fontWeight={"bold"}>{finalGrade ? finalGrade.toFixed(1) : <>Calculating</>}</Typography>
+                                        </th>
+                                    );
+                                })}
                             </tr>
                         </tfoot>
                     </table>
