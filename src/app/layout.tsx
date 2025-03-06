@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import favico from '../../public/favicon.ico'
-import { UserProvider } from "@/Utils/AuthContext";
+import { UserProvider } from "@/Contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 
 const geistSans = Geist({

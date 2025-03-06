@@ -1,4 +1,4 @@
-import { useUserContext } from '@/Utils/AuthContext'
+import { useUserContext } from '@/Contexts/AuthContext'
 import { dpurple, Team, UserType } from '@/Utils/Global_variables'
 import { randomGroupImage } from '@/Utils/Utility_functions'
 import { Button, Typography } from '@mui/material'

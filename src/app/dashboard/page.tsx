@@ -2,7 +2,7 @@
 import BaseComponent from '@/Components/BaseComponent'
 import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
-import { useUserContext } from '@/Utils/AuthContext'
+import { useUserContext } from '@/Contexts/AuthContext'
 import { UserType } from '@/Utils/Global_variables';
 import React from 'react'
 

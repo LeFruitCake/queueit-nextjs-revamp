@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { User, Classes, UserType } from './Global_variables';
+import { User, Classes, UserType } from '../Utils/Global_variables';
 
 // Define the context type
 interface UserContextType {

@@ -13,9 +13,8 @@ import CampaignIcon from '@mui/icons-material/Campaign';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
 import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
-import './fullCalendarStyles.css';  
-// import { useUserContext } from '@/Contexts/AuthContext';
-import { useUserContext } from '@/Utils/AuthContext';
+import './fullCalendarStyles.css';   
+import { useUserContext } from '@/Contexts/AuthContext';
 
 
 const modalStyle = {
