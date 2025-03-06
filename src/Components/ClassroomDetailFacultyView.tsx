@@ -4,16 +4,18 @@ import BackButton from './BackButton'
 import { Avatar, Button, IconButton, Modal, Typography } from '@mui/material'
 import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
-import { dpurple, lgreen } from '@/Utils/Global_variables';
+import { dpurple, lgreen, SPEAR_URL } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import person from '../../public/images/pointingUpwardPerson.png'
 import whiteStar from '../../public/images/star-white.png'
 import whiteSquiggly from '../../public/images/squiggly-white.png'
 import GroupBar from './GroupBar';
+import { useTeamsContext } from '@/Contexts/TeamsContext';
+import { toast } from 'react-toastify';
 
 const GroupDetailAdviserView = () => {
-    const teams = sampleTeams
+    const {Teams, setTeams} = useTeamsContext();
     const classroomContext = useClassroomContext().classroom
     const [classroom, setClassroom] = useState(classroomContext)
     const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
@@ -29,6 +31,32 @@ const GroupDetailAdviserView = () => {
         setClassroom(classroomContext)
     }
     },[classroomContext,router])
+
+
+    useEffect(()=>{
+        if(classroom){
+            fetch(`${SPEAR_URL}/teams/class/${classroom?.cid}`)
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        const response = await res.json();
+                        // console.log(response)
+                        setTeams(response)
+                        break;
+                    case 404:
+                        setTeams(undefined)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Caught an exception while fetching teams.")
+                console.log(err)
+            })
+        }
+    },[classroom])
+
     return (
         <div className='bg-dpurple flex flex-col flex-grow w-full h-full relative mt-5 rounded-md'>
             <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 bottom-0' style={{height:'70%', zIndex:2}} />
@@ -58,7 +86,7 @@ const GroupDetailAdviserView = () => {
             </div>
             </Modal>
             <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 h-full overflow-auto' style={{alignSelf:'end'}}> 
-            {teams.map((team,index)=>(
+            {Teams?.map((team,index)=>(
                 <GroupBar key={index} team={team} index={index}/>
             ))}
             </div>

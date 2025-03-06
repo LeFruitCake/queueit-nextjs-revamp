@@ -1,17 +1,54 @@
-import { User } from '@/Utils/Global_variables'
+import { useUserContext } from '@/Contexts/AuthContext'
+import { SPEAR_URL, User } from '@/Utils/Global_variables'
 import { capitalizeFirstLetter, randomAvatar, stringAvatar } from '@/Utils/Utility_functions'
-import { Avatar, Typography } from '@mui/material'
-import React from 'react'
+import { Avatar, CircularProgress, Typography } from '@mui/material'
+import { error } from 'console'
+import React, { useEffect, useState } from 'react'
+import { toast } from 'react-toastify'
 
 interface MemberProfileProps{
-    member:User
+    memberID:number
 }
 
-const MemberProfile:React.FC<MemberProfileProps> = ({member}) => {
+const MemberProfile:React.FC<MemberProfileProps> = ({memberID}) => {
+    const [studentDetails, setStudentDetails] = useState<User>()
+    const user=useUserContext().user
+    useEffect(()=>{
+        fetch(`${SPEAR_URL}/get-student/${memberID}`,{
+            method:"GET",
+            headers:{
+                'Authorization': `Bearer ${user?.token}`
+            }
+        })
+        .then(async(res)=>{
+            switch(res.status){
+                case 200:
+                    const response = await res.json()
+                    setStudentDetails(response)
+                    break;
+                case 404:
+                    toast.error(`Student with ID: ${memberID} not found.`)
+                    break;
+                default:
+                    console.log(res.status)
+                    toast.error("Server error.");
+            }
+        })
+        .catch((err)=>{
+            console.log(err);
+            toast.error("Caught an exception while fetching student details.")
+        })
+    },[memberID])
     return (
-        <div className='bg-white rounded-md flex justify-center items-center flex-col w-40 overflow-hidden'>
-            <img src={randomAvatar()} alt="avatar" />
-            <Typography fontWeight='bold' variant='subtitle1'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</Typography>
+        <div className='bg-white rounded-md flex justify-center items-center flex-col w-52 p-6 overflow-hidden'>
+            <div>
+                <img src={randomAvatar()} alt="avatar" />
+            </div>
+            {studentDetails?
+                <Typography fontWeight='bold' variant='subtitle1'>{`${capitalizeFirstLetter(studentDetails?.firstname)} ${capitalizeFirstLetter(studentDetails?.lastname)}`}</Typography>
+                :
+                <CircularProgress size={'small'}/>
+            }
         </div>
     )
 }

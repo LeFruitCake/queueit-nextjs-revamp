@@ -12,6 +12,8 @@ import { QueueingManagerProvider } from "@/Contexts/QueueingManagerContext";
 import { RubricProvider } from "@/Contexts/RubricContext";
 import { RubricsProvider } from "@/Contexts/RubricsContext";
 import { GradesProvider } from "@/Contexts/GradesContext";
+import { TeamsProvider } from "@/Contexts/TeamsContext";
+import { MeetingsProvider } from "@/Contexts/MeetingsContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,20 +47,24 @@ export default function RootLayout({
         <UserProvider>
           <WebSocketProvider>
             <ClassroomProvider>
-              <TeamProvider>
-                <FacultyProvider>
-                  <QueueingManagerProvider>
-                    <RubricsProvider>
-                      <RubricProvider>
-                        <GradesProvider>
-                          {children}
-                        </GradesProvider>
-                      </RubricProvider>
-                    </RubricsProvider>
-                  </QueueingManagerProvider>
-                  <ToastContainer/>
-                </FacultyProvider>
-              </TeamProvider>
+              <TeamsProvider>
+                <TeamProvider>
+                  <FacultyProvider>
+                    <QueueingManagerProvider>
+                      <RubricsProvider>
+                        <RubricProvider>
+                          <GradesProvider>
+                            <MeetingsProvider>
+                              {children}
+                            </MeetingsProvider>
+                          </GradesProvider>
+                        </RubricProvider>
+                      </RubricsProvider>
+                    </QueueingManagerProvider>
+                    <ToastContainer/>
+                  </FacultyProvider>
+                </TeamProvider>
+              </TeamsProvider>
             </ClassroomProvider>
           </WebSocketProvider>
         </UserProvider>

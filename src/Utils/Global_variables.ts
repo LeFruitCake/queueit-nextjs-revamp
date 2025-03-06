@@ -27,6 +27,7 @@ export interface MeetingBoardHistoryEntry{
     start:Date
     end:Date
     attendanceList:Array<Attendance>
+    meetingStatus: MeetingStatus
 }
 
 //user on log in
@@ -170,7 +171,8 @@ export enum MeetingStatus{
     FACULTY_NO_SHOW = "FACULTY_NO_SHOW",
     FACULTY_CONDUCTED = "FACULTY_CONDUCTED",
     QUEUEING_CONDUCTED = "QUEUEING_CONDUCTED",
-    DEFAULTED = "DEFAULTED"
+    DEFAULTED = "DEFAULTED",
+    AUTOMATED = "AUTOMATED",
 }
 
 export interface Meeting{
