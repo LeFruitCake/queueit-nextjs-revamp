@@ -11,6 +11,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import Stack from '@mui/material/Stack';
+import Autocomplete from '@mui/material/Autocomplete';
+import './fullCalendarStyles.css';  
 // import { useUserContext } from '@/Contexts/AuthContext';
 import { useUserContext } from '@/Utils/AuthContext';
 
@@ -35,6 +38,14 @@ interface CalendarEvent {
     sessionType?: string;
 }
 
+const groupNames = [
+    'Group A',
+    'Boy B',
+    'Cat C',
+    'Delta D',
+    'Elephant E',
+];
+
 export default function Page() {
     const userContext = useUserContext();
     const user = userContext.user;
@@ -46,8 +57,10 @@ export default function Page() {
     const [groupName, setGroupName] = useState<string>('');
     const [sessionType, setSessionType] = useState<string>('');
     const [successModalOpen, setSuccessModalOpen] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
+    const [confirmationOpen, setConfirmationOpen] = useState(false);
 
     // State for the event details modal
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -116,7 +129,7 @@ export default function Page() {
         setEndTime('');
         setGroupName('');
         setSessionType('');
-        setErrorMessage(''); 
+        setErrorMessage('');
     };
 
     const handleSubmit = () => {
@@ -171,6 +184,7 @@ export default function Page() {
         });
 
         setEvents([...events, ...newEvents]);
+        setSuccessMessage('Session Created Successfully');
         setSuccessModalOpen(true);
         handleClose();
     };
@@ -205,7 +219,10 @@ export default function Page() {
                 event.start.getTime() !== selectedEvent.start.getTime() ||
                 event.end.getTime() !== selectedEvent.end.getTime()
             ));
-            setEventDetailsModalOpen(false); // Close the modal after cancellation
+            setConfirmationOpen(false);
+            setSuccessMessage('Session Cancelled Successfully');
+            setEventDetailsModalOpen(false);
+            setSuccessModalOpen(true);
         }
     };
 
@@ -221,88 +238,7 @@ export default function Page() {
                         Your Calendar Schedule
                     </Typography>
                     <div className="mx-auto overflow-x-auto" style={{ width: '95%' }} >
-                        <style>
-                            {`
-                                .fc-button {
-                                    background-color: white !important;
-                                    color: black !important; 
-                                    border-radius: 5px !important; 
-                                    padding: 5px 20px !important; 
-                                    border-color: black !important;
-                                    border-width:  1.5px !important;
-                                    border-style: solid !important;
-                                    margin-right: 10px !important;
-                                    margin-top: 30px !important;
-                                }
-                                .fc-button:hover {
-                                    background-color: #5a0c9d !important;
-                                    color: white !important; 
-                                }
-                                .fc-button-active {
-                                    background-color: #7d57fc !important;
-                                    color: white !important; 
-                                }
-                                .fc-toolbar-title {
-                                    font-size: 1.2rem !important; 
-                                    margin-left: -50% !important;
-                                    margin-bottom: 20px !important;
-                                }
-                                tr .fc-col-header-cell{
-                                    background-color: #7d57fc !important;
-                                    color: white !important; 
-                                    overflow: auto;
-                                }
-                                .fc-daygrid-day {
-                                    border: 1px solid black !important; 
-                                }
-                                table {
-                                    border-collapse: collapse; 
-                                    width: 100%; 
-                                    border-radius: 5px !important; 
-                                }
-                                table, th, td {
-                                    border: 1px solid black !important;
-                                }
-                                .fc-day-other {
-                                    background-color: #e9e9e9 !important; 
-                                }
-                                th.fc-timegrid-axis {
-                                    background-color: #7d57fc !important;
-                                }
-                                .fc-daygrid-event-harness {
-                                    padding: 2px;
-                                    margin-bottom: 1%;
-                                }
-                                .fc-event-main {
-                                    overflow-y: auto;
-                                }
-                                ::-webkit-scrollbar {
-                                    width: 8px; /* Width of the scrollbar */
-                                    height: 8px; /* Height of the scrollbar */
-                                }
-
-                                ::-webkit-scrollbar-thumb {
-                                    background-color: #7d57fc; /* Color of the scrollbar thumb */
-                                    border-radius: 10px; /* Rounded corners for the scrollbar thumb */
-                                }
-
-                                ::-webkit-scrollbar-track {
-                                    background: #f1f1f1; /* Background color of the scrollbar track */
-                                    border-radius: 10px; /* Rounded corners for the scrollbar track */
-                                }
-
-                                /* Hide the scrollbar arrows */
-                                ::-webkit-scrollbar-button {
-                                    display: none; /* Hides the arrows */
-                                }
-
-                                /* Thin scroll bars for Firefox */
-                                * {
-                                    scrollbar-width: thin; /* Use thin scrollbars */
-                                    scrollbar-color: #7d57fc #f1f1f1; /* Thumb color and track color */
-                                }
-                            `}
-                        </style>
+                        
                         <FullCalendar
                             height="70vh"
                             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
@@ -405,21 +341,31 @@ export default function Page() {
                                 required
                             />
                         </div>
-                        <TextField
-                            label="Enter Group Name"
-                            value={groupName}
-                            onChange={(e) => setGroupName(e.target.value)}
-                            fullWidth
-                            margin="normal"
-                            InputProps={{
-                                startAdornment: (
-                                    <InputAdornment position="start">
-                                        <SearchIcon />
-                                    </InputAdornment>
-                                ),
-                            }}
-                            required
-                        />
+                        <Stack spacing={2} >
+                            <Autocomplete
+                                freeSolo
+                                options={groupNames}
+                                onInputChange={(event, newInputValue) => {
+                                    setGroupName(newInputValue);
+                                }}
+                                renderInput={(params) => (
+                                    <TextField
+                                        {...params}
+                                        label="Enter Group Name"
+                                        margin="normal"
+                                        required
+                                        InputProps={{
+                                            ...params.InputProps,
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <SearchIcon />
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                )}
+                            />
+                        </Stack>
                         <FormControl fullWidth margin="normal">
                             <InputLabel id="session-type-label">Purpose</InputLabel>
                             <Select
@@ -559,7 +505,7 @@ export default function Page() {
 
                                 <Button
                                     variant="outlined"
-                                    onClick={handleCancelSession}
+                                    onClick={() => setConfirmationOpen(true)}
                                     style={{
                                         backgroundColor: '#7D57FC',
                                         color: 'white',
@@ -580,7 +526,7 @@ export default function Page() {
                 </Box>
             </Modal>
 
-            <Modal open={successModalOpen} onClose={handleSuccessClose}>
+            <Modal open={successModalOpen} onClose={() => setSuccessModalOpen(false)}>
                 <Box sx={modalStyle}>
                     <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
                         <CheckCircleIcon style={{ color: '#7d57fc', fontSize: '50px' }} />
@@ -595,11 +541,11 @@ export default function Page() {
                                 width: '100%',
                             }}
                         >
-                            Session Created Successfully
+                            {successMessage}
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={handleSuccessClose}
+                            onClick={() => setSuccessModalOpen(false)}
                             style={{
                                 backgroundColor: '#7d57fc',
                                 color: 'white',
@@ -614,6 +560,76 @@ export default function Page() {
                     </div>
                 </Box>
             </Modal>
+
+            {/* Confirmation Modal */}
+            <Modal
+                open={confirmationOpen}
+                onClose={() => setConfirmationOpen(false)}
+                aria-labelledby="confirmation-modal-title"
+                aria-describedby="confirmation-modal-description"
+            >
+                <Box sx={modalStyle}>
+                    <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
+                        <Typography
+                            id="confirmation-modal-title"
+                            variant="h4"
+                            component="h2"
+                            style={{ color: '#7D57FC', padding: '0 25px', fontWeight:'bold' }}
+                        >
+                            Cancel Session
+                        </Typography>
+                        <Typography id="confirmation-modal-description" variant="body1" style={{ marginBottom: '40px' }}>
+                            Are you sure you want to cancel this team's session?
+                        </Typography>
+                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                            <Button
+                                onClick={() => setConfirmationOpen(false)}
+                                style={{
+                                    backgroundColor: 'white',
+                                    color: 'black',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    flex: 0.2,
+                                    marginRight: '10px',
+                                    transition: 'background-color 0.3s',
+                                    textTransform: 'none',
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
+                                    e.currentTarget.style.color = 'white';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'white';
+                                    e.currentTarget.style.color = 'black';
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleCancelSession}
+                                style={{
+                                    backgroundColor: '#7d57fc',
+                                    color: 'white',
+                                    borderRadius: '10px',
+                                    flex: 0.2,
+                                    transition: 'background-color 0.3s',
+                                    textTransform: 'none',
+
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = '#7d57fc';
+                                }} 
+                            >
+                                Confirm
+                            </Button>
+                        </Box>
+                    </div>
+                </Box>
+            </Modal>
+
         </div>
     );
 }
