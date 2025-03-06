@@ -29,6 +29,33 @@ const modalStyle = {
     borderRadius: '10px',
 };
 
+const buttonStyles = {
+    borderRadius: '10px',
+    flex: 0.2,
+    transition: 'background-color 0.3s',
+    textTransform: 'none',
+};
+
+const cancelButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: 'white',
+    color: 'black',
+    marginRight: '10px',
+    '&:hover': {
+        backgroundColor: '#5a0c9d',
+        color: 'white',
+    },
+};
+
+const confirmButtonStyles = {
+    ...buttonStyles,
+    backgroundColor: '#7d57fc',
+    color: 'white',
+    '&:hover': {
+        backgroundColor: '#5a0c9d',
+    },
+};
+
 interface CalendarEvent {
     start: Date;
     end: Date;
@@ -61,35 +88,31 @@ export default function Page() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
-
-    // State for the event details modal
+ 
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [eventDetailsModalOpen, setEventDetailsModalOpen] = useState(false);
 
     // Hardcoded array of scheduled meetings
     const scheduledMeetings: CalendarEvent[] = [
-        {
-            // title: "Team Sync",
+        { 
             start: new Date(2025, 1, 15, 10, 0),
             end: new Date(2025, 1, 15, 11, 0),
             backgroundColor: '#7D57FC',
-            type: 'scheduledMeeting', // Set type
-            groupName: "Team Sync", // Example group name
+            type: 'scheduledMeeting',  
+            groupName: "Team Sync",  
             sessionType: "Consultation",
         },
-        {
-            // title: "Project Kickoff",
+        { 
             start: new Date(2025, 1, 16, 14, 0),
             end: new Date(2025, 1, 16, 15, 0),
             backgroundColor: '#7D57FC',
-            type: 'scheduledMeeting', // Set type
-            groupName: "Project Kickoff", // Example group name
+            type: 'scheduledMeeting',  
+            groupName: "Project Kickoff", 
             sessionType: "Presentation",
         },
     ];
 
-    useEffect(() => {
-        // Set initial events including scheduled meetings
+    useEffect(() => { 
         setEvents(prevEvents => [
             ...prevEvents,
             ...scheduledMeetings,
@@ -143,8 +166,7 @@ export default function Page() {
             setErrorMessage("Start time must be before the end time");
             return;
         }
-
-        // Check for conflicts on all selected dates
+ 
         for (const selectedDate of selectedDates) {
             const eventStartDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), startDate.getHours(), startDate.getMinutes());
             const eventEndDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), endDate.getHours(), endDate.getMinutes());
@@ -152,8 +174,7 @@ export default function Page() {
             for (const event of events) {
                 const eventStart = new Date(event.start);
                 const eventEnd = new Date(event.end);
-
-                // Check if the new event overlaps with an existing event
+ 
                 if (
                     eventStart.toDateString() === eventStartDate.toDateString() &&
                     eventStartDate < eventEnd && eventEndDate > eventStart
@@ -173,14 +194,14 @@ export default function Page() {
             const newEvent = {
                 start: eventStartDate,
                 end: eventEndDate,
-                backgroundColor: '#D8FF78', // Color for upcoming events
-                type: 'upcomingEvent', // Set type for upcoming events
-                groupName: groupName, // Store group name
+                backgroundColor: '#D8FF78',  
+                type: 'upcomingEvent',  
+                groupName: groupName,  
                 sessionType: sessionType,
             };
 
-            console.log("New Event Created:", newEvent); // Log the new event being created
-            return newEvent; // Return the newEvent object
+            console.log("New Event Created:", newEvent); 
+            return newEvent; 
         });
 
         setEvents([...events, ...newEvents]);
@@ -193,11 +214,9 @@ export default function Page() {
         setSuccessModalOpen(false);
     };
 
-    const handleEventClick = (eventInfo: any) => {
-        // Log the eventInfo to see what data is being passed
+    const handleEventClick = (eventInfo: any) => { 
         console.log("Event Info:", eventInfo);
-
-        // Set the selected event and open the details modal
+ 
         const selectedEvent = {
             start: eventInfo.event.start,
             end: eventInfo.event.end,
@@ -207,14 +226,13 @@ export default function Page() {
             sessionType: eventInfo.event._def.extendedProps.sessionType,
         };
 
-        console.log("Selected Event:", selectedEvent); // Log the selected event
+        console.log("Selected Event:", selectedEvent); 
         setSelectedEvent(selectedEvent);
         setEventDetailsModalOpen(true);
     };
 
     const handleCancelSession = () => {
-        if (selectedEvent) {
-            // Remove the selected event from the events array
+        if (selectedEvent) { 
             setEvents(events.filter(event =>
                 event.start.getTime() !== selectedEvent.start.getTime() ||
                 event.end.getTime() !== selectedEvent.end.getTime()
@@ -254,12 +272,10 @@ export default function Page() {
                             eventContent={(eventInfo) => {
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-                                // Get sessionType and groupName from extendedProps
+ 
                                 const sessionType = eventInfo.event._def.extendedProps.sessionType;
                                 const groupName = eventInfo.event._def.extendedProps.groupName;
-
-                                // Construct the display string
+ 
                                 const displayTitle = sessionType === "Consultation"
                                     ? `Consultation Session - ${groupName}`
                                     : `Presentation Session - ${groupName}`;
@@ -378,27 +394,9 @@ export default function Page() {
                             </Select>
                         </FormControl>
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25%' }}>
-                            <Button
-                                variant="outlined"
+                            <Button 
                                 onClick={handleClose}
-                                style={{
-                                    backgroundColor: 'white',
-                                    color: 'black',
-                                    borderRadius: '10px',
-                                    border: 'none',
-                                    flex: 0.2,
-                                    marginRight: '10px',
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
-                                    e.currentTarget.style.color = 'white';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'white';
-                                    e.currentTarget.style.color = 'black';
-                                }}
+                                sx={cancelButtonStyles}
                             >
                                 Cancel
                             </Button>
@@ -428,20 +426,19 @@ export default function Page() {
                     </div>
                 </Box>
             </Modal>
-
-            {/* Event Details Modal */}
+ 
             <Modal open={eventDetailsModalOpen} onClose={() => setEventDetailsModalOpen(false)}>
                 <Box sx={modalStyle}>
                     <Box
                         style={{
                             display: 'flex',
-                            alignItems: 'center', // Align items vertically centered
-                            justifyContent: 'space-between', // Space between the items
+                            alignItems: 'center',  
+                            justifyContent: 'space-between',  
                             backgroundColor: '#7d57fc',
                             color: 'white',
                             fontWeight: 'bold',
                             borderRadius: '10px 10px 0 0',
-                            padding: '25px', // Add padding to the container
+                            padding: '25px', 
                             width: '100%',
                         }}
                     >
@@ -457,7 +454,7 @@ export default function Page() {
                         </Typography>
                         <Button
                             variant="contained"
-                            onClick={() => alert('Meeting Started!')} // Replace with actual meeting logic
+                            onClick={() => alert('Meeting Started!')} 
                             style={{
                                 backgroundColor: '#CCFC57',
                                 color: 'black',
@@ -560,8 +557,7 @@ export default function Page() {
                     </div>
                 </Box>
             </Modal>
-
-            {/* Confirmation Modal */}
+ 
             <Modal
                 open={confirmationOpen}
                 onClose={() => setConfirmationOpen(false)}
@@ -584,44 +580,13 @@ export default function Page() {
                         <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
                             <Button
                                 onClick={() => setConfirmationOpen(false)}
-                                style={{
-                                    backgroundColor: 'white',
-                                    color: 'black',
-                                    borderRadius: '10px',
-                                    border: 'none',
-                                    flex: 0.2,
-                                    marginRight: '10px',
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
-                                    e.currentTarget.style.color = 'white';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = 'white';
-                                    e.currentTarget.style.color = 'black';
-                                }}
+                                sx={cancelButtonStyles}
                             >
                                 Cancel
                             </Button>
                             <Button
                                 onClick={handleCancelSession}
-                                style={{
-                                    backgroundColor: '#7d57fc',
-                                    color: 'white',
-                                    borderRadius: '10px',
-                                    flex: 0.2,
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
-
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#5a0c9d';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = '#7d57fc';
-                                }} 
+                                sx={confirmButtonStyles}
                             >
                                 Confirm
                             </Button>
