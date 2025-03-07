@@ -1,6 +1,5 @@
 "use client";
 import BaseComponent from '@/Components/BaseComponent';
-import { useUserContext } from '@/Utils/AuthContext';
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
@@ -12,6 +11,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CampaignIcon from '@mui/icons-material/Campaign';
 import ClearRoundedIcon from '@mui/icons-material/ClearRounded';
+import { useUserContext } from '@/Contexts/AuthContext';
 
 const modalStyle = {
     position: 'absolute' as 'absolute',
