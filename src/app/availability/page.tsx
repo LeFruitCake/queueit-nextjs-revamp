@@ -15,6 +15,8 @@ import Stack from '@mui/material/Stack';
 import Autocomplete from '@mui/material/Autocomplete';
 import './fullCalendarStyles.css';   
 import { useUserContext } from '@/Contexts/AuthContext';
+import { toast } from 'react-toastify';
+import { Attendance, AttendanceDTO, AttendanceStatus, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
 
 
 const modalStyle = {
@@ -56,157 +58,167 @@ const confirmButtonStyles = {
 };
 
 interface CalendarEvent {
-    start: Date;
-    end: Date;
-    backgroundColor: string;
-    type: 'scheduledMeeting' | 'upcomingEvent';
-    groupName?: string;
-    sessionType?: string;
+    meetingID: number
+    start: Date
+    end: Date
+    meetingStatus: MeetingStatus
+    groupName: string;
 }
 
-const groupNames = [
-    'Group A',
-    'Boy B',
-    'Cat C',
-    'Delta D',
-    'Elephant E',
-];
+interface ManualAppointmentSetting{
+    teamID: number
+    teamName: string
+    start: Date
+    end: Date
+    attendanceList: Array<Attendance>
+    mentorID: number
+}
+
+
 
 export default function Page() {
     const userContext = useUserContext();
     const user = userContext.user;
 
     const [open, setOpen] = useState(false);
-    const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-    const [startTime, setStartTime] = useState<string>('');
-    const [endTime, setEndTime] = useState<string>('');
-    const [groupName, setGroupName] = useState<string>('');
-    const [sessionType, setSessionType] = useState<string>('');
+    const [meetingPackage, setMeetingPackage] = useState<ManualAppointmentSetting>();
     const [successModalOpen, setSuccessModalOpen] = useState(false);
     const [successMessage, setSuccessMessage] = useState('');
-    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [appointments, setAppointments] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
  
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [eventDetailsModalOpen, setEventDetailsModalOpen] = useState(false);
 
-    // Hardcoded array of scheduled meetings
-    const scheduledMeetings: CalendarEvent[] = [
-        { 
-            start: new Date(2025, 1, 15, 10, 0),
-            end: new Date(2025, 1, 15, 11, 0),
-            backgroundColor: '#7D57FC',
-            type: 'scheduledMeeting',  
-            groupName: "Team Sync",  
-            sessionType: "Consultation",
-        },
-        { 
-            start: new Date(2025, 1, 16, 14, 0),
-            end: new Date(2025, 1, 16, 15, 0),
-            backgroundColor: '#7D57FC',
-            type: 'scheduledMeeting',  
-            groupName: "Project Kickoff", 
-            sessionType: "Presentation",
-        },
-    ];
+    
+    const [groupNames, setGroupNames] = useState<Array<string>>([])
+    const [teams, setTeams] = useState<Array<Team>>([]);
+    const handleGroupNameInputChange = (groupName:string)=>{
+        const team = teams.find((team)=>team.groupName == groupName)
+        let attendanceList:Array<Attendance> = []
+        team?.memberNames.map((fullname)=>{
+            const [firstname, lastname] = fullname.split(" ")
+            const attendance:Attendance = {
+                "firstname":firstname,
+                "lastname":lastname,
+                "studentEmail":`${firstname}.${lastname}@cit.edu`,
+                attendanceStatus:AttendanceStatus.PRESENT
+            }
+            attendanceList.push(attendance);
+        })
+        setMeetingPackage((prev)=>({
+            ...prev,
+            "teamName":groupName,
+            "teamID": team?.tid,
+            "attendanceList":attendanceList,
+            "mentorID":user?.uid,
+        }))
+    }
+    useEffect(()=>{
+        if(user?.role === UserType.FACULTY){
+            fetch(`${SPEAR_URL}/team/mentored/${user.uid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:Array<Team> = await res.json();
+                    response.map((team)=>{
+                        setGroupNames((prev)=>[...prev, team.groupName])
+                        setTeams(response)
+                    })
+                }else{
+                    toast.error("Server error while fetching your mentees.")
+                }
+            })
+            .catch((err)=>{
+                console.log(err);
+                toast.error("Caught an exception while fetching your mentees.")
+            })
+        }
+    },[user])
 
     useEffect(() => { 
-        setEvents(prevEvents => [
-            ...prevEvents,
-            ...scheduledMeetings,
-        ]);
-    }, []);
+        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/facultyAppointments/${user?.uid}`)
+        .then(async(res)=>{
+            if(res.ok){
+                
+                const response = await res.json();
+                console.log(response)
+                setAppointments(response)
+            }else{
+                toast.error("Server error while fetching appointments")
+            }
+        })
+        .catch((err)=>{
+            console.log(err)
+            toast.error("Caught an exception while fetching appointments.")
+        })
+    }, [user]);
+
+    const formatDateForInput = (date) => {
+        // Convert the date to the required format: yyyy-MM-ddTHH:mm
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
 
     const handleDateSelect = (selectInfo: any) => {
-        const dates = [];
-        let currentDate = selectInfo.start;
-
-        if (selectInfo.start.getTime() === selectInfo.end.getTime()) {
-            dates.push(new Date(currentDate));
-        } else {
-            while (currentDate < selectInfo.end) {
-                dates.push(new Date(currentDate));
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
+        if(new Date() > selectInfo.start){
+            toast.error("Please refrain from selecting past times.")
+        }else{
+            const formattedStart = formatDateForInput(selectInfo.start)
+            const formattedEnd = formatDateForInput(selectInfo.end)
+            setMeetingPackage((prev)=>({
+                ...prev,
+                "start":formattedStart,
+                "end":formattedEnd
+            }))
+            setOpen(true)
         }
-
-        console.log(dates);
-        setSelectedDates(dates);
-        setOpen(true);
-
-        const startHour = selectInfo.start.getHours().toString().padStart(2, '0');
-        const startMinute = selectInfo.start.getMinutes().toString().padStart(2, '0');
-        const endHour = selectInfo.end.getHours().toString().padStart(2, '0');
-        const endMinute = selectInfo.end.getMinutes().toString().padStart(2, '0');
-
-        setStartTime(`${startHour}:${startMinute}`);
-        setEndTime(`${endHour}:${endMinute}`);
     };
 
     const handleClose = () => {
         setOpen(false);
-        setSelectedDates([]);
-        setStartTime('');
-        setEndTime('');
-        setGroupName('');
-        setSessionType('');
         setErrorMessage('');
     };
 
     const handleSubmit = () => {
-        const startDate = new Date();
-        const endDate = new Date();
-
-        startDate.setHours(parseInt(startTime.split(':')[0]), parseInt(startTime.split(':')[1]), 0);
-        endDate.setHours(parseInt(endTime.split(':')[0]), parseInt(endTime.split(':')[1]), 0);
-
-        if (startDate >= endDate) {
-            setErrorMessage("Start time must be before the end time");
-            return;
-        }
- 
-        for (const selectedDate of selectedDates) {
-            const eventStartDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), startDate.getHours(), startDate.getMinutes());
-            const eventEndDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate(), endDate.getHours(), endDate.getMinutes());
-
-            for (const event of events) {
-                const eventStart = new Date(event.start);
-                const eventEnd = new Date(event.end);
- 
-                if (
-                    eventStart.toDateString() === eventStartDate.toDateString() &&
-                    eventStartDate < eventEnd && eventEndDate > eventStart
-                ) {
-                    setErrorMessage("Time conflict with your other schedule. Please modify the time.");
-                    return;
+        console.log(meetingPackage)
+        if(isFormValid()){
+            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/createAppointment`,{
+                method:'POST',
+                body:JSON.stringify(meetingPackage),
+                headers:{
+                    'Content-Type':'application/json'
                 }
-            }
+            })
+            .then(async(res)=>{
+
+                switch(res.status){
+                    case 200:
+                        const response = await res.json();
+                        setAppointments((prev)=>[...prev,response])
+                        setSuccessMessage('Session Created Successfully');
+                        setSuccessModalOpen(true);
+                        break;
+                    case 400:
+                        toast.error(await res.text());
+                        break;
+                    default:
+                        toast.error("Server error.")
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Something went wrong.")
+            })
+            .finally(()=>{
+                handleClose();
+            })
         }
-
-        setErrorMessage('');
-
-        const newEvents = selectedDates.map(date => {
-            const eventStartDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), startDate.getHours(), startDate.getMinutes());
-            const eventEndDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), endDate.getHours(), endDate.getMinutes());
-
-            const newEvent = {
-                start: eventStartDate,
-                end: eventEndDate,
-                backgroundColor: '#D8FF78',  
-                type: 'upcomingEvent',  
-                groupName: groupName,  
-                sessionType: sessionType,
-            };
-
-            console.log("New Event Created:", newEvent); 
-            return newEvent; 
-        });
-
-        setEvents([...events, ...newEvents]);
-        setSuccessMessage('Session Created Successfully');
-        setSuccessModalOpen(true);
-        handleClose();
     };
 
     const handleSuccessClose = () => {
@@ -216,13 +228,12 @@ export default function Page() {
     const handleEventClick = (eventInfo: any) => { 
         console.log("Event Info:", eventInfo);
  
-        const selectedEvent = {
+        const selectedEvent:CalendarEvent = {
+            meetingID:eventInfo.event._def.extendedProps.meetingID,
             start: eventInfo.event.start,
             end: eventInfo.event.end,
-            backgroundColor: eventInfo.event._def.extendedProps.backgroundColor,
-            type: eventInfo.event._def.extendedProps.type,
-            groupName: eventInfo.event._def.extendedProps.groupName,
-            sessionType: eventInfo.event._def.extendedProps.sessionType,
+            meetingStatus: eventInfo.event._def.extendedProps.meetingStatus,
+            groupName: eventInfo.event._def.extendedProps.teamName,
         };
 
         console.log("Selected Event:", selectedEvent); 
@@ -232,19 +243,52 @@ export default function Page() {
 
     const handleCancelSession = () => {
         if (selectedEvent) { 
-            setEvents(events.filter(event =>
-                event.start.getTime() !== selectedEvent.start.getTime() ||
-                event.end.getTime() !== selectedEvent.end.getTime()
-            ));
-            setConfirmationOpen(false);
-            setSuccessMessage('Session Cancelled Successfully');
-            setEventDetailsModalOpen(false);
-            setSuccessModalOpen(true);
+            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/facultyAppointments/cancel/${selectedEvent.meetingID}`,{
+                method:'POST'
+            })
+            .then(async(res)=>{
+                switch(res.status){
+                    case 200:
+                        setAppointments((prev)=>
+                            prev.filter((meeting)=>meeting.meetingID != selectedEvent.meetingID)
+                        )
+                        setConfirmationOpen(false);
+                        setSuccessMessage('Session Cancelled Successfully');
+                        setEventDetailsModalOpen(false);
+                        setSuccessModalOpen(true);
+                        break;
+                    case 400:
+                        const response = await res.text()
+                        toast.error(response);
+                        break;
+                    default:
+                        toast.error("Server error");
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Caught an exception while cancelling appointment.");
+            })
+            
         }
     };
 
     const isFormValid = () => {
-        return startTime !== '' && endTime !== '' && groupName !== '' && sessionType !== '';
+        // Check if meetingPackage is defined
+        if (!meetingPackage) {
+            return false;
+        }
+    
+        // Check if all required fields are defined and not empty
+        const { teamID, teamName, start, end, attendanceList } = meetingPackage;
+    
+        return (
+            teamID !== undefined &&
+            teamName !== undefined && teamName.trim() !== '' &&
+            start !== undefined &&
+            end !== undefined &&
+            Array.isArray(attendanceList) && attendanceList.length > 0
+        );
     };
 
     return (
@@ -257,38 +301,44 @@ export default function Page() {
                     <div className="mx-auto overflow-x-auto" style={{ width: '95%' }} >
                         
                         <FullCalendar
+                            allDaySlot={false}
+                            selectOverlap={false}
+                            slotMinTime='08:00:00'
+                            slotMaxTime='18:00:00'
                             height="70vh"
                             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                            initialView="dayGridMonth"
+                            initialView="timeGridWeek"
                             selectable={true}
                             select={handleDateSelect}
-                            events={events}
+                            events={appointments}
+                            hiddenDays={[0]}
+                            validRange={{
+                                start: new Date()
+                            }}
                             headerToolbar={{
-                                start: 'dayGridMonth,timeGridWeek,timeGridDay',
+                                start: 'timeGridWeek,timeGridDay',
                                 center: 'title',
                                 right: 'prev,next'
                             }}
                             eventContent={(eventInfo) => {
+                                console.log(eventInfo)
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
  
                                 const sessionType = eventInfo.event._def.extendedProps.sessionType;
-                                const groupName = eventInfo.event._def.extendedProps.groupName;
+                                const groupName = eventInfo.event._def.extendedProps.teamName;
  
                                 const displayTitle = sessionType === "Consultation"
-                                    ? `Consultation Session - ${groupName}`
-                                    : `Presentation Session - ${groupName}`;
+                                    ? `Consultation Session with ${groupName}`
+                                    : `Presentation Session with ${groupName}`;
 
                                 return (
-                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? '#000' : '#fff', backgroundColor: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%' }}>
+                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: eventInfo.event._def.extendedProps.meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%', height:'100%' }}>
                                         {startTime} - {endTime} <br />
                                         <strong>{displayTitle}</strong>
                                     </div>
                                 );
                             }}
-                            // eventClick={(e)=>{
-                            //     console.log(e.event._instance.range)
-                            // }}
                             eventClick={handleEventClick}
                         />
                     </div>
@@ -313,27 +363,15 @@ export default function Page() {
                         Set Consultation or Presentation Session
                     </Typography>
                     <div style={{ padding: '3% 10% 10% 10%' }}>
-                        {selectedDates.length > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '25px 0' }}>
-                                <Typography variant="body1" style={{ textAlign: 'left' }}>
-                                    Date:
-                                </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                    {selectedDates.length > 1
-                                        ? `Every ${selectedDates.map(date => `${date.toLocaleString('default', { month: 'long' })} ${date.getDate()}`).join(', ')}`
-                                        : `${selectedDates[0].toLocaleString('default', { month: 'long' })} ${selectedDates[0].getDate()}, ${selectedDates[0].getFullYear()}`}
-                                </Typography>
-                            </div>
-                        )}
                         <hr />
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '3px 0' }}>
                             <Typography variant="body1" style={{ textAlign: 'left' }}>
                                 Start Time:
                             </Typography>
                             <TextField
-                                type="time"
-                                value={startTime}
-                                onChange={(e) => setStartTime(e.target.value)}
+                                type="datetime-local"
+                                disabled
+                                value={meetingPackage?.start}
                                 margin="normal"
                                 required
                             />
@@ -349,9 +387,9 @@ export default function Page() {
                                 End Time:
                             </Typography>
                             <TextField
-                                type="time"
-                                value={endTime}
-                                onChange={(e) => setEndTime(e.target.value)}
+                                type="datetime-local"
+                                disabled
+                                value={meetingPackage?.end}
                                 margin="normal"
                                 required
                             />
@@ -361,7 +399,8 @@ export default function Page() {
                                 freeSolo
                                 options={groupNames}
                                 onInputChange={(event, newInputValue) => {
-                                    setGroupName(newInputValue);
+                                    handleGroupNameInputChange(newInputValue);
+                                    // setGroupName(newInputValue);
                                 }}
                                 renderInput={(params) => (
                                     <TextField
@@ -381,17 +420,6 @@ export default function Page() {
                                 )}
                             />
                         </Stack>
-                        <FormControl fullWidth margin="normal">
-                            <InputLabel id="session-type-label">Purpose</InputLabel>
-                            <Select
-                                labelId="session-type-label"
-                                value={sessionType}
-                                onChange={(e) => setSessionType(e.target.value)}
-                            >
-                                <MenuItem value="Presentation">Presentation</MenuItem>
-                                <MenuItem value="Consultation">Consultation</MenuItem>
-                            </Select>
-                        </FormControl>
                         <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25%' }}>
                             <Button 
                                 onClick={handleClose}
@@ -474,10 +502,6 @@ export default function Page() {
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Group Name: </Typography>
                                 <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.groupName}</Typography>
-                            </div><hr />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <Typography variant="body1">Purpose: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.sessionType}</Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Date: </Typography>

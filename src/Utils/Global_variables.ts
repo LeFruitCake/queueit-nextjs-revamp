@@ -98,6 +98,7 @@ export interface Team{
     leaderId:number
     classId:number
     memberIds:Array<number>
+    memberNames:Array<string>
     features:null
     projectDescription:string
     adviserId:number
@@ -178,12 +179,14 @@ export interface Grade{
 }
 
 export enum MeetingStatus{
-    TEAM_NO_SHOW = "TEAM_NO_SHOW",
-    FACULTY_NO_SHOW = "FACULTY_NO_SHOW",
-    FACULTY_CONDUCTED = "FACULTY_CONDUCTED",
-    QUEUEING_CONDUCTED = "QUEUEING_CONDUCTED",
-    DEFAULTED = "DEFAULTED",
-    AUTOMATED = "AUTOMATED",
+    FAILED_TEAM_NO_SHOW = "FAILED_TEAM_NO_SHOW",
+    FAILED_FACULTY_NO_SHOW = "FAILED_FACULTY_NO_SHOW",
+    ATTENDED_FACULTY_CONDUCTED = "ATTENDED_FACULTY_CONDUCTED",
+    ATTENDED_QUEUEING_CONDUCTED = "ATTENDED_QUEUEING_CONDUCTED",
+    FAILED_DEFAULTED = "FAILED_DEFAULTED",
+    SET_AUTOMATED = "SET_AUTOMATED",
+    SET_MANUALLY = "SET_MANUALLY",
+    CANCELLED = "CANCELLED",
 }
 
 export interface Meeting{

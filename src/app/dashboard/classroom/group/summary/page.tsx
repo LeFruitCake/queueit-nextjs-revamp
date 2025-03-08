@@ -144,10 +144,11 @@ const Page = () => {
                                     // Calculate the average and round up to the tenths place
                                     const average = grades?.length ? sumGrades / grades.length : 0;
                                     const finalGrade = Math.ceil(average * 10) / 10; // Round up to the tenths place
+                                    console.log(`${name}: ${finalGrade}`)
 
                                     return (
                                         <th key={index} className='bg-lgreen font-bold py-6' style={{border:'solid 1px black'}}>
-                                            <Typography fontWeight={"bold"}>{finalGrade ? finalGrade.toFixed(1) : <>Calculating</>}</Typography>
+                                            <Typography fontWeight={"bold"}>{finalGrade != null || finalGrade != undefined? finalGrade.toFixed(1) : <>Calculating</>}</Typography>
                                         </th>
                                     );
                                 })}

@@ -67,6 +67,8 @@ export default function page() {
             
         }catch(err){
             console.log(err)
+            toast.error("Possible cors error. Nevertheless, caught an exception while logging in.")
+            setLoggingIn(false)
         }
     }
     return (
