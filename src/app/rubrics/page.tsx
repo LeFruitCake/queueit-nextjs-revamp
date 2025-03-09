@@ -1,22 +1,20 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import BaseComponent from '@/Components/BaseComponent';
+import BaseComponent from "@/Components/BaseComponent";
 import RubricHeader from "@/Components/RubricHeader";
 import CreateRubricButton from "@/Components/CreateRubricButton";
 import RubricCard from "@/Components/RubricCard";
-import { Rubric } from "@/Utils/Global_variables";
 import { useUserContext } from "@/Contexts/AuthContext";
 import { useRubricsContext } from "@/Contexts/RubricsContext";
-import { useQueueingManagerContext } from "@/Contexts/QueueingManagerContext";
 import { useRubricContext } from "@/Contexts/RubricContext";
 import { useRouter } from "next/navigation";
 
 export default function Page() {
-  const rubrics = useRubricsContext().Rubrics
-  const setRubrics = useRubricsContext().setRubrics
-  const user = useUserContext().user
-  const setRubric = useRubricContext().setRubric
+  const { Rubrics: rubrics, setRubrics } = useRubricsContext();
+  const { user } = useUserContext();
+  const { setRubric } = useRubricContext();
   const router = useRouter();
+  const [filter, setFilter] = useState("All Templates");
 
   useEffect(() => {
     const fetchRubrics = async () => {
@@ -26,7 +24,6 @@ export default function Page() {
           throw new Error("Failed to fetch rubrics");
         }
         const data = await response.json();
-        console.log(data)
         setRubrics(data);
       } catch (error) {
         console.error("Error fetching rubrics:", error);
@@ -34,25 +31,32 @@ export default function Page() {
     };
 
     fetchRubrics();
-  }, []);
+  }, [user?.uid, setRubrics]);
 
-  const RubricCardAction = (rubric:Rubric)=>{
+  const RubricCardAction = (rubric) => {
     setRubric(rubric);
-    router.push('/rubrics/details')
-  }
+    router.push("/rubrics/details");
+  };
+
+  // Filter rubrics based on selected header status
+  const filteredRubrics = rubrics?.filter((rubric) => {
+    if (filter === "Public Templates") return rubric.isPrivate == false;
+    if (filter === "Private Templates") return rubric.isPrivate == true;
+    return true; // Show all if "All Templates" is selected
+  });
 
   return (
     <BaseComponent>
       <div className="bg-white w-full min-h-screen flex flex-col relative rounded-md px-10 py-6 border-2 border-black">
         <div className="flex justify-between items-center w-full">
-          <RubricHeader />
+          <RubricHeader onFilterChange={setFilter} />
           <CreateRubricButton />
         </div>
 
-        <div className=" relative pt-10 flex flex-wrap gap-8">
-          {rubrics?.length > 0 ? (
-            rubrics?.map((rubric) => ( 
-              <RubricCard key={rubric.id} onClickAction={RubricCardAction} rubric={rubric} /> 
+        <div className="relative pt-10 flex flex-wrap gap-8">
+          {filteredRubrics?.length > 0 ? (
+            filteredRubrics.map((rubric) => (
+              <RubricCard key={rubric.id} onClickAction={RubricCardAction} rubric={rubric} />
             ))
           ) : (
             <p>No rubric found</p>
