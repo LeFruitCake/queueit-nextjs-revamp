@@ -9,6 +9,7 @@ import { useRubricContext } from '@/Contexts/RubricContext'
 import SelectRubricModal from './SelectRubricModal'
 import EvaluationModal from './EvaluationModal'
 import { useGradesContext } from '@/Contexts/GradesContext'
+import { MentionsInput, Mention } from "react-mentions";
 
 interface MeetingBoardProps{
     meeting: Meeting
@@ -22,6 +23,9 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
     const [selectRubricModalOpen, setSelectRubricModalOpen] = useState(false);
     const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
     const {Grades, setGrades} = useGradesContext();
+    const [taskNote, setTaskNote] = useState("");
+    const [impedimentNote, setImpedimentNote] = useState("");
+    
     useEffect(()=>{
         if(!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID){
             let tempGrades:Array<Grade> = []
@@ -41,8 +45,15 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
         }
     },[Rubric])
 
+    const getUniqueStudents = () => {
+        return meeting.queueingEntry.attendanceList.map((student) => ({
+          id: student.firstname + " " + student.lastname,
+          display: student.firstname + " " + student.lastname,
+        }));
+      };
+
     // Assuming `Grades` is your array of student data
-const getUniqueStudentsWithAveragedGrades = () => {
+    const getUniqueStudentsWithAveragedGrades = () => {
     // Create a new object to store the aggregated data
     const studentGrades = {};
 
@@ -84,22 +95,42 @@ const getUniqueStudentsWithAveragedGrades = () => {
                     <HistoryBoard/>
                 </div>
             </div>
-            <div className='w-full border-2 border-black'>
-                <div className='border-b-2 border-black p-3'>
+            <div className='w-full border-2 border-black rounded-md'>
+                <div className='border-b-2 border-black p-3' style={{ backgroundColor: "#7D57FC" }}>
                     Note Title
                 </div>
                 <div className='flex flex-col p-3 border-b-2 border-black'>
-                    <div className='px-3 font-bold'>
-                        Assign student tasks
+                    <div className='px-3 font-bold'>Assign student tasks</div>
+                    <div className='p-3'>
+                        <MentionsInput
+                            value={taskNote}
+                            onChange={(e) => {
+                                setTaskNote(e.target.value);
+                                setNotedAssignedTasks(e.target.value);
+                            }}
+                            className="rounded-md w-full" 
+                            style={{ minHeight: "120px" }} 
+                            placeholder={`These are the deliverables to be checked in the next consultation.\nMention students with @...`}>
+                            <Mention trigger="@" data={getUniqueStudents()} markup="@[@__id__](__display__)" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
+                        </MentionsInput>
                     </div>
-                    <textarea onChange={(e)=>{setNotedAssignedTasks(e.target.value)}} rows={5} className='p-3' placeholder='These are the deliverables to be checked in the next consultation.'></textarea>
                 </div>
                 <div className='flex flex-col p-3 border-b-2 border-black'>
-                    <div className='px-3 font-bold'>
-                        Are there any impediments?
+                    <div className='px-3 font-bold'>Are there any impediments?</div>
+                    <div className='p-3'>
+                        <MentionsInput
+                            value={impedimentNote}
+                            onChange={(e) => {
+                                setImpedimentNote(e.target.value);
+                                setImpedimentsEncountered(e.target.value);
+                            }}
+                            className="rounded-md w-full " 
+                            style={{ minHeight: "120px" }} 
+                            placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.\nMention students with @...`}>
+                            <Mention trigger="@" data={getUniqueStudents()} markup="@[@__id__](__display__)" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
+                        </MentionsInput>
                     </div>
-                    <textarea onChange={(e)=>{setImpedimentsEncountered(e.target.value)}} rows={5} className='p-3' placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.`}></textarea>
-                </div>
+                </div> 
                 <div className='flex flex-col p-3'>
                     <div className='px-3 font-bold'>
                         Student Evaluation
