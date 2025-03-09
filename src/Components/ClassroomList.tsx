@@ -13,7 +13,7 @@ const ClassroomList:React.FC<ClassroomListProps> = ({classrooms}) => {
     const classes = classrooms? Array.from(classrooms) : [];
     const user = useUserContext().user
     return (
-        <div className='border-2 border-black mt-5 rounded-xl relative bg-white p-10 flex flex-wrap gap-16'>
+        <div className='border-2 border-black mt-5 rounded-xl relative bg-white p-10 flex flex-wrap gap-12'>
             {classrooms?.length > 0?
                 <>
                     {classes.map((classs, index)=>(
