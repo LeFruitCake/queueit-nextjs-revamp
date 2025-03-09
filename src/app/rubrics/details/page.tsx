@@ -20,7 +20,7 @@ import {
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { dpurple, QUEUEIT_URL, Rubric, RubricDTO } from "@/Utils/Global_variables";
 import WestIcon from '@mui/icons-material/West';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
 import { toast } from "react-toastify";
 import IndexEnumerator from "@/Components/IndexEnumerator";
 import { useUserContext } from "@/Contexts/AuthContext";
@@ -166,7 +166,7 @@ export default function page() {
               </div>
               {rubric?.userID == user?.uid?
                 <div>
-                  <IconButton onClick={()=>{handleRemoveCriterion(index)}}><RemoveCircleIcon sx={{color:'red'}}/></IconButton>
+                  <IconButton onClick={()=>{handleRemoveCriterion(index)}}><CancelIcon sx={{color:'black'}}/></IconButton>
                 </div>
                 :
                 <></>
