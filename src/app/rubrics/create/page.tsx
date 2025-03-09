@@ -16,11 +16,12 @@ import {
   Divider,
   IconButton,
   colors,
+  Tooltip,
 } from "@mui/material";
-import AddCircleIcon from '@mui/icons-material/AddCircle';
-import { dpurple, QUEUEIT_URL, RubricDTO } from "@/Utils/Global_variables";
+import AddCircleIcon from '@mui/icons-material/AddCircle'; 
 import WestIcon from '@mui/icons-material/West';
-import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
+import CancelIcon from '@mui/icons-material/Cancel'; 
+import { dpurple, QUEUEIT_URL, RubricDTO } from "@/Utils/Global_variables";
 import { toast } from "react-toastify";
 import IndexEnumerator from "@/Components/IndexEnumerator";
 import { useUserContext } from "@/Contexts/AuthContext";
@@ -167,7 +168,11 @@ export default function page() {
                 />
               </div>
               <div>
-                <IconButton onClick={()=>{handleRemoveCriterion(index)}}><RemoveCircleIcon sx={{color:'red'}}/></IconButton>
+              <Tooltip title="Remove Criterion" arrow>
+                <IconButton onClick={() => handleRemoveCriterion(index)}>
+                  <CancelIcon sx={{ color: "black" }} />
+                </IconButton>
+              </Tooltip> 
               </div>
             </div>
           ))}

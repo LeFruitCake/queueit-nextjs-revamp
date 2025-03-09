@@ -15,7 +15,8 @@ import {
   Typography,
   Divider,
   IconButton,
-  colors,
+  colors, 
+  Tooltip,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { dpurple, QUEUEIT_URL, Rubric, RubricDTO } from "@/Utils/Global_variables";
@@ -166,7 +167,11 @@ export default function page() {
               </div>
               {rubric?.userID == user?.uid?
                 <div>
-                  <IconButton onClick={()=>{handleRemoveCriterion(index)}}><CancelIcon sx={{color:'black'}}/></IconButton>
+                  <Tooltip title="Remove Criterion" arrow>
+                    <IconButton onClick={() => handleRemoveCriterion(index)}>
+                      <CancelIcon sx={{ color: "black" }} />
+                    </IconButton>
+                  </Tooltip> 
                 </div>
                 :
                 <></>
