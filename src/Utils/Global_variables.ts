@@ -93,9 +93,9 @@ export interface Faculty{
 export interface Team{
     tid:number
     groupName:string
-    // projectName:string
+    projectName:string
     projectId:number
-    leaderId:number
+    leaderName:string
     classId:number
     memberIds:Array<number>
     memberNames:Array<string>
@@ -103,7 +103,9 @@ export interface Team{
     projectDescription:string
     adviserId:number
     scheduleId:number
-    recruitmentOpen:boolean
+    scheduledDay:string
+    start:string
+    end:string
 }
 
 export interface TeamQueueitDTO{
@@ -181,12 +183,15 @@ export interface Grade{
 export enum MeetingStatus{
     FAILED_TEAM_NO_SHOW = "FAILED_TEAM_NO_SHOW",
     FAILED_FACULTY_NO_SHOW = "FAILED_FACULTY_NO_SHOW",
+    FAILED_DEFAULTED = "FAILED_DEFAULTED",
     ATTENDED_FACULTY_CONDUCTED = "ATTENDED_FACULTY_CONDUCTED",
     ATTENDED_QUEUEING_CONDUCTED = "ATTENDED_QUEUEING_CONDUCTED",
-    FAILED_DEFAULTED = "FAILED_DEFAULTED",
     SET_AUTOMATED = "SET_AUTOMATED",
     SET_MANUALLY = "SET_MANUALLY",
     CANCELLED = "CANCELLED",
+    STARTED_TEAM_INITIATED = "STARTED_TEAM_INITIATED",
+    STARTED_FACULTY_INITIATED = "STARTED_FACULTY_INITIATED",
+    STARTED_AUTOMATED = "STARTED_AUTOMATED"
 }
 
 export interface Meeting{

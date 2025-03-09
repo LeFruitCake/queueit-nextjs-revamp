@@ -16,7 +16,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import './fullCalendarStyles.css';   
 import { useUserContext } from '@/Contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { Attendance, AttendanceDTO, AttendanceStatus, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
+import { Attendance, AttendanceDTO, AttendanceStatus, dpurple, lgreen, Meeting, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
 
 
 const modalStyle = {
@@ -58,11 +58,11 @@ const confirmButtonStyles = {
 };
 
 interface CalendarEvent {
-    meetingID: number
+    meetingID: number | undefined | null
     start: Date
     end: Date
     meetingStatus: MeetingStatus
-    groupName: string;
+    teamName: string;
 }
 
 interface ManualAppointmentSetting{
@@ -135,23 +135,97 @@ export default function Page() {
             })
         }
     },[user])
+    const daysOfWeek = {
+        SUNDAY: 0,
+        MONDAY: 1,
+        TUESDAY: 2,
+        WEDNESDAY: 3,
+        THURSDAY: 4,
+        FRIDAY: 5,
+        SATURDAY: 6
+    };
+    function getDateForDayAtTime(dayName:string, timeString:string) {
+        const now = new Date();
+        const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+        const targetDay = daysOfWeek[dayName]; // Convert input to uppercase
+    
+        // Calculate the difference in days
+        const daysDifference = (targetDay - currentDay + 7) % 7; // Ensure it's always positive
+    
+        // If the target day is today, we want to set the time for today
+        const targetDate = new Date(now);
+        targetDate.setDate(now.getDate() + daysDifference);
+    
+        // Split the time string into hours, minutes, and seconds
+        const [hours, minutes, seconds] = timeString.split(':').map(Number);
+        
+        // Set the time
+        targetDate.setHours(hours, minutes, seconds, 0);
+        
+        return targetDate;
+    }
+
+    useEffect(() => {
+        if (teams) {
+            const today = new Date().toLocaleString('en-US', { weekday: 'long' }).toUpperCase(); // Get today's day as a string
+            teams
+                .filter((team) => team.scheduledDay !== today) // Exclude teams scheduled for today
+                .forEach((team) => { // Use forEach instead of map since you're not returning a new array
+                    console.log(getDateForDayAtTime(team.scheduledDay, team.start));
+                    const appointment: CalendarEvent = {
+                        "start": getDateForDayAtTime(team.scheduledDay, team.start),
+                        "end": getDateForDayAtTime(team.scheduledDay, team.end),
+                        "teamName": team.groupName,
+                        "meetingStatus": MeetingStatus.SET_AUTOMATED,
+                        "meetingID": undefined
+                    };
+                    setAppointments((prev) => [...prev, appointment]);
+                });
+        }
+    }, [teams]);
+
+    // useEffect(()=>{
+    //     if(teams){
+    //         teams.map((team)=>{
+    //             console.log(getDateForDayAtTime(team.scheduledDay,team.start))
+    //             const appointment:CalendarEvent ={
+    //                 "start":getDateForDayAtTime(team.scheduledDay,team.start),
+    //                 "end":getDateForDayAtTime(team.scheduledDay,team.end),
+    //                 "teamName":team.groupName, 
+    //                 "meetingStatus":MeetingStatus.SET_AUTOMATED,
+    //                 "meetingID":undefined
+    //             }
+    //             setAppointments((prev)=>[...prev, appointment])
+    //         })
+    //     }
+        
+    // },[teams])
+
+    useEffect(()=>{
+        if(appointments){
+            console.log(`Appointments updated:`)
+            console.log(appointments)
+        }
+    },[appointments])
 
     useEffect(() => { 
-        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/facultyAppointments/${user?.uid}`)
-        .then(async(res)=>{
-            if(res.ok){
-                
-                const response = await res.json();
-                console.log(response)
-                setAppointments(response)
-            }else{
-                toast.error("Server error while fetching appointments")
-            }
-        })
-        .catch((err)=>{
-            console.log(err)
-            toast.error("Caught an exception while fetching appointments.")
-        })
+        if(user){
+            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/facultyAppointments/${user?.uid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    
+                    const response = await res.json();
+                    console.log(response)
+                    setAppointments(response)
+                }else{
+                    toast.error("Server error while fetching appointments")
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Caught an exception while fetching appointments.")
+            })
+        }
     }, [user]);
 
     const formatDateForInput = (date) => {
@@ -199,8 +273,16 @@ export default function Page() {
 
                 switch(res.status){
                     case 200:
-                        const response = await res.json();
-                        setAppointments((prev)=>[...prev,response])
+                        const response:Meeting = await res.json();
+                        console.log(response)
+                        const event:CalendarEvent = {
+                            "start":new Date(response.start),
+                            "end":new Date(response.end),
+                            "meetingID":response.meetingID,
+                            "meetingStatus":response.meetingStatus,
+                            "teamName":response.queueingEntry.teamName
+                        }
+                        setAppointments((prev)=>[...prev,event])
                         setSuccessMessage('Session Created Successfully');
                         setSuccessModalOpen(true);
                         break;
@@ -233,7 +315,7 @@ export default function Page() {
             start: eventInfo.event.start,
             end: eventInfo.event.end,
             meetingStatus: eventInfo.event._def.extendedProps.meetingStatus,
-            groupName: eventInfo.event._def.extendedProps.teamName,
+            teamName: eventInfo.event._def.extendedProps.teamName,
         };
 
         console.log("Selected Event:", selectedEvent); 
@@ -321,21 +403,16 @@ export default function Page() {
                                 right: 'prev,next'
                             }}
                             eventContent={(eventInfo) => {
-                                console.log(eventInfo)
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
- 
-                                const sessionType = eventInfo.event._def.extendedProps.sessionType;
+                                const meetingStatus = eventInfo.event.extendedProps.meetingStatus
                                 const groupName = eventInfo.event._def.extendedProps.teamName;
- 
-                                const displayTitle = sessionType === "Consultation"
-                                    ? `Consultation Session with ${groupName}`
-                                    : `Presentation Session with ${groupName}`;
 
                                 return (
-                                    <div style={{ whiteSpace: 'normal', overflow: 'hidden', textOverflow: 'ellipsis', color: eventInfo.event._def.extendedProps.meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: eventInfo.event._def.extendedProps.type === "upcomingEvent" ? eventInfo.backgroundColor : '#7d57fc', width: '100%', height:'100%' }}>
-                                        {startTime} - {endTime} <br />
-                                        <strong>{displayTitle}</strong>
+                                    <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
+                                        <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
+                                        <Typography  fontWeight={"bold"}>{groupName}</Typography>
+                                        <Typography color={meetingStatus === MeetingStatus.SET_MANUALLY?lgreen:dpurple} variant='caption' >{meetingStatus === MeetingStatus.SET_AUTOMATED?<>Scheduled</>:meetingStatus === MeetingStatus.SET_MANUALLY?<>Appointment</>:<></>}</Typography>
                                     </div>
                                 );
                             }}
@@ -501,7 +578,7 @@ export default function Page() {
                         <div style={{ padding: '3% 10% 10% 10%' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Group Name: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.groupName}</Typography>
+                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.teamName}</Typography>
                             </div><hr />
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <Typography variant="body1">Date: </Typography>

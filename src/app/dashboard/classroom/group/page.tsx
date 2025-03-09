@@ -5,7 +5,7 @@ import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, IconButton, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { AttendanceStatus, lgreen, QUEUEIT_URL, SPEAR_URL, User, UserType } from '@/Utils/Global_variables'
+import { AttendanceStatus, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import '../group/group.css'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions'
@@ -139,9 +139,10 @@ const page = () => {
                                     </div>
                                     <div className='flex flex-col gap-12'>
                                         {Meetings.map((historyEntry,index)=>(
+                                            historyEntry.meetingStatus === MeetingStatus.ATTENDED_QUEUEING_CONDUCTED || historyEntry.meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED?
                                             <div key={index} style={{backgroundColor:'#1D1D1C'}} className='p-10 flex flex-col gap-3 rounded-md'>
                                                 <Typography color={lgreen} variant='h4' fontWeight={"bold"}>{`Meeting #${index + 1}`}</Typography>
-                                                <Typography variant='subtitle2' color='gray'>{new Date(historyEntry?.start).toDateString()}</Typography>
+                                                <Typography variant='h6' color='gray'>{new Date(historyEntry?.start).toDateString()}</Typography>
                                                 <div className='flex gap-3'>
                                                     {historyEntry?.attendanceList.map((attendanceEntry,index)=>(
                                                         <div key={index} className={`${attendanceEntry.attendanceStatus == AttendanceStatus.ABSENT?'bg-notlushred':attendanceEntry.attendanceStatus == AttendanceStatus.LATE?'bg-notlushorange':'bg-notlushgreen'} rounded-md px-3 py-2`}>
@@ -160,6 +161,30 @@ const page = () => {
                                                     <div className='w-full p-3 border-2 border-white max-h-48 overflow-auto' style={{backgroundColor:'black', color:'white'}}>
                                                         <Typography variant='subtitle2' sx={{lineHeight:'2.5em'}}>{historyEntry?.impedimentsEncountered || 'No impediments recorded'}</Typography>
                                                     </div>
+                                                </div>
+                                            </div>
+                                            :
+                                            <div key={index} style={{backgroundColor:'#1D1D1C'}} className='p-10 flex justify-between items-center rounded-md'>
+                                                <div>
+                                                    <Typography color={lgreen} variant='h4' fontWeight={"bold"}>{`Meeting #${index + 1}`}</Typography>
+                                                    <Typography variant='h6' color='gray'>{new Date(historyEntry?.start).toDateString()}</Typography>
+                                                </div>
+                                                <div>
+                                                    {historyEntry.meetingStatus === MeetingStatus.CANCELLED?
+                                                        <Typography variant='h6' color='error' fontWeight={"bold"}>Mentor cancelled the appointment.</Typography>
+                                                        :historyEntry.meetingStatus === MeetingStatus.FAILED_DEFAULTED?
+                                                            <Typography variant='h6' color='error' fontWeight={"bold"}>Both parties did not show up on the agreed schedule.</Typography>
+                                                            :historyEntry.meetingStatus === MeetingStatus.FAILED_FACULTY_NO_SHOW?
+                                                                <Typography variant='h6' color='error' fontWeight={"bold"}>Mentor did not show up on the agreed schedule.</Typography>
+                                                                :historyEntry.meetingStatus === MeetingStatus.FAILED_TEAM_NO_SHOW?
+                                                                    <Typography variant='h6' color='error' fontWeight={"bold"}>Team did not show up on the agreed schedule.</Typography>
+                                                                    :historyEntry.meetingStatus === MeetingStatus.SET_AUTOMATED?
+                                                                        <Typography variant='h6' color='primary' fontWeight={"bold"}>System automated meeting is expected.</Typography>
+                                                                        :historyEntry.meetingStatus === MeetingStatus.SET_MANUALLY?
+                                                                            <Typography variant='h6' color='primary' fontWeight={"bold"}>Mentor created an appointment for {new Date(historyEntry.end).toDateString()}.</Typography>
+                                                                            :
+                                                                            <Typography variant='h6' color='success' fontWeight={"bold"}>Ongoing</Typography>
+                                                    }
                                                 </div>
                                             </div>
                                         ))}
