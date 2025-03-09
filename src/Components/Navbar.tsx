@@ -23,7 +23,6 @@ const Navbar = () => {
         setAvatarAnchorEl(event.currentTarget);
     };
     const handleAvatarClose = () => {
-        userContext.logout()
         setAvatarAnchorEl(null);
     };
     const handleNotificationClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -85,9 +84,9 @@ const Navbar = () => {
                         horizontal:'right'
                     }}
                 >
-                    <MenuItem onClick={handleAvatarClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleAvatarClose}>My account</MenuItem>
-                    <MenuItem onClick={handleAvatarClose}>Logout</MenuItem>
+                    {/* <MenuItem onClick={handleAvatarClose}>Profile</MenuItem>
+                    <MenuItem onClick={handleAvatarClose}>My account</MenuItem> */}
+                    <MenuItem onClick={()=>{userContext.logout()}}>Logout</MenuItem>
                 </Menu>
                 <Menu
                     anchorEl={notificationAnchorEl}

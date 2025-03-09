@@ -135,18 +135,16 @@ export default function Page() {
             })
         }
     },[user])
-
+    const daysOfWeek = {
+        SUNDAY: 0,
+        MONDAY: 1,
+        TUESDAY: 2,
+        WEDNESDAY: 3,
+        THURSDAY: 4,
+        FRIDAY: 5,
+        SATURDAY: 6
+    };
     function getDateForDayAtTime(dayName:string, timeString:string) {
-        const daysOfWeek = {
-            SUNDAY: 0,
-            MONDAY: 1,
-            TUESDAY: 2,
-            WEDNESDAY: 3,
-            THURSDAY: 4,
-            FRIDAY: 5,
-            SATURDAY: 6
-        };
-    
         const now = new Date();
         const currentDay = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
         const targetDay = daysOfWeek[dayName]; // Convert input to uppercase
@@ -167,22 +165,41 @@ export default function Page() {
         return targetDate;
     }
 
-    useEffect(()=>{
-        if(teams){
-            teams.map((team)=>{
-                console.log(getDateForDayAtTime(team.scheduledDay,team.start))
-                const appointment:CalendarEvent ={
-                    "start":getDateForDayAtTime(team.scheduledDay,team.start),
-                    "end":getDateForDayAtTime(team.scheduledDay,team.end),
-                    "teamName":team.groupName, 
-                    "meetingStatus":MeetingStatus.SET_AUTOMATED,
-                    "meetingID":undefined
-                }
-                setAppointments((prev)=>[...prev, appointment])
-            })
+    useEffect(() => {
+        if (teams) {
+            const today = new Date().toLocaleString('en-US', { weekday: 'long' }).toUpperCase(); // Get today's day as a string
+            teams
+                .filter((team) => team.scheduledDay !== today) // Exclude teams scheduled for today
+                .forEach((team) => { // Use forEach instead of map since you're not returning a new array
+                    console.log(getDateForDayAtTime(team.scheduledDay, team.start));
+                    const appointment: CalendarEvent = {
+                        "start": getDateForDayAtTime(team.scheduledDay, team.start),
+                        "end": getDateForDayAtTime(team.scheduledDay, team.end),
+                        "teamName": team.groupName,
+                        "meetingStatus": MeetingStatus.SET_AUTOMATED,
+                        "meetingID": undefined
+                    };
+                    setAppointments((prev) => [...prev, appointment]);
+                });
         }
+    }, [teams]);
+
+    // useEffect(()=>{
+    //     if(teams){
+    //         teams.map((team)=>{
+    //             console.log(getDateForDayAtTime(team.scheduledDay,team.start))
+    //             const appointment:CalendarEvent ={
+    //                 "start":getDateForDayAtTime(team.scheduledDay,team.start),
+    //                 "end":getDateForDayAtTime(team.scheduledDay,team.end),
+    //                 "teamName":team.groupName, 
+    //                 "meetingStatus":MeetingStatus.SET_AUTOMATED,
+    //                 "meetingID":undefined
+    //             }
+    //             setAppointments((prev)=>[...prev, appointment])
+    //         })
+    //     }
         
-    },[teams])
+    // },[teams])
 
     useEffect(()=>{
         if(appointments){
