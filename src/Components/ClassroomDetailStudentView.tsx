@@ -22,39 +22,42 @@ const GroupDetailStudentView = () => {
     const [season, setSeason] = useState<string>()
 
     const fetchCurrentStudentTeam = async ()=>{
-        const response = fetch(`${SPEAR_URL}/team/my/${classroom?.cid}/${user?.uid}`)
-                        .then(async (data)=>{
-                            if(data.ok){
-                                const team_data = await data.json()
-                                groupContext.setTeam(team_data)
-                            }else{
-                                groupContext.setTeam(undefined)
-                            }
-                        })
-                        .catch((err)=>{
-                            console.log(err)
-                            toast.error("Something went wrong while fetching your team.")
-                        })
+        fetch(`${SPEAR_URL}/team/my/${classroom?.cid}/${user?.uid}`)
+            .then(async (data)=>{
+                if(data.ok){
+                    const team_data = await data.json()
+                    groupContext.setTeam(team_data)
+                }else{
+                    groupContext.setTeam(undefined)
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Something went wrong while fetching your team.")
+            })
     }
 
     const fetchCurrentStudentMentor = async ()=>{
-        const response = fetch(`${SPEAR_URL}/get-teacher/${project?.adviserId}`)
-                        .then(async (data)=>{
-                            const mentor_data = await data.json()
-                            setMentor(mentor_data)
-                        })
+        fetch(`${SPEAR_URL}/get-teacher/${groupContext.Team?.adviserId}`)
+            .then(async (data)=>{
+                const mentor_data = await data.json()
+                setMentor(mentor_data)
+            })
+            .catch((error)=>{
+                console.log(error)
+            })
     }
 
     const fetchCurrentStudentProject = async ()=>{
-        const response = fetch(`${SPEAR_URL}/proposals/class/${classroom?.cid}/student/${user?.uid}`)
-                        .then(async (data)=>{
-                            const project_data = await data.json()
-                            setProject(project_data)
-                        })
-                        .catch((err)=>{
-                            console.log(err)
-                            toast.error("Something went wrong while fetching your project proposals.")
-                        })
+        fetch(`${SPEAR_URL}/proposals/class/${classroom?.cid}/student/${user?.uid}`)
+            .then(async (data)=>{
+                const project_data = await data.json()
+                setProject(project_data)
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Something went wrong while fetching your project proposals.")
+            })
     }
 
     useEffect(()=>{
@@ -66,13 +69,10 @@ const GroupDetailStudentView = () => {
             fetchCurrentStudentProject()
         }
         setSeason(randomSeason())
-    },[groupContext.Team])
-
-    useEffect(()=>{
-        if(project?.adviserId){
+        if(groupContext.Team?.adviserId){
             fetchCurrentStudentMentor()
         }
-    },[project])
+    },[groupContext.Team])
 
     return (
         <div className='flex flex-col h-full'>

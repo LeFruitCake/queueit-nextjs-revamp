@@ -199,36 +199,40 @@ const QueueingPageFacultyView = () => {
     };
 
     const concludeMeeting = ()=>{
-        console.log(grades)
-        fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
-            body:JSON.stringify({
-                grades:grades,
-                notedAssignedTasks:notedAssignedTasks,
-                impedimentsEncountered:impedimentsEncountered
-            }),
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            }
-        })
-        .then( async (res)=>{
-            switch(res.status){
-                case 200:
-                    setGrades(undefined);
-                    toast.success("Meeting concluded.")
-                    break;
-                case 400:
-                    const text = await res.text()
-                    toast.error(text)
-                    break;
-                default:
-                    toast.error("Server error")
-            }
-        })
-        .catch((err)=>{
-            toast.error("Something went wrong during admittance.")
-            console.log(err)
-        })
+        if(grades?.length == 0){
+            toast.error("You have yet to grade anybody.")
+        }else{
+            fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
+                body:JSON.stringify({
+                    grades:grades,
+                    notedAssignedTasks:notedAssignedTasks,
+                    impedimentsEncountered:impedimentsEncountered
+                }),
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            })
+            .then( async (res)=>{
+                switch(res.status){
+                    case 200:
+                        setGrades(undefined);
+                        toast.success("Meeting concluded.")
+                        break;
+                    case 400:
+                        const text = await res.text()
+                        console.log(res)
+                        toast.error(text)
+                        break;
+                    default:
+                        toast.error("Server error")
+                }
+            })
+            .catch((err)=>{
+                toast.error("Something went wrong during admittance.")
+                console.log(err)
+            })
+        }
     }
 
     return (
