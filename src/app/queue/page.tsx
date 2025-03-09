@@ -5,6 +5,7 @@ import QueueingPageFacultyView from '@/Components/QueueingPageFacultyView'
 import QueueingPageStudentView from '@/Components/QueueingPageStudentView'
 import { useUserContext } from '@/Contexts/AuthContext'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
+import { useFacultyContext } from '@/Contexts/FacultyContext'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
 import { QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
@@ -18,6 +19,7 @@ const page = () => {
     const {QueueingManager, setQueueingManager} = useQueueingManagerContext()
     const classroom = useClassroomContext().classroom
     const router = useRouter()
+    const faculty = useFacultyContext().Faculty
 
     useEffect(()=>{
       if(!user){
@@ -33,7 +35,7 @@ const page = () => {
 
       //if walay queueing manager, nya dapat naay classroom (for student), or dapat ang user kay faculty.
       // if(!QueueingManager && (classroom || user?.role == UserType.FACULTY)){
-        fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:classroom?.uid}`)
+        fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
         .then(async(res)=>{
           const response = await res.json()
           setQueueingManager(response)
@@ -46,16 +48,17 @@ const page = () => {
 
     useEffect(()=>{
       if (client) {
-        const queueingStatusSubscription = client.subscribe(`/topic/queueStatus/adviser/${user?.role == UserType.FACULTY?user.uid:classroom?.uid}`, (message) => {
+        const queueingStatusSubscription = client.subscribe(`/topic/queueStatus/adviser/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`, (message) => {
             const receivedMessage = JSON.parse(message.body);
             // console.log(`Received from websocket! ${receivedMessage}`)
             (console.log(receivedMessage))
             if(receivedMessage === true){
-              fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:classroom?.uid}`)
+              fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
               .then(async(data)=>{
                   switch(data.status){
                       case 200:
                           const response:QueueingManager = await data.json()
+                          console.log(response)
                           setQueueingManager(response);
                           break;
                       default:

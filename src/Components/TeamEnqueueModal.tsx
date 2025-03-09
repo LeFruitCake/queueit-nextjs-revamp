@@ -7,6 +7,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import { toast } from 'react-toastify'
+import { useFacultyContext } from '@/Contexts/FacultyContext'
 
 interface StudentEnqueueModalProps {
     modalToggle: boolean
@@ -18,6 +19,8 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
     const team = useTeamContext().Team
     const classroom = useClassroomContext().classroom
     const [attendanceList, setAttendanceList] = useState<Array<Attendance>>([])
+    const faculty = useFacultyContext().Faculty
+    console.log(faculty)
     const fetchMemberDetails = () => {
         const memberPromises = team?.memberIds.map((memberID) => {
             return fetch(`${SPEAR_URL}/get-student/${memberID}`, {
@@ -77,7 +80,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
                 method:'POST',
                 body:JSON.stringify(
                     {
-                        "facultyID":classroom?.uid,
+                        "facultyID":faculty?.uid,
                         "teamID":team?.tid,
                         "teamName":team?.groupName,
                         "classReference":`${classroom?.courseCode.toLocaleUpperCase()} - ${classroom?.section.toUpperCase()}`,
