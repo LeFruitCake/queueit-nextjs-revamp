@@ -1,9 +1,10 @@
 "use client"
+import { useUserContext } from '@/Contexts/AuthContext'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import { useFacultyContext } from '@/Contexts/FacultyContext'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
 import { useTeamContext } from '@/Contexts/TeamContext'
-import { dpurple, Faculty, QueueingManager, QUEUEIT_URL } from '@/Utils/Global_variables'
+import { dpurple, Faculty, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { capitalizeFirstLetter, randomAvatar, randomSeason } from '@/Utils/Utility_functions'
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
 import { Button, Typography } from '@mui/material'
@@ -21,17 +22,33 @@ interface FacultyAvailabilityCardProps{
 
 const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({facultyFirstname, facultyLastname, facultyDesignation, facultyID}) => {
     const client = useWebSocket()
-    const queueingManager = useQueueingManagerContext().QueueingManager
-    const setQueueingManager = useQueueingManagerContext().setQueueingManager
+    const [queueingManager, setQueueingManager] = useState<QueueingManager>()
     const [avatar, setAvatar] = useState<string>()
     const facultyContext = useFacultyContext()
     const team = useTeamContext().Team
     const classroom = useClassroomContext().classroom
     const router = useRouter();
+    const user = useUserContext().user
 
     useEffect(()=>{
-        if(!queueingManager?.isActive){
-            router.push('/dashboard/classroom')
+        if(!queueingManager){
+            fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${facultyID}`)
+            .then(async(data)=>{
+                switch(data.status){
+                    case 200:
+                        const response:QueueingManager = await data.json()
+                        console.log(response)
+                        setQueueingManager(response);
+                        break;
+                    default:
+                        console.log(data)
+                        // toast.error("Something went wrong while fetching Faculty active status.")
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Caught an exception while fetching Faculty active status.")
+            })
         }
     },[queueingManager])
 
@@ -71,10 +88,40 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                 console.log(receivedMessage)
                 setQueueingManager(receivedMessage)
             });
+
+            const queueingStatusSubscription = client.subscribe(`/topic/queueStatus/adviser/${facultyID}`, (message) => {
+                        const receivedMessage = JSON.parse(message.body);
+                        // console.log(`Received from websocket! ${receivedMessage}`)
+                        (console.log(receivedMessage))
+                        if(receivedMessage === true){
+                          fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${facultyID}`)
+                          .then(async(data)=>{
+                              switch(data.status){
+                                  case 200:
+                                      const response:QueueingManager = await data.json()
+                                      console.log(response)
+                                      setQueueingManager(response);
+                                      break;
+                                  default:
+                                      toast.error("Something went wrong while fetching Faculty active status.")
+                              }
+                          })
+                          .catch((err)=>{
+                              console.log(err)
+                              toast.error("Caught an exception while fetching Faculty active status.")
+                          })
+                        }else{
+                          setQueueingManager((prev:QueueingManager) => ({
+                            ...prev, // Spread the previous state
+                            queueingEntries: receivedMessage // Update the queueingEntries with the new data
+                          }))
+                        }
+                    });
     
             return () => {
                 console.log('Unsubscribing');
                 facultyStatusSubscription.unsubscribe();
+                queueingStatusSubscription.unsubscribe();
             };
         }
     }, [client, facultyID]);
