@@ -59,8 +59,8 @@ const confirmButtonStyles = {
 
 interface CalendarEvent {
     meetingID: number | undefined | null
-    start: Date
-    end: Date
+    start: Date | null | undefined
+    end: Date | null | undefined
     meetingStatus: MeetingStatus
     teamName: string;
 }
@@ -171,10 +171,10 @@ export default function Page() {
             teams
                 .filter((team) => team.scheduledDay !== today) // Exclude teams scheduled for today
                 .forEach((team) => { // Use forEach instead of map since you're not returning a new array
-                    console.log(getDateForDayAtTime(team.scheduledDay, team.start));
+                    // console.log(getDateForDayAtTime(team.scheduledDay, team.start));
                     const appointment: CalendarEvent = {
-                        "start": getDateForDayAtTime(team.scheduledDay, team.start),
-                        "end": getDateForDayAtTime(team.scheduledDay, team.end),
+                        "start": team.scheduledDay && team.start? getDateForDayAtTime(team.scheduledDay, team.start): null,
+                        "end": team.scheduledDay && team.end? getDateForDayAtTime(team.scheduledDay, team.end):null,
                         "teamName": team.groupName,
                         "meetingStatus": MeetingStatus.SET_AUTOMATED,
                         "meetingID": undefined

@@ -111,7 +111,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                             className="rounded-md w-full" 
                             style={{ minHeight: "120px" }} 
                             placeholder={`These are the deliverables to be checked in the next consultation.\nMention students with @...`}>
-                            <Mention trigger="@" data={getUniqueStudents()} markup="@[@__id__](__display__)" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
+                            <Mention trigger="@" data={getUniqueStudents()} markup="@__display__" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "0.5em", borderRadius: "4px", width:'fit-content', border:'solid 1px red' }} />
                         </MentionsInput>
                     </div>
                 </div>
@@ -127,7 +127,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                             className="rounded-md w-full " 
                             style={{ minHeight: "120px" }} 
                             placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.\nMention students with @...`}>
-                            <Mention trigger="@" data={getUniqueStudents()} markup="@[@__id__](__display__)" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
+                            <Mention trigger="@" data={getUniqueStudents()} markup="@__display__" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
                         </MentionsInput>
                     </div>
                 </div> 
