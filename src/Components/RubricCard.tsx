@@ -31,7 +31,7 @@ const RubricCard:React.FC<RubricCardProps> = ({ rubric,onClickAction }) => {
     })
     .then((res)=>{
       setSuccessOpen(true);  
-      toast.success("rubric deleted")
+      toast.success("Rubric deleted successfully.")
       setRubrics((prevRubrics) => 
           prevRubrics.filter((r) => r.id !== rubric.id)
       );
