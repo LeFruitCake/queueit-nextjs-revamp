@@ -102,17 +102,29 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                 <div className='flex flex-col p-3 border-b-2 border-black'>
                     <div className='px-3 font-bold'>Assign student tasks</div>
                     <div className='p-3'>
-                        <MentionsInput
-                            value={taskNote}
-                            onChange={(e) => {
-                                setTaskNote(e.target.value);
-                                setNotedAssignedTasks(e.target.value);
-                            }}
-                            className="rounded-md w-full" 
-                            style={{ minHeight: "120px" }} 
-                            placeholder={`These are the deliverables to be checked in the next consultation.\nMention students with @...`}>
-                            <Mention trigger="@" data={getUniqueStudents()} markup="@__display__" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "0.5em", borderRadius: "4px", width:'fit-content', border:'solid 1px red' }} />
-                        </MentionsInput>
+                    <MentionsInput
+                        value={taskNote}
+                        onChange={(e) => {
+                            setTaskNote(e.target.value);
+                            setNotedAssignedTasks(e.target.value);
+                        }}
+                        className="rounded-md w-full" 
+                        style={{ minHeight: "120px" }} 
+                        placeholder={`These are the deliverables to be checked in the next consultation.\nMention students with @...`}
+                    >
+                        <Mention 
+                            trigger="@" 
+                            data={getUniqueStudents()} 
+                            markup="@__display__:" 
+                            displayTransform={(display) => `@${display}`} 
+                            style={{
+                                backgroundColor: "#E5E5E5",
+                                borderRadius: "6px", 
+                                display: "inline-block", 
+                                padding: "2px "
+                            }} 
+                        /> 
+                    </MentionsInput> 
                     </div>
                 </div>
                 <div className='flex flex-col p-3 border-b-2 border-black'>
@@ -127,7 +139,18 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                             className="rounded-md w-full " 
                             style={{ minHeight: "120px" }} 
                             placeholder={`List any challenges or obstacles that may affect the progress of each member or group's tasks.\nMention students with @...`}>
-                            <Mention trigger="@" data={getUniqueStudents()} markup="@__display__" displayTransform={(id, display) => `@${display}`} style={{ backgroundColor: "#E5E5E5", padding: "2px", borderRadius: "4px" }} />
+                            <Mention 
+                                trigger="@" 
+                                data={getUniqueStudents()} 
+                                markup="@__display__:" 
+                                displayTransform={(display) => `@${display}`} 
+                                style={{
+                                    backgroundColor: "#E5E5E5",
+                                    borderRadius: "6px", 
+                                    display: "inline-block", 
+                                    padding: "2px "
+                                }} 
+                            /> 
                         </MentionsInput>
                     </div>
                 </div> 

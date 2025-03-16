@@ -46,12 +46,15 @@ const HistoryBoard = () => {
         <div className='rounded-md bg-gray-100 p-3 h-full overflow-auto flex flex-col gap-3'>
             <p style={{fontSize:'1.5em', fontWeight:'bold'}}>History</p>
             <div className='flex flex-col gap-3'>
-                {histories?.map((entry,index)=>(
-                    <div onClick={(e)=>{handleHistoryEntryClick(entry, histories.length - index)}} key={index} className='flex gap-3 items-center bg-white p-3 cursor-pointer rounded-lg hover:bg-lgreen'>
-                        <IndexEnumerator index={histories.length - index}/>
-                        <Typography sx={{flex:1}} textAlign={"center"} variant='h6' fontWeight={"bold"}>{new Date(entry.start).toDateString()}</Typography>
-                    </div>
-                ))}   
+            {histories?.slice().reverse().map((entry, index) => (
+                <div onClick={(e)=>{handleHistoryEntryClick(entry, histories.length - index)}} key={index} className='flex gap-3 items-center bg-white p-3 cursor-pointer rounded-lg hover:bg-lgreen'>
+                    <IndexEnumerator index={histories.length - index}/>
+                    <Typography sx={{flex:1}} textAlign={"center"} variant='h6' fontWeight={"bold"}>
+                        {new Date(entry.start).toDateString()}
+                    </Typography>
+                </div>
+            ))}
+  
             </div>
             <MeetingBoardHistoryDetails index={index} historyEntry={historyEntry} open={open} setOpen={setOpen} />
         </div>

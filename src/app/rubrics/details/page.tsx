@@ -31,8 +31,7 @@ import { useRubricContext } from "@/Contexts/RubricContext";
 export default function page() {
   const user = useUserContext().user
   const router = useRouter();
-  const [rubric, setRubric] = useState<Rubric|null|undefined>(useRubricContext().Rubric);
-  console.log(`rubric line 34: ${rubric?.isPrivate}`)
+  const [rubric, setRubric] = useState<Rubric|null|undefined>(useRubricContext().Rubric); 
   const [isPrivate, setisPrivate] = useState(rubric?.isPrivate);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
 
