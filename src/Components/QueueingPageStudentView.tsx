@@ -11,6 +11,7 @@ import StudentEnqueueModal from './TeamEnqueueModal';
 import { useTeamContext } from '@/Contexts/TeamContext';
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const QueueingPageStudentView = () => {
     const faculty = useFacultyContext().Faculty;
@@ -19,6 +20,7 @@ const QueueingPageStudentView = () => {
     const [avatar, setAvatar] = useState<string>()
     const [currentTime, setCurrentTime] = useState<string>()
     const [groupAvatar, setGroupAvatar] = useState<string>()
+    const router = useRouter()
     const team = useTeamContext().Team
     useEffect(() => {
         // Set the avatar when the component mounts
@@ -166,6 +168,12 @@ const QueueingPageStudentView = () => {
             toast.error("Your team is not in the line.")
         }
     }
+    
+    useEffect(()=>{
+        if(!queueingManager?.isActive){
+            router.back();
+        }
+    },[queueingManager?.isActive])
     
 
 

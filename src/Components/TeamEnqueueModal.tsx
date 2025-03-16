@@ -20,7 +20,6 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
     const classroom = useClassroomContext().classroom
     const [attendanceList, setAttendanceList] = useState<Array<Attendance>>([])
     const faculty = useFacultyContext().Faculty
-    console.log(faculty)
     const fetchMemberDetails = () => {
         const memberPromises = team?.memberIds.map((memberID) => {
             return fetch(`${SPEAR_URL}/get-student/${memberID}`, {
@@ -38,7 +37,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
         });
         Promise.all(memberPromises).then((data) => {
             const uniqueMembers:Array<UserRetrieved> = data.filter((member: User) => member !== null && !attendanceList.some((m: User) => `${m.firstname} ${m.lastname}` === `${member.firstname} ${member.lastname}`));
-            console.log(uniqueMembers)
+            // console.log(uniqueMembers)
             uniqueMembers.map((member)=>{
                 const attendance:Attendance = {
                     "attendanceStatus":AttendanceStatus.PRESENT,
@@ -53,7 +52,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
     }
 
     const updateAttendanceStatus = (studentEmail: string) => {
-        console.log(attendanceList)
+        // console.log(attendanceList)
         setAttendanceList((prev) => 
             prev.map((attendance) => 
                 attendance.studentEmail === studentEmail
@@ -72,7 +71,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
     };
 
     const getInLine = ()=>{
-        console.log(attendanceList)
+        // console.log(attendanceList)
         if(attendanceList.filter(attendance => attendance.attendanceStatus == AttendanceStatus.PRESENT).length == 0){
             toast.error("What's the point of getting in line, if everybody is absent right?")
         }else{
@@ -92,7 +91,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
                 }
             })
             .then( async (res)=>{
-                console.log(res)
+                // console.log(res)
                 switch(res.status){
                     case 200:
                         toast.success(`Your team is now in the queue.`)

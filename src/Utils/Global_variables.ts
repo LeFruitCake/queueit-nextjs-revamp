@@ -55,6 +55,31 @@ export interface User{
     lastname:string
 }
 
+export enum NotificationType{
+    QUEUEING_OPEN = "QUEUEING_OPEN",
+    QUEUEING_CLOSE = "QUEUEING_CLOSE",
+    TEAM_ENQUEUE = "TEAM_ENQUEUE",
+    APPOINTMENT_SET = "APPOINTMENT_SET",
+    APPOINTMENT_CANCELLED = "APPOINTMENT_CANCELLED",
+    APPOINTMENT_DEFAULTED = "APPOINTMENT_DEFAULTED",
+}
+
+export interface Notification{
+    notificationID:number
+    trigerringPersonID:number
+    notificationType: NotificationType
+    dateTimeGenerated: Date
+    redirectedUrl: string | null,
+    notificationMessage: string
+}
+
+export interface NotificationRecipient{
+    notificationRecipientID:number
+    recipientID:number
+    notification:Notification
+    read:boolean
+}
+
 export interface Classes{
     cid:number
     courseType:string

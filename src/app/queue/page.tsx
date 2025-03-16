@@ -1,14 +1,17 @@
 "use client"
 
 import BaseComponent from '@/Components/BaseComponent'
+import CatLoader from '@/Components/CatLoader'
+import NotFound from '@/Components/NotFound'
 import QueueingPageFacultyView from '@/Components/QueueingPageFacultyView'
 import QueueingPageStudentView from '@/Components/QueueingPageStudentView'
 import { useUserContext } from '@/Contexts/AuthContext'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import { useFacultyContext } from '@/Contexts/FacultyContext'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
-import { QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
+import { dpurple, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
+import { Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
@@ -20,6 +23,7 @@ const page = () => {
     const classroom = useClassroomContext().classroom
     const router = useRouter()
     const faculty = useFacultyContext().Faculty
+    const [loading,setLoading] = useState<boolean>(false)
 
     useEffect(()=>{
       if(!user){
@@ -32,18 +36,30 @@ const page = () => {
     },[])
 
     useEffect(()=>{
-
-      //if walay queueing manager, nya dapat naay classroom (for student), or dapat ang user kay faculty.
-      // if(!QueueingManager && (classroom || user?.role == UserType.FACULTY)){
+      setLoading(true)
+      if((user?.uid && user?.role == UserType.FACULTY) || faculty?.uid){
         fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
         .then(async(res)=>{
-          const response = await res.json()
-          setQueueingManager(response)
+          switch(res.status){
+            case 200:
+              const response = await res.json()
+              setQueueingManager(response)
+              break;
+            default:
+              // const responseText = await res.text()
+              // toast.error(responseText)
+          }
         })
         .catch((err)=>{
           console.log(`Fetching queueing manager error ${err}`)
         })
-      // }
+        .finally(()=>{
+          setLoading(false)
+        })
+      }else{
+        setLoading(false)
+        toast.error("Could not refer to the right queueing manager.")
+      }
     },[])
 
     useEffect(()=>{
@@ -51,14 +67,14 @@ const page = () => {
         const queueingStatusSubscription = client.subscribe(`/topic/queueStatus/adviser/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`, (message) => {
             const receivedMessage = JSON.parse(message.body);
             // console.log(`Received from websocket! ${receivedMessage}`)
-            (console.log(receivedMessage))
+            // (console.log(receivedMessage))
             if(receivedMessage === true){
               fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
               .then(async(data)=>{
                   switch(data.status){
                       case 200:
                           const response:QueueingManager = await data.json()
-                          console.log(response)
+                          // console.log(response)
                           setQueueingManager(response);
                           break;
                       default:
@@ -77,14 +93,14 @@ const page = () => {
             }
         });
 
-        const facultyStatusSubscription = client.subscribe(`/topic/facultyActivity/adviser/${user?.role == UserType.FACULTY?user.uid:classroom?.uid}`, (message) => {
+        const facultyStatusSubscription = client.subscribe(`/topic/facultyActivity/adviser/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`, (message) => {
                         const receivedMessage:QueueingManager = JSON.parse(message.body);
-                        console.log(receivedMessage)
+                        // console.log(receivedMessage)
                         setQueueingManager(receivedMessage)
                     });
 
         return () => {
-            console.log('Unsubscribing');
+            // console.log('Unsubscribing');
             queueingStatusSubscription.unsubscribe();
             facultyStatusSubscription.unsubscribe();
         };
@@ -93,10 +109,18 @@ const page = () => {
     return (
       <BaseComponent opacity={0.25}>
         {
-          user?.role == UserType.FACULTY?
-            <QueueingPageFacultyView/>
-            :
-            <QueueingPageStudentView/>
+          loading?
+            <CatLoader loading={loading}/>:
+              !QueueingManager && user?.role == UserType.STUDENT?
+                <NotFound>
+                  <Typography sx={{color:dpurple}} variant='h6' fontWeight={"bold"}>Queueing Manager Not Found</Typography>
+                  <Typography textAlign={"center"} variant='caption' color='gray'>We do not think the queueing manager you are referring to has not been established.</Typography>
+                </NotFound>
+                :
+                user?.role == UserType.FACULTY?
+                  <QueueingPageFacultyView/>
+                  :
+                  <QueueingPageStudentView/>
         }
       </BaseComponent>
     )

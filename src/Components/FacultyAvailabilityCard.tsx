@@ -23,6 +23,7 @@ interface FacultyAvailabilityCardProps{
 const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({facultyFirstname, facultyLastname, facultyDesignation, facultyID}) => {
     const client = useWebSocket()
     const [queueingManager, setQueueingManager] = useState<QueueingManager>()
+    const setLocalStorageQueueingManager = useQueueingManagerContext().setQueueingManager
     const [avatar, setAvatar] = useState<string>()
     const facultyContext = useFacultyContext()
     const team = useTeamContext().Team
@@ -37,7 +38,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                 switch(data.status){
                     case 200:
                         const response:QueueingManager = await data.json()
-                        console.log(response)
+                        // console.log(response)
                         setQueueingManager(response);
                         break;
                     default:
@@ -85,14 +86,15 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
         if (client && facultyID) {
             const facultyStatusSubscription = client.subscribe(`/topic/facultyActivity/adviser/${facultyID}`, (message) => {
                 const receivedMessage:QueueingManager = JSON.parse(message.body);
-                console.log(receivedMessage)
+                // console.log(receivedMessage)
                 setQueueingManager(receivedMessage)
+                setLocalStorageQueueingManager(receivedMessage)
             });
 
             const queueingStatusSubscription = client.subscribe(`/topic/queueStatus/adviser/${facultyID}`, (message) => {
                         const receivedMessage = JSON.parse(message.body);
                         // console.log(`Received from websocket! ${receivedMessage}`)
-                        (console.log(receivedMessage))
+                        // (console.log(receivedMessage))
                         if(receivedMessage === true){
                           fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${facultyID}`)
                           .then(async(data)=>{
@@ -101,6 +103,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                                       const response:QueueingManager = await data.json()
                                       console.log(response)
                                       setQueueingManager(response);
+                                      setLocalStorageQueueingManager(response)
                                       break;
                                   default:
                                       toast.error("Something went wrong while fetching Faculty active status.")
