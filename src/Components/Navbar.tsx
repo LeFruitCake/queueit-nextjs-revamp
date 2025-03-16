@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import logo from '../../public/images/logo.png'
 import { Avatar, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -8,9 +8,13 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '@/Contexts/AuthContext';
 import { stringAvatar } from '@/Utils/Utility_functions';
-import { UserType } from '@/Utils/Global_variables';
+import { NotificationRecipient, QUEUEIT_URL, UserType } from '@/Utils/Global_variables';
+import { useWebSocket } from '@/WebSocket/WebSocketContext';
+import Notification from './Notification';
 
 const Navbar = () => {
+    const user = useUserContext().user
+    const client = useWebSocket();
     const location = window.location
     const userContext = useUserContext()
     const router = useRouter()
@@ -19,6 +23,7 @@ const Navbar = () => {
     const avatarOpen = Boolean(avatarAnchorEl);
     const notificationOpen = Boolean(notificationAnchorEl)
     const [toggleDrawer, setToggleDrawer] = useState(false)
+    const [notifications, setNotifications] = useState<Array<NotificationRecipient>>([]);
     const handleAvatarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAvatarAnchorEl(event.currentTarget);
     };
@@ -31,6 +36,40 @@ const Navbar = () => {
     const handleNotificationClose = () => {
         setNotificationAnchorEl(null)
     }
+
+    const notificationSound = '/sounds/alert.wav';
+
+    useEffect(()=>{
+        if(client){
+            const notificationSubscription = client.subscribe(`/topic/notification/${user?.uid}`, (message) => {
+                const receivedMessage:NotificationRecipient = JSON.parse(message.body);
+                setNotifications((prev)=>[receivedMessage, ...prev])
+                const audio = new Audio(notificationSound)
+                audio.play().catch(err => console.error("Audio play failed:",err));
+            });
+            return ()=>{
+                notificationSubscription.unsubscribe();
+            }
+        }
+    },[client])
+
+    useEffect(()=>{
+        if(user){
+            fetch(`${QUEUEIT_URL}/notifications/${user.uid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:Array<NotificationRecipient> = await res.json();
+                    console.log(response)
+                    setNotifications((prev)=>[...response, ...prev])
+                }else{
+                    console.log("could not retrieve notifications.")
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        }
+    },[user])
     
     return (
         <div className='w-full flex p items-center justify-end md:justify-between lg:justify-between xl:justify-between py-5 relative' style={{height:'100px', zIndex:3}}>
@@ -84,8 +123,6 @@ const Navbar = () => {
                         horizontal:'right'
                     }}
                 >
-                    {/* <MenuItem onClick={handleAvatarClose}>Profile</MenuItem>
-                    <MenuItem onClick={handleAvatarClose}>My account</MenuItem> */}
                     <MenuItem onClick={()=>{userContext.logout()}}>Logout</MenuItem>
                 </Menu>
                 <Menu
@@ -114,7 +151,11 @@ const Navbar = () => {
                         horizontal:'right'
                     }}
                 >
-                    Lorem, ipsum dolor sit amet consectetur adipisicing elit. Recusandae molestiae, facere odit quasi dolorum distinctio repellendus eius a fugit dignissimos! Consequatur nostrum assumenda incidunt vitae tenetur architecto ducimus at consectetur?
+                    <div className='flex flex-col gap-3'>
+                        {notifications?.map((notification,index)=>(
+                            <Notification key={index} notification={notification}/>
+                        ))}
+                    </div>
                 </Menu>
             </div>
         </div>

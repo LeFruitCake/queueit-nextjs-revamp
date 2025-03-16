@@ -8,7 +8,7 @@ import StopQueueingButton from '@/Components/StopQueueingButton'
 import { faculty, queueingManager1 } from '@/Sample_Data/SampleData1'
 import { useUserContext } from '@/Contexts/AuthContext'
 import { AttendanceStatus, Classes, Grade, QueueingManager, QUEUEIT_URL, UserType } from '@/Utils/Global_variables'
-import { isPastTime, standardizeTime } from '@/Utils/Utility_functions'
+import { capitalizeFirstLetter, isPastTime, standardizeTime } from '@/Utils/Utility_functions'
 import { useState } from 'react'
 import { toast } from 'react-toastify'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
@@ -42,13 +42,15 @@ const QueueingPageFacultyView = () => {
                 queueingFilter.map((classroom)=>{
                     cateredClassrooms.push(classroom.cid)
                 })
+                console.log(cateredClassrooms)
                 console.log(`timeStop: ${standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${cateredClassrooms}`)
                 fetch(`${QUEUEIT_URL}/faculty/openQueueing`,{
                     body:JSON.stringify({
                         "facultyID":user?.uid,
                         "timeEnds":standardizeTime(timeStop),
                         "cateringLimit":queueingLimit,
-                        "cateredClassrooms":cateredClassrooms
+                        "cateredClassrooms":cateredClassrooms,
+                        "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
                     }),
                     method:'POST',
                     headers:{

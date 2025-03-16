@@ -24,7 +24,7 @@ const GroupDetailStudentView = () => {
     const fetchCurrentStudentTeam = async ()=>{
         fetch(`${SPEAR_URL}/team/myTeam/${classroom?.cid}/${user?.uid}`)
             .then(async (data)=>{
-                console.log(data)
+                // console.log(data)
                 if(data.ok){
                     const team_data = await data.json()
                     groupContext.setTeam(team_data)

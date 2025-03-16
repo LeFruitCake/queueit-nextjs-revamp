@@ -17,6 +17,7 @@ import './fullCalendarStyles.css';
 import { useUserContext } from '@/Contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { Attendance, AttendanceDTO, AttendanceStatus, dpurple, lgreen, Meeting, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
+import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 
 
 const modalStyle = {
@@ -72,6 +73,7 @@ interface ManualAppointmentSetting{
     end: Date
     attendanceList: Array<Attendance>
     mentorID: number
+    facultyName: string
 }
 
 
@@ -113,6 +115,7 @@ export default function Page() {
             "teamID": team?.tid,
             "attendanceList":attendanceList,
             "mentorID":user?.uid,
+            "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
         }))
     }
     useEffect(()=>{
@@ -274,7 +277,6 @@ export default function Page() {
                 switch(res.status){
                     case 200:
                         const response:Meeting = await res.json();
-                        console.log(response)
                         const event:CalendarEvent = {
                             "start":new Date(response.start),
                             "end":new Date(response.end),
