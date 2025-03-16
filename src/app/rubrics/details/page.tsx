@@ -78,8 +78,7 @@ export default function page() {
     }
     else{
       console.log("Rubric Saved:", rubric);
-      console.log(`isprivate: ${isPrivate}`)
-      // toast.success("Rubric saved.")
+      console.log(`isprivate: ${isPrivate}`) 
       
 
       fetch(`${QUEUEIT_URL}/rubrics/update`,{
@@ -101,7 +100,7 @@ export default function page() {
       .then((res)=>{
         setSaveTemplateOpen(false);
         router.push("/rubrics");
-        toast.success("received a response")
+        toast.success("Rubric updated successfully.")
         console.log(res)
       })
       .catch((err)=>{
@@ -110,6 +109,40 @@ export default function page() {
       })
     }
   };
+
+  const handleCreateCopy = () => {
+    if (!rubric) {
+      toast.error("Rubric data is missing.");
+      return;
+    }
+  
+    const copiedRubric = {
+      title: rubric.title + " (Copy)",
+      description: rubric.description,
+      criteria: rubric.criteria,
+      isPrivate: true,  
+      userID: user?.uid,
+      facultyName: `${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`,
+    };
+  
+    fetch(`${QUEUEIT_URL}/rubrics/create`, {
+      method: "POST",
+      body: JSON.stringify(copiedRubric),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        toast.success("Rubric copied successfully!");
+        router.push("/rubrics");
+      })
+      .catch((err) => {
+        toast.error("Error copying rubric.");
+        console.error(err);
+      });
+  };
+  
 
   return (
     <BaseComponent>
@@ -206,7 +239,7 @@ export default function page() {
           :
           <div className="flex justify-center w-full gap-5 mt-6">
             <Button sx={{textTransform:'none'}}
-              
+              onClick={handleCreateCopy}
               style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
             >
               Create a copy

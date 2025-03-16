@@ -103,7 +103,7 @@ export default function page() {
       .then((res)=>{
         setSaveTemplateOpen(false);
         router.push("/rubrics");
-        toast.success("received a response")
+        toast.success("Rubric created successfully.")
         console.log(res)
       })
       .catch((err)=>{
