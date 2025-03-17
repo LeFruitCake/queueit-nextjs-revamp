@@ -63,7 +63,7 @@ const Navbar = () => {
             .then(async(res)=>{
                 if(res.ok){
                     const response:Array<NotificationRecipient> = await res.json();
-                    console.log(response)
+                    // console.log(response)
                     setNotifications((prev)=>[...response, ...prev])
                 }else{
                     console.log("could not retrieve notifications.")
