@@ -37,6 +37,10 @@ const Navbar = () => {
         setNotificationAnchorEl(null)
     }
 
+    const handleNotificationRedirectionClick = (uri:string)=>{
+        router.push(uri)
+    }
+
     const notificationSound = '/sounds/alert.wav';
 
     useEffect(()=>{
@@ -153,7 +157,7 @@ const Navbar = () => {
                 >
                     <div className='flex flex-col gap-3'>
                         {notifications?.map((notification,index)=>(
-                            <Notification key={index} notification={notification}/>
+                            <Notification action={handleNotificationRedirectionClick} key={index} notification={notification}/>
                         ))}
                     </div>
                 </Menu>
