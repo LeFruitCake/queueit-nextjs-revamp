@@ -46,8 +46,8 @@ const page = () => {
               setQueueingManager(response)
               break;
             default:
-              // const responseText = await res.text()
-              // toast.error(responseText)
+              const responseText = await res.text()
+              toast.error(responseText)
           }
         })
         .catch((err)=>{

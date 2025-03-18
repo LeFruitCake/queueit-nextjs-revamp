@@ -170,7 +170,7 @@ const QueueingPageStudentView = () => {
     }
     
     useEffect(()=>{
-        if(!queueingManager?.isActive){
+        if(!queueingManager?.isActive && queueingManager?.meeting?.queueingEntry.teamID != team?.tid){
             router.back();
         }
     },[queueingManager?.isActive])

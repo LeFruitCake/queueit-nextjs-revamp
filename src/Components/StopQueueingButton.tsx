@@ -15,7 +15,7 @@ const StopQueueingButton: React.FC<StopQueueingButtonProps> = ({ closeQueueing }
     const [difference, setDifference] = useState<string | null>(null);
 
     useEffect(() => {
-        if (queueingManager) {
+        if (queueingManager?.timeEnds) {
             // Combine the current date with the timeEnds
             const currentDate = new Date();
             const timeParts = queueingManager.timeEnds.split(':');
@@ -49,7 +49,7 @@ const StopQueueingButton: React.FC<StopQueueingButtonProps> = ({ closeQueueing }
 
     return (
         <Button onClick={() => { closeQueueing(); }} sx={{ position: 'relative', backgroundColor: dpurple, color: 'white', width: '100%' }} className='h-24'>
-            {queueingManager?.isActive ?
+            {queueingManager?.isActive || queueingManager?.meeting ?
                 (difference == null ? <>Close Queueing</> : <>{`Queueing ends in ${difference}`}</>) :
                 <></>
             }

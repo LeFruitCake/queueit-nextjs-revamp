@@ -18,6 +18,9 @@ import { useUserContext } from '@/Contexts/AuthContext';
 import { toast } from 'react-toastify';
 import { Attendance, AttendanceDTO, AttendanceStatus, dpurple, lgreen, Meeting, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
+import { useRouter } from 'next/navigation';
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
+import CatLoader from '@/Components/CatLoader';
 
 
 const modalStyle = {
@@ -89,10 +92,11 @@ export default function Page() {
     const [appointments, setAppointments] = useState<CalendarEvent[]>([]);
     const [errorMessage, setErrorMessage] = useState<string>('');
     const [confirmationOpen, setConfirmationOpen] = useState(false);
- 
+    const router = useRouter();
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [eventDetailsModalOpen, setEventDetailsModalOpen] = useState(false);
-
+    const {QueueingManager, setQueueingManager} = useQueueingManagerContext()
+    const [loading,setLoading] = useState<boolean>(false)
     
     const [groupNames, setGroupNames] = useState<Array<string>>([])
     const [teams, setTeams] = useState<Array<Team>>([]);
@@ -166,6 +170,46 @@ export default function Page() {
         targetDate.setHours(hours, minutes, seconds, 0);
         
         return targetDate;
+    }
+    
+    const startMeeting = (meetingID:number | undefined) =>{
+        setLoading(true)
+        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/startAppointment/${meetingID}`)
+        .then(async(res)=>{
+            if(res.ok){
+                if(!QueueingManager || QueueingManager.queueingManagerID != user?.uid){
+                    fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
+                    .then(async(res)=>{
+                        switch(res.status){
+                            case 200:
+                                const response = await res.json()
+                                setQueueingManager(response)
+                                router.push("/queue")
+                                break;
+                            default:
+                            const responseText = await res.text()
+                            toast.error(responseText)
+                        }
+                    })
+                    .catch((err)=>{
+                        console.log(`Fetching queueing manager error ${err}`)
+                    })
+                    .finally(()=>{
+                        setLoading(false)
+                    })
+                }
+            }else{
+                const err_text = await res.text()
+                toast.error(err_text)
+            }
+        })
+        .catch((err)=>{
+            console.log(err)
+            toast.error("Caught an exception while starting appointment.")
+        })
+        .finally(()=>{
+            setLoading(false)
+        })
     }
 
     useEffect(() => {
@@ -375,335 +419,341 @@ export default function Page() {
         );
     };
 
-    return (
-        <div className='h-screen overflow-auto'>
-            <BaseComponent>
-                <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full max-h-[80vh] overflow-auto relative'>
-                    <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
-                        Your Calendar Schedule
-                    </Typography>
-                    <div className="mx-auto overflow-x-auto" style={{ width: '95%' }} >
-                        
-                        <FullCalendar
-                            allDaySlot={false}
-                            selectOverlap={false}
-                            slotMinTime='08:00:00'
-                            slotMaxTime='18:00:00'
-                            height="70vh"
-                            plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-                            initialView="timeGridWeek"
-                            selectable={true}
-                            select={handleDateSelect}
-                            events={appointments}
-                            hiddenDays={[0]}
-                            validRange={{
-                                start: new Date()
-                            }}
-                            headerToolbar={{
-                                start: 'timeGridWeek,timeGridDay',
-                                center: 'title',
-                                right: 'prev,next'
-                            }}
-                            eventContent={(eventInfo) => {
-                                // console.log(eventInfo)
-                                const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                const meetingStatus = eventInfo.event.extendedProps.meetingStatus
-                                const groupName = eventInfo.event._def.extendedProps.teamName;
-
-                                return (
-                                    <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
-                                        <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
-                                        <Typography  fontWeight={"bold"}>{groupName}</Typography>
-                                        <Typography color={meetingStatus === MeetingStatus.SET_MANUALLY?lgreen:dpurple} variant='caption' >{meetingStatus === MeetingStatus.SET_AUTOMATED?<>Scheduled</>:meetingStatus === MeetingStatus.SET_MANUALLY?<>Appointment</>:<></>}</Typography>
-                                    </div>
-                                );
-                            }}
-                            eventClick={handleEventClick}
-                        />
-                    </div>
-                </div>
-            </BaseComponent>
-
-            <Modal open={open} onClose={handleClose}>
-                <Box sx={modalStyle}>
-                    <Typography
-                        variant="h6"
-                        component="h2"
-                        style={{
-                            backgroundColor: '#7d57fc',
-                            color: 'white',
-                            fontWeight: 'bold',
-                            padding: '25px',
-                            borderRadius: '10px 10px 0 0',
-                            textAlign: 'center',
-                            width: '100%',
-                        }}
-                    >
-                        Set Consultation or Presentation Session
-                    </Typography>
-                    <div style={{ padding: '3% 10% 10% 10%' }}>
-                        <hr />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '3px 0' }}>
-                            <Typography variant="body1" style={{ textAlign: 'left' }}>
-                                Start Time:
-                            </Typography>
-                            <TextField
-                                type="datetime-local"
-                                disabled
-                                value={meetingPackage?.start}
-                                margin="normal"
-                                required
-                            />
-                        </div>
-                        {errorMessage && (
-                            <Typography variant="body1" style={{ color: 'red', marginBottom: '10px' }}>
-                                {errorMessage}
-                            </Typography>
-                        )}
-                        <hr />
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '3px 0' }}>
-                            <Typography variant="body1" style={{ textAlign: 'left' }}>
-                                End Time:
-                            </Typography>
-                            <TextField
-                                type="datetime-local"
-                                disabled
-                                value={meetingPackage?.end}
-                                margin="normal"
-                                required
-                            />
-                        </div>
-                        <Stack spacing={2} >
-                            <Autocomplete
-                                freeSolo
-                                options={groupNames}
-                                onInputChange={(event, newInputValue) => {
-                                    handleGroupNameInputChange(newInputValue);
-                                    // setGroupName(newInputValue);
-                                }}
-                                renderInput={(params) => (
-                                    <TextField
-                                        {...params}
-                                        label="Enter Group Name"
-                                        margin="normal"
-                                        required
-                                        InputProps={{
-                                            ...params.InputProps,
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <SearchIcon />
-                                                </InputAdornment>
-                                            ),
-                                        }}
-                                    />
-                                )}
-                            />
-                        </Stack>
-                        <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25%' }}>
-                            <Button 
-                                onClick={handleClose}
-                                sx={cancelButtonStyles}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                variant="contained"
-                                onClick={handleSubmit}
-                                style={{
-                                    backgroundColor: isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)',
-                                    color: 'white',
-                                    borderRadius: '10px',
-                                    flex: 0.2,
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
-
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.backgroundColor = isFormValid() ? '#5a0c9d' : 'rgb(222, 213, 252)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.backgroundColor = isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)';
-                                }}
-                                disabled={!isFormValid()}
-                            >
-                                Set
-                            </Button>
-                        </div>
-                    </div>
-                </Box>
-            </Modal>
- 
-            <Modal open={eventDetailsModalOpen} onClose={() => setEventDetailsModalOpen(false)}>
-                <Box sx={modalStyle}>
-                    <Box
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',  
-                            justifyContent: 'space-between',  
-                            backgroundColor: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?lgreen:'#7d57fc',
-                            color: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?'black':'white',
-                            fontWeight: 'bold',
-                            borderRadius: '10px 10px 0 0',
-                            padding: '25px', 
-                            width: '100%',
-                        }}
-                    >
-                        <Typography
-                            variant="h6"
-                            component="h2"
-                            style={{
-                                textAlign: 'left',
-                                fontWeight: 'bold',
-                            }}
-                        >
-                            Details
+    if(loading){
+        return(
+            <CatLoader loading={loading}/>
+        )
+    }else{
+        return (
+            <div className='h-screen overflow-auto'>
+                <BaseComponent>
+                    <div className='border-2 border-black mt-5 rounded-xl bg-white p-10 md:p-6 sm:p-4 w-full max-h-[80vh] overflow-auto relative'>
+                        <Typography className="text-center text-2xl md:text-xl sm:text-lg" variant='h5' fontWeight='bold' style={{ textAlign: 'center' }}>
+                            Your Calendar Schedule
                         </Typography>
-                        {selectedEvent?.meetingStatus != MeetingStatus.SCHEDULED?
-                            <Button
-                                variant="contained"
-                                onClick={() => alert('Meeting Started!')} 
-                                style={{
-                                    backgroundColor: '#CCFC57',
-                                    color: 'black',
-                                    borderRadius: '5px',
-                                    borderWidth: '1px',
-                                    borderStyle: 'solid',
-                                    borderColor: 'black',
-                                    transition: 'background-color 0.3s',
-                                    textTransform: 'none',
+                        <div className="mx-auto overflow-x-auto" style={{ width: '95%' }} >
+                            
+                            <FullCalendar
+                                allDaySlot={false}
+                                selectOverlap={false}
+                                slotMinTime='08:00:00'
+                                slotMaxTime='18:00:00'
+                                height="70vh"
+                                plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
+                                initialView="timeGridWeek"
+                                selectable={true}
+                                select={handleDateSelect}
+                                events={appointments}
+                                hiddenDays={[0]}
+                                validRange={{
+                                    start: new Date()
                                 }}
-                            >
-                                <CampaignIcon style={{ marginRight: '8px' }} />
-                                Meet Now
-                            </Button>
-                            :<></>
-                        }
-                    </Box>
-                    {selectedEvent && (
-                        <div style={{ padding: '3% 10% 10% 10%' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <Typography variant="body1">Group Name: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.teamName}</Typography>
-                            </div><hr />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <Typography variant="body1">Date: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                    {selectedEvent.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                                </Typography>
-                            </div><hr />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <Typography variant="body1">Start Time: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                    {selectedEvent.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </Typography>
-                            </div><hr />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <Typography variant="body1">End Time: </Typography>
-                                <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                    {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </Typography>
-                            </div>
-                            {selectedEvent.meetingStatus != MeetingStatus.SCHEDULED?
-                                <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
-
-                                    <Button
-                                        variant="outlined"
-                                        onClick={() => setConfirmationOpen(true)}
-                                        style={{
-                                            backgroundColor: '#7D57FC',
-                                            color: 'white',
-                                            borderRadius: '5px',
-                                            borderWidth: '1px',
-                                            borderStyle: 'solid',
-                                            borderColor: 'black',
-                                            transition: 'background-color 0.3s',
-                                            textTransform: 'none',
-                                        }}
-                                    >
-                                        <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
-                                        Cancel Session
-                                    </Button>
-                                </div>
-                                :<></>
-                            }
+                                headerToolbar={{
+                                    start: 'timeGridWeek,timeGridDay',
+                                    center: 'title',
+                                    right: 'prev,next'
+                                }}
+                                eventContent={(eventInfo) => {
+                                    // console.log(eventInfo)
+                                    const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    const meetingStatus = eventInfo.event.extendedProps.meetingStatus
+                                    const groupName = eventInfo.event._def.extendedProps.teamName;
+    
+                                    return (
+                                        <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
+                                            <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
+                                            <Typography  fontWeight={"bold"}>{groupName}</Typography>
+                                            <Typography color={meetingStatus === MeetingStatus.SET_MANUALLY?lgreen:dpurple} variant='caption' >{meetingStatus === MeetingStatus.SET_AUTOMATED?<>Scheduled</>:meetingStatus === MeetingStatus.SET_MANUALLY?<>Appointment</>:<></>}</Typography>
+                                        </div>
+                                    );
+                                }}
+                                eventClick={handleEventClick}
+                            />
                         </div>
-                    )}
-                </Box>
-            </Modal>
-
-            <Modal open={successModalOpen} onClose={() => setSuccessModalOpen(false)}>
-                <Box sx={modalStyle}>
-                    <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
-                        <CheckCircleIcon style={{ color: '#7d57fc', fontSize: '50px' }} />
+                    </div>
+                </BaseComponent>
+    
+                <Modal open={open} onClose={handleClose}>
+                    <Box sx={modalStyle}>
                         <Typography
                             variant="h6"
                             component="h2"
                             style={{
-                                color: 'black',
+                                backgroundColor: '#7d57fc',
+                                color: 'white',
+                                fontWeight: 'bold',
                                 padding: '25px',
                                 borderRadius: '10px 10px 0 0',
                                 textAlign: 'center',
                                 width: '100%',
                             }}
                         >
-                            {successMessage}
+                            Set Consultation or Presentation Session
                         </Typography>
-                        <Button
-                            variant="contained"
-                            onClick={() => setSuccessModalOpen(false)}
+                        <div style={{ padding: '3% 10% 10% 10%' }}>
+                            <hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '3px 0' }}>
+                                <Typography variant="body1" style={{ textAlign: 'left' }}>
+                                    Start Time:
+                                </Typography>
+                                <TextField
+                                    type="datetime-local"
+                                    disabled
+                                    value={meetingPackage?.start}
+                                    margin="normal"
+                                    required
+                                />
+                            </div>
+                            {errorMessage && (
+                                <Typography variant="body1" style={{ color: 'red', marginBottom: '10px' }}>
+                                    {errorMessage}
+                                </Typography>
+                            )}
+                            <hr />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '3px 0' }}>
+                                <Typography variant="body1" style={{ textAlign: 'left' }}>
+                                    End Time:
+                                </Typography>
+                                <TextField
+                                    type="datetime-local"
+                                    disabled
+                                    value={meetingPackage?.end}
+                                    margin="normal"
+                                    required
+                                />
+                            </div>
+                            <Stack spacing={2} >
+                                <Autocomplete
+                                    freeSolo
+                                    options={groupNames}
+                                    onInputChange={(event, newInputValue) => {
+                                        handleGroupNameInputChange(newInputValue);
+                                        // setGroupName(newInputValue);
+                                    }}
+                                    renderInput={(params) => (
+                                        <TextField
+                                            {...params}
+                                            label="Enter Group Name"
+                                            margin="normal"
+                                            required
+                                            InputProps={{
+                                                ...params.InputProps,
+                                                startAdornment: (
+                                                    <InputAdornment position="start">
+                                                        <SearchIcon />
+                                                    </InputAdornment>
+                                                ),
+                                            }}
+                                        />
+                                    )}
+                                />
+                            </Stack>
+                            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '25%' }}>
+                                <Button 
+                                    onClick={handleClose}
+                                    sx={cancelButtonStyles}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    variant="contained"
+                                    onClick={handleSubmit}
+                                    style={{
+                                        backgroundColor: isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)',
+                                        color: 'white',
+                                        borderRadius: '10px',
+                                        flex: 0.2,
+                                        transition: 'background-color 0.3s',
+                                        textTransform: 'none',
+    
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = isFormValid() ? '#5a0c9d' : 'rgb(222, 213, 252)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = isFormValid() ? '#7d57fc' : 'rgb(222, 213, 252)';
+                                    }}
+                                    disabled={!isFormValid()}
+                                >
+                                    Set
+                                </Button>
+                            </div>
+                        </div>
+                    </Box>
+                </Modal>
+     
+                <Modal open={eventDetailsModalOpen} onClose={() => setEventDetailsModalOpen(false)}>
+                    <Box sx={modalStyle}>
+                        <Box
                             style={{
-                                backgroundColor: '#7d57fc',
-                                color: 'white',
-                                borderRadius: '10px',
-                                flex: 0.2,
-                                transition: 'background-color 0.3s',
-                                textTransform: 'none',
+                                display: 'flex',
+                                alignItems: 'center',  
+                                justifyContent: 'space-between',  
+                                backgroundColor: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?lgreen:'#7d57fc',
+                                color: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?'black':'white',
+                                fontWeight: 'bold',
+                                borderRadius: '10px 10px 0 0',
+                                padding: '25px', 
+                                width: '100%',
                             }}
                         >
-                            Close
-                        </Button>
-                    </div>
-                </Box>
-            </Modal>
- 
-            <Modal
-                open={confirmationOpen}
-                onClose={() => setConfirmationOpen(false)}
-                aria-labelledby="confirmation-modal-title"
-                aria-describedby="confirmation-modal-description"
-            >
-                <Box sx={modalStyle}>
-                    <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
-                        <Typography
-                            id="confirmation-modal-title"
-                            variant="h4"
-                            component="h2"
-                            style={{ color: '#7D57FC', padding: '0 25px', fontWeight:'bold' }}
-                        >
-                            Cancel Session
-                        </Typography>
-                        <Typography id="confirmation-modal-description" variant="body1" style={{ marginBottom: '40px' }}>
-                            Are you sure you want to cancel this team's session?
-                        </Typography>
-                        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
-                            <Button
-                                onClick={() => setConfirmationOpen(false)}
-                                sx={cancelButtonStyles}
+                            <Typography
+                                variant="h6"
+                                component="h2"
+                                style={{
+                                    textAlign: 'left',
+                                    fontWeight: 'bold',
+                                }}
                             >
-                                Cancel
-                            </Button>
-                            <Button
-                                onClick={handleCancelSession}
-                                sx={confirmButtonStyles}
-                            >
-                                Confirm
-                            </Button>
+                                Details
+                            </Typography>
+                            {selectedEvent?.meetingStatus != MeetingStatus.SCHEDULED?
+                                <Button
+                                    variant="contained"
+                                    onClick={() => startMeeting(selectedEvent?.meetingID)} 
+                                    style={{
+                                        backgroundColor: '#CCFC57',
+                                        color: 'black',
+                                        borderRadius: '5px',
+                                        borderWidth: '1px',
+                                        borderStyle: 'solid',
+                                        borderColor: 'black',
+                                        transition: 'background-color 0.3s',
+                                        textTransform: 'none',
+                                    }}
+                                >
+                                    <CampaignIcon style={{ marginRight: '8px' }} />
+                                    Meet Now
+                                </Button>
+                                :<></>
+                            }
                         </Box>
-                    </div>
-                </Box>
-            </Modal>
-
-        </div>
-    );
+                        {selectedEvent && (
+                            <div style={{ padding: '3% 10% 10% 10%' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <Typography variant="body1">Group Name: </Typography>
+                                    <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>{selectedEvent.teamName}</Typography>
+                                </div><hr />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <Typography variant="body1">Date: </Typography>
+                                    <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                        {selectedEvent.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                    </Typography>
+                                </div><hr />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <Typography variant="body1">Start Time: </Typography>
+                                    <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                        {selectedEvent.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </Typography>
+                                </div><hr />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                                    <Typography variant="body1">End Time: </Typography>
+                                    <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                        {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </Typography>
+                                </div>
+                                {selectedEvent.meetingStatus != MeetingStatus.SCHEDULED?
+                                    <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
+    
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => setConfirmationOpen(true)}
+                                            style={{
+                                                backgroundColor: '#7D57FC',
+                                                color: 'white',
+                                                borderRadius: '5px',
+                                                borderWidth: '1px',
+                                                borderStyle: 'solid',
+                                                borderColor: 'black',
+                                                transition: 'background-color 0.3s',
+                                                textTransform: 'none',
+                                            }}
+                                        >
+                                            <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
+                                            Cancel Session
+                                        </Button>
+                                    </div>
+                                    :<></>
+                                }
+                            </div>
+                        )}
+                    </Box>
+                </Modal>
+    
+                <Modal open={successModalOpen} onClose={() => setSuccessModalOpen(false)}>
+                    <Box sx={modalStyle}>
+                        <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
+                            <CheckCircleIcon style={{ color: '#7d57fc', fontSize: '50px' }} />
+                            <Typography
+                                variant="h6"
+                                component="h2"
+                                style={{
+                                    color: 'black',
+                                    padding: '25px',
+                                    borderRadius: '10px 10px 0 0',
+                                    textAlign: 'center',
+                                    width: '100%',
+                                }}
+                            >
+                                {successMessage}
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                onClick={() => setSuccessModalOpen(false)}
+                                style={{
+                                    backgroundColor: '#7d57fc',
+                                    color: 'white',
+                                    borderRadius: '10px',
+                                    flex: 0.2,
+                                    transition: 'background-color 0.3s',
+                                    textTransform: 'none',
+                                }}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </Box>
+                </Modal>
+     
+                <Modal
+                    open={confirmationOpen}
+                    onClose={() => setConfirmationOpen(false)}
+                    aria-labelledby="confirmation-modal-title"
+                    aria-describedby="confirmation-modal-description"
+                >
+                    <Box sx={modalStyle}>
+                        <div style={{ padding: '10% 10% 10% 10%', textAlign: 'center' }}>
+                            <Typography
+                                id="confirmation-modal-title"
+                                variant="h4"
+                                component="h2"
+                                style={{ color: '#7D57FC', padding: '0 25px', fontWeight:'bold' }}
+                            >
+                                Cancel Session
+                            </Typography>
+                            <Typography id="confirmation-modal-description" variant="body1" style={{ marginBottom: '40px' }}>
+                                Are you sure you want to cancel this team's session?
+                            </Typography>
+                            <Box sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}>
+                                <Button
+                                    onClick={() => setConfirmationOpen(false)}
+                                    sx={cancelButtonStyles}
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={handleCancelSession}
+                                    sx={confirmButtonStyles}
+                                >
+                                    Confirm
+                                </Button>
+                            </Box>
+                        </div>
+                    </Box>
+                </Modal>
+    
+            </div>
+        );
+    }
 }

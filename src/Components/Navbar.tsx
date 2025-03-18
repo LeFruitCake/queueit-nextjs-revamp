@@ -8,9 +8,12 @@ import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
 import { useUserContext } from '@/Contexts/AuthContext';
 import { stringAvatar } from '@/Utils/Utility_functions';
-import { NotificationRecipient, QUEUEIT_URL, UserType } from '@/Utils/Global_variables';
+import { NotificationRecipient, QueueingManager, QUEUEIT_URL, SPEAR_URL, User, UserType } from '@/Utils/Global_variables';
 import { useWebSocket } from '@/WebSocket/WebSocketContext';
 import Notification from './Notification';
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
+import { toast } from 'react-toastify';
+import { useFacultyContext } from '@/Contexts/FacultyContext';
 
 const Navbar = () => {
     const user = useUserContext().user
@@ -24,6 +27,7 @@ const Navbar = () => {
     const notificationOpen = Boolean(notificationAnchorEl)
     const [toggleDrawer, setToggleDrawer] = useState(false)
     const [notifications, setNotifications] = useState<Array<NotificationRecipient>>([]);
+    const setFaculty = useFacultyContext().setFaculty
     const handleAvatarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAvatarAnchorEl(event.currentTarget);
     };
@@ -36,9 +40,38 @@ const Navbar = () => {
     const handleNotificationClose = () => {
         setNotificationAnchorEl(null)
     }
-
-    const handleNotificationRedirectionClick = (uri:string)=>{
-        router.push(uri)
+    const handleNotificationRedirectionClick = (notification:NotificationRecipient)=>{
+        if(user?.role === UserType.STUDENT){
+            fetch(`${SPEAR_URL}/get-teacher/${notification.notification.trigerringPersonID}`,{
+                method:"GET",
+                headers:{
+                    'Authorization': `Bearer ${user?.token}`
+                }
+            })
+            .then(async(res)=>{
+                switch(res.status){
+                    case 200:
+                        const response:User = await res.json()
+                        setFaculty({
+                            "firstname":response.firstname,
+                            "lastname":response.lastname,
+                            "uid":notification.notification.trigerringPersonID
+                        })
+                        break;
+                    case 404:
+                        toast.error(`Faculty with ID: ${notification.notification.trigerringPersonID} not found.`)
+                        break;
+                    default:
+                        console.log(res)
+                        toast.error("Server error.");
+                }
+            })
+            .catch((err)=>{
+                console.log(err);
+                toast.error("Caught an exception while fetching faculty details.")
+            })
+        }
+        router.replace(notification.notification.redirectedUrl)
     }
 
     const notificationSound = '/sounds/alert.wav';

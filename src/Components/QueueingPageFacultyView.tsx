@@ -240,7 +240,7 @@ const QueueingPageFacultyView = () => {
 
     return (
         <div>
-            {queueingManager?.isActive && user?.role == UserType.FACULTY?
+            {user?.role == UserType.FACULTY && (queueingManager?.meeting || queueingManager?.isActive)?
                 <div className='relative min-h-screen pt-5 flex-grow flex flex-col md:flex-row lg:flex-row xl:flex-row w-full gap-3'>
                     <div className='w-full md:w-1/4 lg:w-1/4 xl:w-1/4 flex-grow flex flex-col gap-3' style={{minWidth:'350px'}}>
                         <StopQueueingButton closeQueueing={closeQueueing} />
