@@ -179,7 +179,7 @@ export default function Page() {
                         "start": team.scheduledDay && team.start? getDateForDayAtTime(team.scheduledDay, team.start): null,
                         "end": team.scheduledDay && team.end? getDateForDayAtTime(team.scheduledDay, team.end):null,
                         "teamName": team.groupName,
-                        "meetingStatus": MeetingStatus.SET_AUTOMATED,
+                        "meetingStatus": MeetingStatus.SCHEDULED,
                         "meetingID": undefined
                     };
                     setAppointments((prev) => [...prev, appointment]);
@@ -204,12 +204,12 @@ export default function Page() {
         
     // },[teams])
 
-    useEffect(()=>{
-        if(appointments){
-            console.log(`Appointments updated:`)
-            console.log(appointments)
-        }
-    },[appointments])
+    // useEffect(()=>{
+    //     if(appointments){
+    //         console.log(`Appointments updated:`)
+    //         console.log(appointments)
+    //     }
+    // },[appointments])
 
     useEffect(() => { 
         if(user){
@@ -218,7 +218,7 @@ export default function Page() {
                 if(res.ok){
                     
                     const response = await res.json();
-                    console.log(response)
+                    // console.log(response)
                     setAppointments(response)
                 }else{
                     toast.error("Server error while fetching appointments")
@@ -263,7 +263,7 @@ export default function Page() {
     };
 
     const handleSubmit = () => {
-        console.log(meetingPackage)
+        // console.log(meetingPackage)
         if(isFormValid()){
             fetch(`${QUEUEIT_URL}/meeting/teamMeetings/createAppointment`,{
                 method:'POST',
@@ -310,7 +310,7 @@ export default function Page() {
     };
 
     const handleEventClick = (eventInfo: any) => { 
-        console.log("Event Info:", eventInfo);
+        // console.log("Event Info:", eventInfo);
  
         const selectedEvent:CalendarEvent = {
             meetingID:eventInfo.event._def.extendedProps.meetingID,
@@ -320,7 +320,7 @@ export default function Page() {
             teamName: eventInfo.event._def.extendedProps.teamName,
         };
 
-        console.log("Selected Event:", selectedEvent); 
+        // console.log("Selected Event:", selectedEvent); 
         setSelectedEvent(selectedEvent);
         setEventDetailsModalOpen(true);
     };
@@ -405,6 +405,7 @@ export default function Page() {
                                 right: 'prev,next'
                             }}
                             eventContent={(eventInfo) => {
+                                // console.log(eventInfo)
                                 const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                 const meetingStatus = eventInfo.event.extendedProps.meetingStatus
@@ -540,8 +541,8 @@ export default function Page() {
                             display: 'flex',
                             alignItems: 'center',  
                             justifyContent: 'space-between',  
-                            backgroundColor: '#7d57fc',
-                            color: 'white',
+                            backgroundColor: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?lgreen:'#7d57fc',
+                            color: selectedEvent?.meetingStatus === MeetingStatus.SCHEDULED?'black':'white',
                             fontWeight: 'bold',
                             borderRadius: '10px 10px 0 0',
                             padding: '25px', 
@@ -558,23 +559,26 @@ export default function Page() {
                         >
                             Details
                         </Typography>
-                        <Button
-                            variant="contained"
-                            onClick={() => alert('Meeting Started!')} 
-                            style={{
-                                backgroundColor: '#CCFC57',
-                                color: 'black',
-                                borderRadius: '5px',
-                                borderWidth: '1px',
-                                borderStyle: 'solid',
-                                borderColor: 'black',
-                                transition: 'background-color 0.3s',
-                                textTransform: 'none',
-                            }}
-                        >
-                            <CampaignIcon style={{ marginRight: '8px' }} />
-                            Meet Now
-                        </Button>
+                        {selectedEvent?.meetingStatus != MeetingStatus.SCHEDULED?
+                            <Button
+                                variant="contained"
+                                onClick={() => alert('Meeting Started!')} 
+                                style={{
+                                    backgroundColor: '#CCFC57',
+                                    color: 'black',
+                                    borderRadius: '5px',
+                                    borderWidth: '1px',
+                                    borderStyle: 'solid',
+                                    borderColor: 'black',
+                                    transition: 'background-color 0.3s',
+                                    textTransform: 'none',
+                                }}
+                            >
+                                <CampaignIcon style={{ marginRight: '8px' }} />
+                                Meet Now
+                            </Button>
+                            :<></>
+                        }
                     </Box>
                     {selectedEvent && (
                         <div style={{ padding: '3% 10% 10% 10%' }}>
@@ -600,26 +604,29 @@ export default function Page() {
                                     {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Typography>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
+                            {selectedEvent.meetingStatus != MeetingStatus.SCHEDULED?
+                                <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
 
-                                <Button
-                                    variant="outlined"
-                                    onClick={() => setConfirmationOpen(true)}
-                                    style={{
-                                        backgroundColor: '#7D57FC',
-                                        color: 'white',
-                                        borderRadius: '5px',
-                                        borderWidth: '1px',
-                                        borderStyle: 'solid',
-                                        borderColor: 'black',
-                                        transition: 'background-color 0.3s',
-                                        textTransform: 'none',
-                                    }}
-                                >
-                                    <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
-                                    Cancel Session
-                                </Button>
-                            </div>
+                                    <Button
+                                        variant="outlined"
+                                        onClick={() => setConfirmationOpen(true)}
+                                        style={{
+                                            backgroundColor: '#7D57FC',
+                                            color: 'white',
+                                            borderRadius: '5px',
+                                            borderWidth: '1px',
+                                            borderStyle: 'solid',
+                                            borderColor: 'black',
+                                            transition: 'background-color 0.3s',
+                                            textTransform: 'none',
+                                        }}
+                                    >
+                                        <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
+                                        Cancel Session
+                                    </Button>
+                                </div>
+                                :<></>
+                            }
                         </div>
                     )}
                 </Box>
