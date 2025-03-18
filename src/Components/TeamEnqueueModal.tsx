@@ -131,9 +131,9 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
             <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', backgroundColor: 'white' }} className='flex flex-col gap-3 p-5 rounded-md justify-center items-center'>
                 <Typography sx={{ textAlign: 'center' }} variant='subtitle1' fontWeight='bold'>{`Hello Team ${team?.groupName}`}</Typography>
                 <Typography sx={{ width: '75%', textAlign: 'center' }} variant='caption' color='gray'>Prior to adding your team to the queue, please toggle your individual attendance for this consultation.</Typography>
-                <div className='w-2/3 flex flex-col gap-3 h-80 overflow-auto'>
+                <div className='w-2/3 flex flex-col gap-3 h-auto overflow-auto'>
                     <AttendanceLogger updateAttendanceStatus={updateAttendanceStatus} attendanceList={attendanceList} />
-                    <Button disabled={attendanceList.length == 0} onClick={getInLine} sx={{backgroundColor:dpurple, color:'white', marginTop:'1em'}}>Get in line</Button>
+                    <Button disabled={attendanceList.length == 0} onClick={getInLine} sx={{backgroundColor:dpurple, color:'white'}}>Get in line</Button>
                 </div>
             </div>
         </Modal>

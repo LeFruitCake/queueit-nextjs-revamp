@@ -204,6 +204,7 @@ const QueueingPageFacultyView = () => {
         if(grades?.length == 0){
             toast.error("You have yet to grade anybody.")
         }else{
+            console.log(grades)
             fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
                 body:JSON.stringify({
                     grades:grades,

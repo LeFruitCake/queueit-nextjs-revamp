@@ -116,8 +116,7 @@ const page = () => {
                                             <Typography variant='subtitle2'>Mentor</Typography>
                                         </span>
                                         <img src={mentorImage.src} alt="mentor" style={{height:'200%', position:'absolute', right:0,bottom:0, marginBottom:'-86px', marginRight:'-50px'}} />
-                                    </div>
-                                    
+                                    </div> 
                                     :
                                     <div className='flex flex-col gap-3 p-5 text-center'>
                                         <Typography variant='h6'>{`"${quote.quote}"`}</Typography>

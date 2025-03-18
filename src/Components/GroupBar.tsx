@@ -10,12 +10,12 @@ interface GroupBarProps{
 
 const GroupBar:React.FC<GroupBarProps> = ({index, team}) => {
     const setTeam = useTeamContext().setTeam
-    const router = useRouter(); // Get the router instance
+    const router = useRouter();  
     
     const handleClick = (event: React.MouseEvent<HTMLDivElement>) => {
-        event.preventDefault(); // Prevent the default anchor behavior
-        setTeam(team) // Set the classroom in context
-        router.push('/dashboard/classroom/group'); // Navigate to the classroom page
+        event.preventDefault();  
+        setTeam(team) 
+        router.push('/dashboard/classroom/group'); 
     };
     return (
         <div onClick={handleClick} className={`w-full h-20 border-2 border-black rounded-md p-5 flex items-center font-bold z-10 cursor-pointer

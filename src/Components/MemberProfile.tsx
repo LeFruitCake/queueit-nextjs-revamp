@@ -40,7 +40,7 @@ const MemberProfile:React.FC<MemberProfileProps> = ({memberID}) => {
         })
     },[memberID])
     return (
-        <div className='bg-white rounded-md flex justify-center items-center flex-col w-52 p-6 overflow-hidden'>
+        <div className='bg-white rounded-md flex justify-center items-center flex-col w-60 p-6 overflow-hidden'>
             <div>
                 <img src={randomAvatar()} alt="avatar" />
             </div>
