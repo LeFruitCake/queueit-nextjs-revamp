@@ -97,6 +97,23 @@ export interface Classes{
     uid:number
 }
 
+export interface MentoredClasses{
+    cid:number
+    courseType:string
+    courseCode:string
+    section:string
+    schoolYear:string
+    semester:string
+    courseDescription:string
+    classKey:string
+    createdDate: Date
+    deleted:boolean
+    firstname:string
+    lastname:string
+    role:string
+    uid:number
+}
+
 export enum UserType{
     FACULTY = "TEACHER",
     STUDENT = "STUDENT"

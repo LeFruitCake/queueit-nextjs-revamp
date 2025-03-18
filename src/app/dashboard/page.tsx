@@ -1,78 +1,91 @@
-"use client"
-import BaseComponent from '@/Components/BaseComponent'
+"use client";
+import BaseComponent from '@/Components/BaseComponent';
 import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
-import { useUserContext } from '@/Contexts/AuthContext'
-import { Classes, SPEAR_URL, UserType } from '@/Utils/Global_variables';
+import { useUserContext } from '@/Contexts/AuthContext';
+import { Classes, MentoredClasses, SPEAR_URL, UserType } from '@/Utils/Global_variables';
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react';
 
 export default function Page() {
     const userContext = useUserContext();
     const user = userContext.user;
     const router = useRouter();
-    const [classes, setClasses] = useState<Classes | undefined>(undefined);
+    const [classes, setClasses] = useState<Classes | undefined>(undefined); 
+    const [mentoredClass, setMentoredClass] = useState<MentoredClasses | undefined>(undefined); 
 
     useEffect(() => {
-        if (!userContext.user) {
+        if (!user) {
             router.push('/login');
-            return; // Exit early if user is not logged in
+            return; 
         }
 
         const fetchClasses = async () => {
-            let response;
-            if (user?.role === UserType.STUDENT) {
-                response = await fetch(`${SPEAR_URL}/student/${user.uid}/enrolled-classes`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .catch((err)=>{
-                    console.log(err)
-                })
-            } else if (user?.role === UserType.FACULTY) {
-                response = await fetch(`${SPEAR_URL}/teacher/classes-created/${user.uid}`, {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                })
-                .catch((err)=>{
-                    console.log(err)
-                })
-                
-            }
+            try {
+                let classResponse, mentoredResponse;
 
-            if(response?.ok){
-                const data = await response?.json();
-                setClasses(data);
-                localStorage.setItem('classrooms', JSON.stringify(data)); // Store in localStorage
+                if (user.role === UserType.STUDENT) {
+                    classResponse = await fetch(`${SPEAR_URL}/student/${user.uid}/enrolled-classes`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                } else if (user.role === UserType.FACULTY) {
+                    classResponse = await fetch(`${SPEAR_URL}/teacher/classes-created/${user.uid}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+
+                    mentoredResponse = await fetch(`${SPEAR_URL}/mentor/classrooms/${user.uid}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' },
+                    });
+                }
+
+                if (classResponse?.ok) {
+                    const classData = await classResponse.json();
+                    setClasses(classData);
+                    localStorage.setItem('classrooms', JSON.stringify(classData));
+                }
+
+                if (mentoredResponse?.ok) {
+                    const mentoredData = await mentoredResponse.json();
+                    setMentoredClass(mentoredData);
+                    localStorage.setItem('mentoredClassrooms', JSON.stringify(mentoredData));
+                }
+            } catch (err) {
+                console.error("Error fetching classes:", err);
             }
         };
 
         fetchClasses();
-    }, [userContext, user]);
+    }, [user]);
 
     useEffect(() => {
-        // Store classroom in localStorage whenever it changes
         if (classes) {
             localStorage.setItem('classrooms', JSON.stringify(classes));
         } else {
-            localStorage.removeItem('classrooms'); // Clear if undefined
+            localStorage.removeItem('classrooms');
         }
     }, [classes]);
 
+    useEffect(() => {
+        if (mentoredClass) {
+            localStorage.setItem('mentoredClassrooms', JSON.stringify(mentoredClass));
+        } else {
+            localStorage.removeItem('mentoredClassrooms');
+        }
+    }, [mentoredClass]);
+
     return (
         <div className='h-screen overflow-auto'>
-            {userContext.user ? (
+            {user ? (
                 <BaseComponent>
-                    <GreetingBar name={user?.role === UserType.FACULTY ? `Teacher ${capitalizeFirstLetter(user?.firstname)}` : capitalizeFirstLetter(user?.firstname)} />
-                    <ClassroomList classrooms={classes} />
+                    <GreetingBar name={user.role === UserType.FACULTY ? `Teacher ${capitalizeFirstLetter(user.firstname)}` : capitalizeFirstLetter(user.firstname)} />
+                    <ClassroomList classrooms={classes} mentoredClassrooms={mentoredClass} />
                 </BaseComponent>
             ) : (
-                <>Loading</>
+                <>Loading...</>
             )}
         </div>
     );

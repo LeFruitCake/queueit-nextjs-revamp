@@ -5,6 +5,7 @@ import favico from '../../public/favicon.ico'
 import { UserProvider } from "@/Contexts/AuthContext";
 import { ToastContainer } from "react-toastify";
 import { ClassroomProvider } from "@/Contexts/ClassroomContext";
+import { MentoredClassroomProvider } from "@/Contexts/MentoredClassroomContext";
 import { TeamProvider } from "@/Contexts/TeamContext";
 import { WebSocketProvider } from "@/WebSocket/WebSocketContext";
 import { FacultyProvider } from "@/Contexts/FacultyContext";
@@ -48,26 +49,28 @@ export default function RootLayout({
         <UserProvider>
           <WebSocketProvider>
             <ClassroomProvider>
-              <TeamsProvider>
-                <TeamProvider>
-                  <FacultyProvider>
-                    <QueueingManagerProvider>
-                      <RubricsProvider>
-                        <RubricProvider>
-                          <GradesProvider>
-                            <MeetingsProvider>
-                              <ReportSummaryProvider>
-                                {children}
-                              </ReportSummaryProvider>
-                            </MeetingsProvider>
-                          </GradesProvider>
-                        </RubricProvider>
-                      </RubricsProvider>
-                    </QueueingManagerProvider>
-                    <ToastContainer/>
-                  </FacultyProvider>
-                </TeamProvider>
-              </TeamsProvider>
+              <MentoredClassroomProvider>
+                <TeamsProvider>
+                  <TeamProvider>
+                    <FacultyProvider>
+                      <QueueingManagerProvider>
+                        <RubricsProvider>
+                          <RubricProvider>
+                            <GradesProvider>
+                              <MeetingsProvider>
+                                <ReportSummaryProvider>
+                                  {children}
+                                </ReportSummaryProvider>
+                              </MeetingsProvider>
+                            </GradesProvider>
+                          </RubricProvider>
+                        </RubricsProvider>
+                      </QueueingManagerProvider>
+                      <ToastContainer/>
+                    </FacultyProvider>
+                  </TeamProvider>
+                </TeamsProvider>
+              </MentoredClassroomProvider> 
             </ClassroomProvider>
           </WebSocketProvider>
         </UserProvider>

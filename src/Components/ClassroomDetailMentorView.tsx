@@ -6,25 +6,24 @@ import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
 import { dpurple, lgreen, SPEAR_URL } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
-import { useClassroomContext } from '@/Contexts/ClassroomContext';
+import { useMentoredClassroomContext } from '@/Contexts/MentoredClassroomContext';
 import person from '../../public/images/pointingUpwardPerson.png'
 import whiteStar from '../../public/images/star-white.png'
 import whiteSquiggly from '../../public/images/squiggly-white.png'
 import GroupBar from './GroupBar';
 import { useTeamsContext } from '@/Contexts/TeamsContext';
 import { toast } from 'react-toastify';
+import { useUserContext } from '@/Contexts/AuthContext';
+
+
+
 
 const GroupDetailAdviserView = () => {
+    const userContext = useUserContext();
+    const user = userContext.user;
     const {Teams, setTeams} = useTeamsContext();
-    const classroomContext = useClassroomContext().classroom
-    const [classroom, setClassroom] = useState(classroomContext)
-    const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
-    const openViewEnrolleesModal = ()=>{
-    setViewEnrolleesModalOpen(true)
-    }
-    const closeViewEnrolleesModal = ()=>{
-    setViewEnrolleesModalOpen(false)
-    }
+    const classroomContext = useMentoredClassroomContext().mentoredClassroom
+    const [classroom, setClassroom] = useState(classroomContext) 
     const router = useRouter()
     useEffect(()=>{
     if(classroomContext){
@@ -35,7 +34,7 @@ const GroupDetailAdviserView = () => {
 
     useEffect(()=>{
         if(classroom){
-            fetch(`${SPEAR_URL}/classroom/team/${classroom?.cid}`)
+            fetch(`${SPEAR_URL}/mentor/classroom/${classroom?.cid}/teams/${user.uid}`)
             .then( async (res)=>{
                 switch(res.status){
                     case 200:
@@ -65,25 +64,7 @@ const GroupDetailAdviserView = () => {
             <BackButton/>
             </div>
             <Typography variant='h4' className='text-white text-center text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
-            <Typography variant='h2' className='text-white text-center text-lg font-bold'>{classroom?.courseDescription}</Typography>
-            <a onClick={openViewEnrolleesModal} className='text-white text-center text-lg cursor-pointer' style={{textDecoration:'underline'}}>View enrolled students</a>
-            <Modal open={viewEnrolleesModalOpen} onClose={closeViewEnrolleesModal}>
-            <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)'}} className='p-5 w-2/3 md:w-1/2 lg:w-1/2 xl:w-1/2 bg-white rounded-md flex flex-col gap-10'>
-                <Typography variant='h5' sx={{color:dpurple, textAlign:'center'}}>Enrolled Students</Typography>
-                <div className='flex flex-grow flex-col h-96 overflow-y-auto p-3 gap-3'>
-                {sampleGroupMembers.map((member, index)=>(
-                    <div className=' md:bg-gray-100 lg:bg-gray-100 xl:bg-gray-100 flex gap-5 p-5 items-center rounded-md' key={index}>
-                        <Avatar {...stringAvatar(`${member.firstname} ${member.lastname}`)}/>
-                        <div>
-                        <Typography fontWeight='bold' variant='subtitle1'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</Typography>
-                        <Typography style={{textDecoration:'underline'}} variant='caption'>{member.email}</Typography>
-                        </div>
-                    </div>
-                ))}
-                </div>
-                <Button onClick={closeViewEnrolleesModal} sx={{backgroundColor:dpurple, color:'white', width:'fit-content', padding:'1em 1.5em', alignSelf:'center'}}>Close</Button>
-            </div>
-            </Modal>
+            <Typography variant='h2' className='text-white text-center text-lg font-bold'>{classroom?.courseDescription}</Typography> 
             <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 overflow-auto' style={{alignSelf:'end'}}> 
             {Teams?.map((team,index)=>(
                 <GroupBar key={index} team={team} index={index}/>
