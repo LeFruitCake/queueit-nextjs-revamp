@@ -147,25 +147,33 @@ const GroupDetailStudentView = () => {
             </div>
 
             <Modal open={isModalOpen} onClose={handleCloseModal}>
-                <div className="flex items-center justify-center h-screen">
-                    <div className="flex flex-col items-center justify-center px-10 py-5 bg-white shadow-lg rounded-lg">
-                        <Typography textAlign="center" variant="h3" fontWeight="bold" color="black">
-                            Members
-                        </Typography> 
-                        <div className="flex gap-3 min-w-max mt-4">
-                            {team?.memberIds?.length > 0 ? (
-                                team.memberIds.map((member, index) => (
-                                    <div key={index}>
-                                        <MemberProfile memberID={member} />
-                                    </div>
-                                ))
-                            ) : (
-                                <Typography textAlign="center" color="gray">No members available</Typography>
-                            )}
-                        </div> 
-                    </div>
-                </div>
-            </Modal>
+            <Box
+                onClick={handleCloseModal} // This ensures clicks outside the modal close it
+                className="flex items-center justify-center h-screen"
+            >
+                
+                <Box
+                    onClick={(e) => e.stopPropagation()} // Prevents closing when clicking inside the modal
+                    className="flex flex-col items-center justify-center px-10 py-5 bg-white shadow-lg rounded-lg"
+                >
+                    <Typography textAlign="center" variant="h3" fontWeight="bold" color="black">
+                        Members
+                    </Typography> 
+                    <div className="flex gap-3 min-w-max mt-4">
+                        {team?.memberIds?.length > 0 ? (
+                            team.memberIds.map((member, index) => (
+                                <div key={index}>
+                                    <MemberProfile memberID={member} />
+                                </div>
+                            ))
+                        ) : (
+                            <Typography textAlign="center" color="gray">No members available</Typography>
+                        )}
+                    </div> 
+                </Box>
+            </Box>
+        </Modal>
+
 
   
         </>
