@@ -5,7 +5,7 @@ import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, IconButton, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Attendance, AttendanceStatus, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserType } from '@/Utils/Global_variables'
+import { Attendance, AttendanceStatus, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import '../group/group.css'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions'
@@ -88,72 +88,92 @@ const page = () => {
     },[])
 
     const [loading,setLoading] = useState<boolean>(false)
+    
     const meetNow = ()=>{
         setLoading(true)
-        let attendanceList:Array<Attendance> = []
-        team?.memberNames.map((fullname)=>{
-            const [firstname, lastname] = fullname.split(" ")
-            const attendance:Attendance = {
-                "firstname":firstname,
-                "lastname":lastname,
-                "studentEmail":`${firstname}.${lastname}@cit.edu`,
-                attendanceStatus:AttendanceStatus.PRESENT
-            }
-            attendanceList.push(attendance);
-        })
-        console.log(attendanceList)
-        const meetingPackage:MeetingPackage = {
-            "teamName":team?.groupName,
-            "teamID": team?.tid,
-            "attendanceList":attendanceList,
-            "mentorID":user?.uid,
-            "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
-        }
-
-        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/spontaneous`,{
-            body:JSON.stringify(
-                meetingPackage
-            ),
-            method:'POST',
-            headers:{
-                'Content-Type':'application/json'
-            }
-        })
-        .then(async(res)=>{
-            if(res.ok){
-                if(!QueueingManager || QueueingManager.queueingManagerID != user?.uid){
-                    fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
-                    .then(async(res)=>{
-                        switch(res.status){
-                            case 200:
-                                const response = await res.json()
-                                setQueueingManager(response)
-                                router.push("/queue")
-                                break;
-                            default:
-                            const responseText = await res.text()
-                            toast.error(responseText)
-                        }
-                    })
-                    .catch((err)=>{
-                        console.log(`Fetching queueing manager error ${err}`)
-                    })
-                    .finally(()=>{
-                        setLoading(false)
-                    })
+        const memberPromises = team?.memberIds.map((memberID) => {
+            return fetch(`${SPEAR_URL}/get-student/${memberID}`, {
+                headers: {
+                    'Authorization': `Bearer ${user?.token}`,
+                    'Content-Type': 'application/json',
+                },
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .catch(err => {
+                console.log(err)
+                return null; // Return null in case of error
+            });
+        });
+        Promise.all(memberPromises).then((data) => {
+            let attendanceList:Array<Attendance> = []
+            const uniqueMembers:Array<UserRetrieved> = data.filter((member: User) => member !== null && !attendanceList.some((m: User) => `${m.firstname} ${m.lastname}` === `${member.firstname} ${member.lastname}`));
+            // console.log(uniqueMembers)
+            uniqueMembers.map((member)=>{
+                const attendance:Attendance = {
+                    "attendanceStatus":AttendanceStatus.PRESENT,
+                    "firstname":member.firstname,
+                    "lastname":member.lastname,
+                    "studentEmail":member.email
                 }
-            }else{
-                const err_text = await res.text()
-                toast.error(err_text)
+                attendanceList.push(attendance);
+            })
+
+            const meetingPackage:MeetingPackage = {
+                "teamName":team?.groupName,
+                "teamID": team?.tid,
+                "attendanceList":attendanceList,
+                "mentorID":user?.uid,
+                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
             }
-        })
-        .catch((err)=>{
-            console.log(err)
-            toast.error("Caught an exception")
-        })
-        .finally(()=>{
-            setLoading(false)
-        })
+
+            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/spontaneous`,{
+                body:JSON.stringify(
+                    meetingPackage
+                ),
+                method:'POST',
+                headers:{
+                    'Content-Type':'application/json'
+                }
+            })
+            .then(async(res)=>{
+                if(res.ok){
+                    if(!QueueingManager || QueueingManager.queueingManagerID != user?.uid){
+                        fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
+                        .then(async(res)=>{
+                            switch(res.status){
+                                case 200:
+                                    const response = await res.json()
+                                    setQueueingManager(response)
+                                    router.push("/queue")
+                                    break;
+                                default:
+                                const responseText = await res.text()
+                                toast.error(responseText)
+                            }
+                        })
+                        .catch((err)=>{
+                            console.log(`Fetching queueing manager error ${err}`)
+                        })
+                        .finally(()=>{
+                            setLoading(false)
+                        })
+                    }
+                }else{
+                    const err_text = await res.text()
+                    toast.error(err_text)
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+                toast.error("Caught an exception")
+            })
+            .finally(()=>{
+                setLoading(false)
+            })
+        });
+
+        
     }
     
 

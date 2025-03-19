@@ -16,7 +16,7 @@ import Autocomplete from '@mui/material/Autocomplete';
 import './fullCalendarStyles.css';   
 import { useUserContext } from '@/Contexts/AuthContext';
 import { toast } from 'react-toastify';
-import { Attendance, AttendanceDTO, AttendanceStatus, dpurple, lgreen, Meeting, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, UserType } from '@/Utils/Global_variables';
+import { Attendance, AttendanceDTO, AttendanceStatus, dpurple, lgreen, Meeting, MeetingStatus, QUEUEIT_URL, SPEAR_URL, Team, User, UserRetrieved, UserType } from '@/Utils/Global_variables';
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { useRouter } from 'next/navigation';
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
@@ -97,30 +97,53 @@ export default function Page() {
     const [eventDetailsModalOpen, setEventDetailsModalOpen] = useState(false);
     const {QueueingManager, setQueueingManager} = useQueueingManagerContext()
     const [loading,setLoading] = useState<boolean>(false)
-    
     const [groupNames, setGroupNames] = useState<Array<string>>([])
     const [teams, setTeams] = useState<Array<Team>>([]);
+
+    const fetchMemberDetails = (team:Team, groupName:string) => {
+        const memberPromises = team?.memberIds.map((memberID) => {
+            return fetch(`${SPEAR_URL}/get-student/${memberID}`, {
+                headers: {
+                    'Authorization': `Bearer ${user?.token}`,
+                    'Content-Type': 'application/json',
+                },
+                method: 'GET'
+            })
+            .then(response => response.json())
+            .catch(err => {
+                console.log(err)
+                return null; // Return null in case of error
+            });
+        });
+        Promise.all(memberPromises).then((data) => {
+            let attendanceList:Array<Attendance> = []
+            const uniqueMembers:Array<UserRetrieved> = data.filter((member: User) => member !== null && !attendanceList.some((m: User) => `${m.firstname} ${m.lastname}` === `${member.firstname} ${member.lastname}`));
+            // console.log(uniqueMembers)
+            uniqueMembers.map((member)=>{
+                const attendance:Attendance = {
+                    "attendanceStatus":AttendanceStatus.PRESENT,
+                    "firstname":member.firstname,
+                    "lastname":member.lastname,
+                    "studentEmail":member.email
+                }
+                attendanceList.push(attendance);
+            })
+            
+            setMeetingPackage((prev)=>({
+                ...prev,
+                "teamName":groupName,
+                "teamID": team?.tid,
+                "attendanceList":attendanceList,
+                "mentorID":user?.uid,
+                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
+            }))
+        });
+    }
+
     const handleGroupNameInputChange = (groupName:string)=>{
         const team = teams.find((team)=>team.groupName == groupName)
-        let attendanceList:Array<Attendance> = []
-        team?.memberNames.map((fullname)=>{
-            const [firstname, lastname] = fullname.split(" ")
-            const attendance:Attendance = {
-                "firstname":firstname,
-                "lastname":lastname,
-                "studentEmail":`${firstname}.${lastname}@cit.edu`,
-                attendanceStatus:AttendanceStatus.PRESENT
-            }
-            attendanceList.push(attendance);
-        })
-        setMeetingPackage((prev)=>({
-            ...prev,
-            "teamName":groupName,
-            "teamID": team?.tid,
-            "attendanceList":attendanceList,
-            "mentorID":user?.uid,
-            "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
-        }))
+        fetchMemberDetails(team, groupName)
+        
     }
     useEffect(()=>{
         if(user?.role === UserType.FACULTY){

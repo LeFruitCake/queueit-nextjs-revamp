@@ -204,12 +204,14 @@ const QueueingPageFacultyView = () => {
         if(grades?.length == 0){
             toast.error("You have yet to grade anybody.")
         }else{
-            console.log(grades)
+            console.log(queueingManager?.meeting?.queueingEntry.attendanceList)
             fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
                 body:JSON.stringify({
                     grades:grades,
                     notedAssignedTasks:notedAssignedTasks,
-                    impedimentsEncountered:impedimentsEncountered
+                    impedimentsEncountered:impedimentsEncountered,
+                    attendanceList:queueingManager?.meeting?.queueingEntry.attendanceList,
+                    queueingManagerID:queueingManager?.queueingManagerID
                 }),
                 method:'POST',
                 headers:{
