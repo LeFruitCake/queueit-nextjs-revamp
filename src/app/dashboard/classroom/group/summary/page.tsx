@@ -53,7 +53,7 @@ const Page = () => {
         if (!classroom) {
             fetchClassroom();
         } else {
-            if(team?.adviserId == user?.uid || (classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname))){
+            if(team?.adviserId == user?.uid || (classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname) ||  (user?.uid !== undefined && team?.memberIds?.includes(user.uid)) )){
                 fetchReportSummary();
             }
         }
