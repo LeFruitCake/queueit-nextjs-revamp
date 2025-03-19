@@ -18,6 +18,8 @@ const Page = () => {
     const { ReportSummary, setReportSummary } = useReportSummaryContext();
     const [uniqueNames, setUniqueNames] = useState<Set<string>>(new Set());
     const [uniqueMeetings, setUniqueMeetings] = useState<Set<number>>(new Set());
+    const [table, setTable] = useState<string[][]>([]);
+
 
     const fetchClassroom = () => {
         fetch(`${SPEAR_URL}/class/${team?.classId}`)
@@ -33,12 +35,10 @@ const Page = () => {
     };
 
     const fetchReportSummary = () => {
-        // console.log(team?.tid);
         fetch(`${QUEUEIT_URL}/meeting/teamMeetings/generateSummary/${team?.tid}`)
             .then(async (res) => {
                 if (res.ok) {
                     const response = await res.json();
-                    // console.log(response);
                     setReportSummary(response);
                 } else {
                     toast.error("Server error");
@@ -51,10 +51,8 @@ const Page = () => {
 
     useEffect(() => {
         if (!classroom) {
-            console.log("Fetching classroom data");
             fetchClassroom();
         } else {
-            console.log(classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname))
             if(team?.adviserId == user?.uid || (classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname))){
                 fetchReportSummary();
             }
@@ -71,10 +69,59 @@ const Page = () => {
             });
             setUniqueNames(names);
             setUniqueMeetings(meetings);
-            // console.log(meetings);
-            // console.log(names);
         }
     }, [ReportSummary]);
+
+    useEffect(() => {
+        if (uniqueMeetings && uniqueNames && ReportSummary) {
+            const meetingsArray = Array.from(uniqueMeetings);
+            const namesArray = Array.from(uniqueNames);
+            let matrix = [];
+
+            for (let i = 0; i < meetingsArray.length + 2; i++) {
+                const row = [];
+                switch (i) {
+                    case 0:
+                        row.push("Names");
+                        namesArray.forEach(name => row.push(name));
+                        break;
+
+                    case meetingsArray.length + 1:
+                        row.push("Final Grade");
+                        namesArray.forEach((name, colIndex) => {
+                            let totalGrade = 0;
+                            let count = 0;
+
+                            matrix.forEach((dataRow, rowIndex) => {
+                                if (rowIndex !== 0 && rowIndex !== meetingsArray.length + 1) {
+                                    const grade = dataRow[colIndex + 1];
+                                    if (typeof grade === 'number') {
+                                        totalGrade += grade;
+                                        count++;
+                                    }
+                                }
+                            });
+
+                            const average = count > 0 ? (totalGrade / count).toFixed(1) : "N/A";
+                            row.push(average);
+                        });
+                        break;
+
+                    default:
+                        row.push(`Meeting #${meetingsArray[i - 1]}`);
+                        namesArray.forEach(name => {
+                            const entry = ReportSummary.reportSummaryEntryList.find(
+                                item => item.studentName === name && item.meetingNumber === meetingsArray[i - 1]
+                            );
+                            row.push(entry ? entry.gradeAverage : "N/A");
+                        });
+                }
+                matrix.push(row);
+            }
+
+            setTable(matrix)
+        }
+    }, [uniqueMeetings, uniqueNames, ReportSummary]);
 
     return (
         <BaseComponent>
@@ -84,87 +131,70 @@ const Page = () => {
                         <BackButton />
                     </div>
                     <div className='flex flex-col gap-3'>
-                        <Typography variant='h2' color='white' fontWeight={"bold"}>{team?.groupName}</Typography>
+                        <Typography variant='h2' color='white' fontWeight="bold">{team?.groupName}</Typography>
                         <Typography variant='h6' color='white'>{`${classroom?.courseDescription} - ${classroom?.courseCode}`}</Typography>
                     </div>
                 </div>
-                {ReportSummary?.reportSummaryEntryList.length == 0?
-                    <div className='flex-1 bg-white flex flex-col justify-center items-center gap-3'>
-                        <img src={catLoader.src} alt="cat" className=''/>
-                        <Typography variant='subtitle2' color={dpurple} fontWeight={"bold"}>I don't think the cat has something to show you.</Typography>
-                        <Typography variant='caption' color='gray'>Try conducting atleast one meeting with the group first.</Typography>
-                    </div>
-                    :
-                    <div className='flex-1 bg-white overflow-auto'>
-                        <table style={{ borderCollapse: 'separate', borderSpacing:'0em 0em'}} className='h-full w-full overflow-hidden bg-black'>
-                            <thead>
+                {table && table.length > 0 && (
+                    <div className='flex-1 bg-white overflow-auto relative'>
+                        <table style={{ borderCollapse: 'separate', borderSpacing: '0em' }} className='h-full w-full bg-black'>
+                            <thead className='sticky top-0 z-10'>
                                 <tr className='h-28'>
-                                    <th style={{width:'20em'}}>
-                                        <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex pl-6 items-center rounded-sm'>
-                                            <Typography variant='h6' fontWeight={"bold"}>Names</Typography>
-                                        </div>
-                                    </th>
-                                    {Array.from(uniqueNames).map((name, index) => (
-                                        <th key={index}>
-                                            <div style={{backgroundColor:'#E9E2FF'}} className='flex-1 h-full flex justify-center items-center border-r-2 rounded-sm'>
-                                                <Typography variant='caption' textAlign={"center"}>{name}</Typography>
+                                    {table[0].map((header, index) => (
+                                        <th key={index} style={{ width: '20em' }}>
+                                            <div
+                                                style={{ backgroundColor: '#E9E2FF' }}
+                                                className={`flex-1 h-full flex items-center rounded-sm justify-center`}
+                                            >
+                                                <Typography textAlign={'center'} variant={header === 'Names' ? 'h6' : 'caption'} fontWeight={header === 'Names' ? 'bold' : ''}>
+                                                    {header}
+                                                </Typography>
                                             </div>
-                                        </th> 
+                                        </th>
                                     ))}
                                 </tr>
                             </thead>
-                            <tbody className='overflow-auto h-20'>
-                                    {Array.from(uniqueMeetings).map((number,index)=>
-                                    {
-                                        const grades:Array<ReportSummaryEntry> = ReportSummary?.reportSummaryEntryList.filter(entry => entry.meetingNumber === number )
-                                        // console.log(grades)
-                                        return (
-                                            <tr key={index} className='h-20 '>
-                                                <td className='flex items-center justify-center h-full'>
-                                                    <div className='flex-1 h-full flex flex-col gap-3 py-3 rounded-sm' style={{backgroundColor:'#E9E2FF'}}>
-                                                        <Typography className='pl-6' variant='h6' fontWeight={"bold"}>{`Meeting #${number}`}</Typography>
-                                                        <Typography className='pl-6' variant='caption' color='gray'>{new Date(ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber==number)?.meetingDate)?.toDateString()}</Typography>
-                                                    </div>
-                                                </td>
-                                                {grades.map((entry,index)=>(
-                                                    <td key={index} className='items-center justify-center h-full'>
-                                                        <div className='flex-1 h-full flex flex-col gap-3 rounded-sm' style={{backgroundColor:'white'}} >
-                                                            <Typography sx={{display:'flex', justifyContent:'center', alignItems:'center', height:'100%'}} variant='caption' fontWeight={"bold"}>{entry.gradeAverage}</Typography>
-                                                        </div>
-                                                    </td>
-                                                    
-                                                ))}
-                                            </tr>
-                                        )
-                                    })}
+                            <tbody>
+                                {table.slice(1, table.length - 1).map((row, rowIndex) => (
+                                    <tr key={rowIndex} className='h-20'>
+                                        {row.map((cell, cellIndex) => (
+                                            <td key={cellIndex}>
+                                                <div 
+                                                    className='flex-1 h-full rounded-sm flex justify-center items-center flex-col' 
+                                                    style={{ backgroundColor: typeof cell === 'string' && cell.startsWith("Meeting") ? '#E9E2FF' : 'white' }}
+                                                >
+                                                    <Typography variant='h6' fontWeight={"bold"}>
+                                                        {cell}
+                                                    </Typography>
+                                                    {typeof cell === 'string' && cell.startsWith("Meeting") ? (
+                                                        <Typography variant='caption' color='gray'>
+                                                            {new Date(
+                                                                ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber == cellIndex + 1)?.meetingDate
+                                                            ).toDateString()}
+                                                        </Typography>
+                                                    ) : (
+                                                        <></>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        ))}
+                                    </tr>
+                                ))}
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <th className='bg-lgreen font-bold py-6' style={{border:'solid 1px black'}}>Final Grade</th>
-                                    {Array.from(uniqueNames).map((name, index) => {
-                                        const grades = ReportSummary?.reportSummaryEntryList.filter(entry => entry.studentName === name);
-                                        let sumGrades = 0;
-
-                                        grades?.forEach(grade => {
-                                            sumGrades += grade.gradeAverage;
-                                        });
-
-                                        // Calculate the average and round up to the tenths place
-                                        const average = grades?.length ? sumGrades / grades.length : 0;
-                                        const finalGrade = Math.ceil(average * 10) / 10; // Round up to the tenths place
-                                        console.log(`${name}: ${finalGrade}`)
-
-                                        return (
-                                            <th key={index} className='bg-lgreen font-bold py-6' style={{border:'solid 1px black'}}>
-                                                <Typography fontWeight={"bold"}>{finalGrade != null || finalGrade != undefined? finalGrade.toFixed(1) : <>Calculating</>}</Typography>
-                                            </th>
-                                        );
-                                    })}
+                                    {table[table.length - 1].map((footerCell, index) => (
+                                        <th className='bg-lgreen font-bold py-6' style={{ border: 'solid 1px black' }} key={index}>
+                                            {footerCell}
+                                        </th>
+                                    ))}
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
-                }
+                
+                )}
+
             </div>
         </BaseComponent>
     );

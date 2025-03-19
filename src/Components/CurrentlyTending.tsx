@@ -1,5 +1,5 @@
 import { useUserContext } from '@/Contexts/AuthContext'
-import { dpurple, Meeting, UserType } from '@/Utils/Global_variables'
+import { dpurple, lgreen, Meeting, UserType } from '@/Utils/Global_variables'
 import { randomGroupImage } from '@/Utils/Utility_functions'
 import { Button, Skeleton, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
@@ -15,6 +15,7 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
     const [elapsedTime, setElapsedTime] = useState<string>('')
     const [groupImage, setGroupImage] = useState<string | null>(null)
     const [open,setOpen] = useState<boolean>(false)
+    const [isGlowing, setIsGlowing] = useState(false);
 
     useEffect(()=>{
         setGroupImage(randomGroupImage());
@@ -38,8 +39,23 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
         }
     }, [meeting]);
 
+    useEffect(() => {
+        setIsGlowing(!!meeting);
+      }, [meeting]);
+
     return (
-        <div className='border-2 border-black w-full h-fit md:h-40 lg:h-40 xl:h-40 p-3 pb-6 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white'>
+        <div className={`border-2 border-black w-full h-fit md:h-40 lg:h-40 xl:h-40 p-3 pb-6 flex items-center flex-col md:flex-row lg:flex-row xl:flex-row rounded-md bg-white ${isGlowing ? 'glow-effect' : ''}`}>
+        <style>
+          {`
+            @keyframes glow {
+              0% { box-shadow: 0 0 1px ${dpurple}; } 
+              100% { box-shadow: 0 0 15px ${dpurple}; }
+            } 
+            .glow-effect {
+              animation: glow 0.7s infinite alternate;
+            }
+          `}
+        </style>
             <div className='h-full flex-1 flex flex-col'>
                 <Typography variant='h6'>Currently Tending</Typography>
                 <div className='relative h-full flex box-content flex-col md:flex-row lg:flex-row xl:flex-row items-center gap-3 overflow-hidden'>
