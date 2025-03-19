@@ -48,8 +48,7 @@ const CurrentlyTending:React.FC<CurrentlyTendingProps> = ({meeting, concludeMeet
         <style>
           {`
             @keyframes glow {
-              0% { box-shadow: 0 0 1px ${dpurple}; }
-              50% { box-shadow: 0 0 5px ${dpurple}; }
+              0% { box-shadow: 0 0 1px ${dpurple}; } 
               100% { box-shadow: 0 0 15px ${dpurple}; }
             } 
             .glow-effect {
