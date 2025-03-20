@@ -16,6 +16,7 @@ import { useMeetingsContext } from '@/Contexts/MeetingsContext'
 import { useRouter } from 'next/navigation'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions' 
 import CatLoader from '@/Components/CatLoader'
+import catLoader from '../../public/loaders/catloader.gif'
 
 const GroupDetailStudentView = () => {
     const classroomContext = useClassroomContext()

@@ -8,6 +8,7 @@ import CurrentlyTending from './CurrentlyTending';
 import Chat from './Chat';
 import QueueingList from './QueueingList';
 import StudentEnqueueModal from './TeamEnqueueModal';
+import ItsYourTurnModal from './ItsYourTurnModal';
 import { useTeamContext } from '@/Contexts/TeamContext';
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
 import { toast } from 'react-toastify';
@@ -22,6 +23,7 @@ const QueueingPageStudentView = () => {
     const [groupAvatar, setGroupAvatar] = useState<string>()
     const router = useRouter()
     const team = useTeamContext().Team
+    const [openModal, setOpenModal] = useState(false);
     useEffect(() => {
         // Set the avatar when the component mounts
         setAvatar(randomAvatar())
@@ -174,6 +176,13 @@ const QueueingPageStudentView = () => {
             router.back();
         }
     },[queueingManager?.isActive])
+
+
+    useEffect(()=>{
+        if(queueingManager?.meeting?.queueingEntry.teamID == team?.tid){
+            setOpenModal(true);
+        }
+    },[queueingManager?.meeting]) 
     
 
 
@@ -199,6 +208,7 @@ const QueueingPageStudentView = () => {
                 <Chat faculty={faculty}/>
             </div>
             <StudentEnqueueModal modalToggle={modalToggle} setModalToggle={setModalToggle}/>
+            <ItsYourTurnModal open={openModal} setOpen={setOpenModal} />
         </div>
     )
 }
