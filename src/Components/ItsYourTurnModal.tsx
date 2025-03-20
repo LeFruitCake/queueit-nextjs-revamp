@@ -6,10 +6,10 @@ import { dpurple } from '@/Utils/Global_variables'
 const ItsYourTurnModal = ({ open, setOpen }) => {
     useEffect(() => {
         if (open) {
-            // const timer = setTimeout(() => {
-            //     setOpen(false);
-            // }, 10000);
-            // return () => clearTimeout(timer);
+            const timer = setTimeout(() => {
+                setOpen(false);
+            }, 8000);
+            return () => clearTimeout(timer);
         }
     }, [open]);
 
