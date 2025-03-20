@@ -1,5 +1,5 @@
-import { Attendance, AttendanceStatus, Grade, lgreen, QUEUEIT_URL } from '@/Utils/Global_variables'
-import { Chip, CircularProgress, Modal, Slider, Typography } from '@mui/material'
+import { Attendance, AttendanceStatus, dpurple, Grade, lgreen, QUEUEIT_URL } from '@/Utils/Global_variables'
+import { Button, Chip, CircularProgress, Divider, Modal, Slider, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
 import EvaluationModal from './EvaluationModal'
@@ -9,6 +9,8 @@ import AttendanceLoggerCard from './AttendanceLoggerCard'
 import IndexEnumerator from './IndexEnumerator'
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
 import rocket from '../../public/images/rocket-thumb.png'
+import { useUserContext } from '@/Contexts/AuthContext'
+import ConfirmationModal from './ConfirmationModal'
 
 interface ModifyAttendanceGradeEntryProps{
     meetingID:number
@@ -27,6 +29,8 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
     const [attendance, setAttendance] = useState<Attendance>()
     const {Grades, setGrades}=useGradesContext()
     const [loading, setLoading] = useState(true)
+    const user = useUserContext().user
+    const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false)
     
     useEffect(()=>{
         if(props?.studentFirstname && props?.studentLastname && props?.meetingID){
@@ -45,7 +49,7 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                 if(res.ok){
                     const response = await res.json();
                     console.log(response)
-                    setGrades(response.grade)
+                    setGrades(response.grades)
                     setAttendance(response.attendance)
                 }else{
                     const err_text = await res.text();
@@ -71,7 +75,8 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                                     ? AttendanceStatus.ABSENT
                                     : attendance.attendanceStatus === AttendanceStatus.ABSENT
                                     ? AttendanceStatus.LATE
-                                    : AttendanceStatus.PRESENT
+                                    : AttendanceStatus.PRESENT,
+                    attendanceNote: `Edited by ${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)} on ${new Date().toDateString()}.`
                 }
             )
         }
@@ -89,20 +94,53 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
     const handleSliderChange = (studentName: string, newValue: number, criterionID: number) => {
         setGrades(prevGrades => 
             prevGrades.map(grade => 
-                grade.studentName === studentName && grade.criterionID === criterionID
-                    ? { ...grade, grade: newValue } // Update the grade
+                grade.studentName === studentName && grade.criterion.criterionID === criterionID
+                    ? { ...grade, mark: newValue } // Update the grade
                     : grade // Return the original grade
             )
         );
     };
+
+    const saveChanges = ()=>{
+        setLoading(true)
+        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/saveModified`,{
+            body:JSON.stringify({
+                "attendance":attendance,
+                "grades":Grades
+            }),
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            }
+        })
+        .then(async(res)=>{
+            if(res.ok){
+                toast.success("Changes saved successfully.")
+            }else{
+                const err_text = await res.text()
+                toast.error(err_text)
+            }
+        })
+        .catch((err)=>{
+            console.log(err)
+            toast.error("Caught an exception while saving changes.")
+        })
+        .finally(()=>{
+            setOpen(false)
+        })
+    }
     
     return (
-        <Modal open={open} onClose={()=>{setOpen(false)}}>
+        <Modal open={open} onClose={()=>{setOpen(false); setLoading(true)}}>
             <div className='bg-white absolute w-2/3 h-2/3 overflow-auto p-10 flex flex-col gap-3 rounded-md' style={{top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}>
                 {loading?
                     <CircularProgress/>
                     :
-                    <div className='p-10'>
+                    <div className='p-10 flex flex-col gap-6'>
+                        <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>Attendandance & Grade Modification</Typography>
+                        <Typography variant='subtitle2' color='silver' textAlign={"center"}>Please be vigilant and mindful when handling the slider input for grades. Ensure that the inputted grades satisfies you prior to clicking save.</Typography>
+                        <Divider/>
+                        <Typography variant='caption' textAlign={"center"}>To start modifying a student's grade, ensure that the student is not absent or <strong style={{color:'red'}}>RED</strong> in color.</Typography>
                         <AttendanceLoggerCard updateAttendanceStatus={updateAttendanceStatus} attendance={attendance}/>
                         {Grades?.map((gradeEntry,index)=>(
                             <div key={index} className='flex flex-col gap-3'>
@@ -118,16 +156,17 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                                 <div className='px-20 py-2 gap-6 flex flex-col'>
                                     <div key={index} className='flex flex-col gap-3'>
                                         <div className='flex gap-3 items-center'>
-                                            <Typography fontWeight={"bold"} variant='h6'>{capitalizeFirstLetter(attendance.firstname)} ${capitalizeFirstLetter(attendance.lastname)}</Typography>
-                                            {attendance.attendanceStatus === AttendanceStatus.ABSENT ?
+                                            <Typography fontWeight={"bold"} variant='h6'>{capitalizeFirstLetter(attendance?.firstname)} {capitalizeFirstLetter(attendance?.lastname)}</Typography>
+                                            {attendance?.attendanceStatus === AttendanceStatus.ABSENT ?
                                                 <Chip size='small' label="Absent" sx={{ backgroundColor: 'rgba(255,102,102,0.5)', color: 'white' }} />
                                                 : <></>
                                             }
                                         </div>
                                         <div className='flex flex-col gap-3 rounded-md py-6 px-10' style={{ border: 'solid 0.1px gray', backgroundColor:'#F9F9F9' }}>
+                                            {console.log(gradeEntry)}
                                             <Slider
                                                 marks={marks}
-                                                disabled={attendance.attendanceStatus === AttendanceStatus.ABSENT}
+                                                disabled={attendance?.attendanceStatus === AttendanceStatus.ABSENT}
                                                 size="medium"
                                                 value={gradeEntry.mark || 0} // Use the grade from context
                                                 min={0}
@@ -135,7 +174,7 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                                                 step={0.1}
                                                 aria-label="Small"
                                                 valueLabelDisplay="auto"
-                                                onChange={(event, newValue) => handleSliderChange(studentName, newValue, criterion.criterionID)} // Update grade on change
+                                                onChange={(event, newValue) => handleSliderChange(gradeEntry.studentName, newValue, gradeEntry.criterion.criterionID)} // Update grade on change
                                                 sx={{
                                                     color: lgreen,
                                                     '& .MuiSlider-thumb': {
@@ -146,7 +185,7 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                                                             backgroundColor: 'transparent',
                                                         },
                                                         '&::before': {
-                                                            display: attendance.attendanceStatus === AttendanceStatus.ABSENT ? 'none' : '',
+                                                            display: attendance?.attendanceStatus === AttendanceStatus.ABSENT ? 'none' : '',
                                                             content: '""',
                                                             backgroundImage: `url(${rocket.src})`,
                                                             backgroundSize: 'contain',
@@ -174,8 +213,18 @@ const ModifyAttendanceGradeEntry:React.FC<props> = ({props, open, setOpen}) => {
                                 </div>
                             </div>
                         ))}
+                        <Divider/>
+                        <div className='w-full flex justify-center items-center gap-6 pt-6'>
+                            <Button variant='outlined' onClick={()=>{setOpen(false); setLoading(true)}}>
+                                Cancel
+                            </Button>
+                            <Button onClick={()=>{setConfirmModalOpen(true)}} sx={{backgroundColor:dpurple, color:'white'}} variant='contained'>
+                                Save
+                            </Button>
+                        </div>
                     </div>
                 }
+                <ConfirmationModal open={confirmModalOpen} setOpen={setConfirmModalOpen} action={saveChanges} headerMessage='Confirm Save?' bodyMessage='Are you sure and satisfied with the edition?'/>
             </div>
         </Modal>
     )

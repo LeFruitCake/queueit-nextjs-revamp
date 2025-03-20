@@ -300,5 +300,8 @@ export interface Attendance{
     firstname:string
     lastname:string
     attendanceStatus:AttendanceStatus
+    attendanceNote:string
+    attendanceID:number
+    attendanceDate: Date
 }
 
