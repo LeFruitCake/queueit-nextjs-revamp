@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import logo from '../../public/images/logo.png'
-import { Avatar, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
+import { Avatar, Badge, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
@@ -34,9 +34,35 @@ const Navbar = () => {
     const handleAvatarClose = () => {
         setAvatarAnchorEl(null);
     };
-    const handleNotificationClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-        setNotificationAnchorEl(event.currentTarget)
-    }
+    const handleNotificationClick = async (event: React.MouseEvent<HTMLButtonElement>) => {
+        setNotificationAnchorEl(event.currentTarget); // Open the dropdown immediately
+    
+        const notificationIDs = notifications.map(notification => notification.notificationRecipientID);
+    
+        try {
+            const res = await fetch(`${QUEUEIT_URL}/notifications/setRead`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ notificationIDs }),
+            });
+    
+            if (res.ok) {
+                setTimeout(() => { // Introduce a 5-second delay before updating state
+                    setNotifications((prev) =>
+                        prev.map((notification) => ({
+                            ...notification,
+                            read: true,
+                        }))
+                    );
+                }, 5000); // Delay of 5000ms (5 seconds)
+            }
+        } catch (error) {
+            console.error('Error marking notifications as read:', error);
+        }
+    };
+    
+    
+    
     const handleNotificationClose = () => {
         setNotificationAnchorEl(null)
     }
@@ -139,7 +165,9 @@ const Navbar = () => {
             
             <div style={{display:'flex', gap:10, position:'relative'}}>
                 <IconButton style={{color:'silver'}} onClick={handleNotificationClick}>
-                    <NotificationsIcon style={{fontSize:'2.3rem'}}/>
+                    <Badge badgeContent={notifications.filter(notficiation=>!notficiation.read).length} color='error'>
+                        <NotificationsIcon style={{fontSize:'2.3rem'}}/>
+                    </Badge>
                 </IconButton>
                 <IconButton style={{color:'silver'}} onClick={handleAvatarClick}>
                     <Avatar {...stringAvatar(`${userContext.user?.firstname} ${userContext.user?.lastname}`)}/>

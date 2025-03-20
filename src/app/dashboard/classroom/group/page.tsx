@@ -5,7 +5,7 @@ import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, IconButton, Tooltip, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Attendance, AttendanceStatus, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
+import { Attendance, AttendanceStatus, dpurple, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import '../group/group.css'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions'
@@ -193,6 +193,8 @@ const page = () => {
             "studentLastname":studentLastname,
         })
     }
+
+    let attendedIndex = 0
     
 
     if(loading){
@@ -250,75 +252,84 @@ const page = () => {
                         <div className='h-24 z-10 bg-black absolute w-full' style={{marginTop:'-90px'}}>
                             
                         </div>
-                        <div className='bg-black w-full relative pt-10 p-5'>
-                            
-                            {Meetings?.length?
-                                <div className='flex flex-col gap-6'>
-                                    <div className='flex justify-between items-center'>
-                                        <Typography variant='h3' fontWeight={"bold"} color='white'>Meeting History</Typography>
-                                        <IconButton onClick={()=>{router.push("/dashboard/classroom/group/summary")}} sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'center', '&:hover':{backgroundColor:'yellowgreen'}, textTransform:'none'}}><AssessmentIcon fontSize='small'/><p style={{fontSize:'16px'}}>Generate Summary</p></IconButton>
-                                    </div>
-                                    <div className='flex flex-col gap-12'>
-                                        {Meetings.map((historyEntry,index)=>(
-                                            historyEntry.meetingStatus === MeetingStatus.ATTENDED_QUEUEING_CONDUCTED || historyEntry.meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED?
-                                            <div key={index} style={{backgroundColor:'#1D1D1C'}} className='p-10 flex flex-col gap-3 rounded-md'>
-                                                <Typography color={lgreen} variant='h4' fontWeight={"bold"}>{`Meeting #${index + 1}`}</Typography>
-                                                <Typography variant='h6' color='gray'>{new Date(historyEntry?.start).toDateString()}</Typography>
-                                                <div className='flex gap-3'>
-                                                    {historyEntry?.attendanceList.map((attendanceEntry,index)=>(
-                                                        <Tooltip onClick={()=>{handleAttendanceClick(historyEntry.meetingID, attendanceEntry.firstname, attendanceEntry.lastname)}} key={index} title="Click to edit">
-                                                            <div className={`cursor-pointer ${attendanceEntry.attendanceStatus == AttendanceStatus.ABSENT?'bg-notlushred':attendanceEntry.attendanceStatus == AttendanceStatus.LATE?'bg-notlushorange':'bg-notlushgreen'} rounded-md px-3 py-2`}>
-                                                                <Typography>{`${capitalizeFirstLetter(attendanceEntry.lastname)}, ${capitalizeFirstLetter(attendanceEntry.firstname)} `}</Typography>
-                                                            </div>
-                                                        </Tooltip>
-                                                    ))}
-                                                </div>
-                                                <div className='flex flex-col gap-3'>
-                                                    <Typography color='white' variant='h6' fontWeight={"bold"}>What will you do?</Typography>
-                                                    <div className='w-full p-3 border-2 border-white max-h-48 overflow-auto' style={{backgroundColor:'black', color:'white'}}>
-                                                        <Typography variant='subtitle2' sx={{lineHeight:'2.5em'}}>{historyEntry?.notedAssignedTasks || 'None recorded for this meeting session'}</Typography>
+
+                        <div className='bg-black w-full relative pt-10 p-5 flex flex-col gap-6'>
+                            <IconButton onClick={()=>{router.push("/dashboard/classroom/group/summary")}} sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'end', '&:hover':{backgroundColor:'yellowgreen'}, textTransform:'none'}}><AssessmentIcon fontSize='small'/><p style={{fontSize:'16px'}}>Generate Summary</p></IconButton>
+                            {Meetings?.map((historyEntry, index) => {
+                                const isAttended = historyEntry.meetingStatus === MeetingStatus.ATTENDED_QUEUEING_CONDUCTED || 
+                                                historyEntry.meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED;
+
+                                return isAttended ? (
+                                    <div key={index} style={{ backgroundColor: '#1D1D1C' }} className="p-10 flex flex-col gap-3 rounded-md">
+                                        <Typography color={lgreen} variant="h4" fontWeight="bold">
+                                            {`Meeting #${++attendedIndex}`} {/* Increment only for attended meetings */}
+                                        </Typography>
+                                        <Typography variant="h6" color="white">{new Date(historyEntry?.start).toDateString()}</Typography>
+                                        <Typography variant='caption' color={dpurple}>{historyEntry.meetingStatus}</Typography>
+                                        <div className="flex gap-3">
+                                            {historyEntry?.attendanceList.map((attendanceEntry, idx) => (
+                                                <Tooltip 
+                                                    key={idx} 
+                                                    title="Click to edit" 
+                                                    onClick={() => handleAttendanceClick(historyEntry.meetingID, attendanceEntry.firstname, attendanceEntry.lastname)}
+                                                >
+                                                    <div 
+                                                        className={`cursor-pointer ${
+                                                            attendanceEntry.attendanceStatus === AttendanceStatus.ABSENT 
+                                                                ? 'bg-notlushred' 
+                                                                : attendanceEntry.attendanceStatus === AttendanceStatus.LATE 
+                                                                ? 'bg-notlushorange' 
+                                                                : 'bg-notlushgreen'
+                                                        } rounded-md px-3 py-2`}
+                                                    >
+                                                        <Typography>{`${capitalizeFirstLetter(attendanceEntry.lastname)}, ${capitalizeFirstLetter(attendanceEntry.firstname)}`}</Typography>
                                                     </div>
-                                                </div>
-                                                <div className='flex flex-col gap-3'>
-                                                    <Typography color='white' variant='h6' fontWeight={"bold"}>Are there any impediments?</Typography>
-                                                    <div className='w-full p-3 border-2 border-white max-h-48 overflow-auto' style={{backgroundColor:'black', color:'white'}}>
-                                                        <Typography variant='subtitle2' sx={{lineHeight:'2.5em'}}>{historyEntry?.impedimentsEncountered || 'No impediments recorded'}</Typography>
-                                                    </div>
-                                                </div>
+                                                </Tooltip>
+                                            ))}
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <Typography color="white" variant="h6" fontWeight="bold">What will you do?</Typography>
+                                            <div className="w-full p-3 border-2 border-white max-h-48 overflow-auto" style={{ backgroundColor: 'black', color: 'white' }}>
+                                                <Typography variant="subtitle2" sx={{ lineHeight: '2.5em' }}>
+                                                    {historyEntry?.notedAssignedTasks || 'None recorded for this meeting session'}
+                                                </Typography>
                                             </div>
-                                            :
-                                            <div key={index} style={{backgroundColor:'#1D1D1C'}} className='p-10 flex justify-between items-center rounded-md'>
-                                                <div>
-                                                    <Typography color={lgreen} variant='h4' fontWeight={"bold"}>{`Meeting #${index + 1}`}</Typography>
-                                                    <Typography variant='h6' color='gray'>{new Date(historyEntry?.start).toDateString()}</Typography>
-                                                </div>
-                                                <div>
-                                                    {historyEntry.meetingStatus === MeetingStatus.CANCELLED?
-                                                        <Typography variant='h6' color='error' fontWeight={"bold"}>Mentor cancelled the appointment.</Typography>
-                                                        :historyEntry.meetingStatus === MeetingStatus.FAILED_DEFAULTED?
-                                                            <Typography variant='h6' color='error' fontWeight={"bold"}>Both parties did not show up on the agreed schedule.</Typography>
-                                                            :historyEntry.meetingStatus === MeetingStatus.FAILED_FACULTY_NO_SHOW?
-                                                                <Typography variant='h6' color='error' fontWeight={"bold"}>Mentor did not show up on the agreed schedule.</Typography>
-                                                                :historyEntry.meetingStatus === MeetingStatus.FAILED_TEAM_NO_SHOW?
-                                                                    <Typography variant='h6' color='error' fontWeight={"bold"}>Team did not show up on the agreed schedule.</Typography>
-                                                                    :historyEntry.meetingStatus === MeetingStatus.SET_AUTOMATED?
-                                                                        <Typography variant='h6' color='primary' fontWeight={"bold"}>System automated meeting is expected.</Typography>
-                                                                        :historyEntry.meetingStatus === MeetingStatus.SET_MANUALLY?
-                                                                            <Typography variant='h6' color='primary' fontWeight={"bold"}>Mentor created an appointment for {new Date(historyEntry.end).toDateString()}.</Typography>
-                                                                            :
-                                                                            <Typography variant='h6' color='success' fontWeight={"bold"}>Ongoing</Typography>
-                                                    }
-                                                </div>
+                                        </div>
+                                        <div className="flex flex-col gap-3">
+                                            <Typography color="white" variant="h6" fontWeight="bold">Are there any impediments?</Typography>
+                                            <div className="w-full p-3 border-2 border-white max-h-48 overflow-auto" style={{ backgroundColor: 'black', color: 'white' }}>
+                                                <Typography variant="subtitle2" sx={{ lineHeight: '2.5em' }}>
+                                                    {historyEntry?.impedimentsEncountered || 'No impediments recorded'}
+                                                </Typography>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
-                                </div>
-                                : 
-                                <div style={{padding:'2em'}} className='flex items-center flex-col justify-center gap-3'>
-                                    <img src={catLoader.src} alt="catLoader" style={{height:'150px'}} />
-                                    <Typography variant='subtitle2' color={lgreen}>The cat guardian has spawned. Guess this team has yet to conduct any meetings. </Typography>
-                                    </div> 
-                            }
+                                ) : (
+                                    <div key={index} style={{ backgroundColor: '#1D1D1C' }} className="p-10 flex justify-between items-center rounded-md">
+                                        <div>
+                                            {/* <Typography color={lgreen} variant="h4" fontWeight="bold">{`Meeting #${index + 1}`}</Typography> */}
+                                            <Typography variant="h6" color="gray">{new Date(historyEntry?.attendanceList[0].attendanceDate).toDateString()}</Typography>
+                                        </div>
+                                        <div>
+                                            {historyEntry.meetingStatus === MeetingStatus.CANCELLED ? (
+                                                <Typography variant="caption" color="error" fontWeight="bold">Mentor cancelled an appointment on {new Date(historyEntry.start).toDateString()}.</Typography>
+                                            ) : historyEntry.meetingStatus === MeetingStatus.FAILED_DEFAULTED ? (
+                                                <Typography variant="caption" color="error" fontWeight="bold">Both parties did not show up on the agreed schedule.</Typography>
+                                            ) : historyEntry.meetingStatus === MeetingStatus.FAILED_FACULTY_NO_SHOW ? (
+                                                <Typography variant="caption" color="error" fontWeight="bold">Mentor did not show up on the agreed schedule.</Typography>
+                                            ) : historyEntry.meetingStatus === MeetingStatus.FAILED_TEAM_NO_SHOW ? (
+                                                <Typography variant="caption" color="error" fontWeight="bold">Team did not show up on the agreed schedule.</Typography>
+                                            ) : historyEntry.meetingStatus === MeetingStatus.SET_AUTOMATED ? (
+                                                <Typography variant="caption" color="primary" fontWeight="bold">System automated meeting is expected.</Typography>
+                                            ) : historyEntry.meetingStatus === MeetingStatus.SET_MANUALLY ? (
+                                                <Typography variant="caption" color="primary" fontWeight="bold">Mentor created an appointment for {new Date(historyEntry.end).toDateString()}.</Typography>
+                                            ) : (
+                                                <Typography variant="subtitle2" color="success" fontWeight="bold">Ongoing</Typography>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
