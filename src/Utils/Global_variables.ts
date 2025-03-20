@@ -33,6 +33,7 @@ export interface ReportSummary{
 }
 
 export interface MeetingBoardHistoryEntry{
+    meetingID: number
     notedAssignedTasks:string
     impedimentsEncountered:string
     start:Date
@@ -248,6 +249,8 @@ export interface Meeting{
     grades:Array<Grade>
     meetingStatus:MeetingStatus
     queueingEntry:QueueingEntry
+    notedAssignedTasks: string
+    impedimentsEncountered: string
 }
 
 export interface AttendanceDTO{

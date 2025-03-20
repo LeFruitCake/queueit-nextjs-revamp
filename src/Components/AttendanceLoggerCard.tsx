@@ -18,7 +18,7 @@ const AttendanceLoggerCard:React.FC<AttendanceLoggerCardProps> = ({attendance, u
             {attendance?
                 <>
                     <div className='flex gap-3 items-center'>
-                        <Avatar {...stringAvatar(`${attendance?.firstname} ${attendance?.lastname}`)}/>
+                        <Avatar {...stringAvatar(`${attendance?.firstname.trim()} ${attendance?.lastname.trim()}`)}/>
                         <span style={{fontWeight:'bold'}}>{`${capitalizeFirstLetter(attendance?.firstname)} ${capitalizeFirstLetter(attendance?.lastname)}`}</span>
                     </div>
                 </>
