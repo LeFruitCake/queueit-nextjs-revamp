@@ -77,6 +77,7 @@ interface ManualAppointmentSetting{
     attendanceList: Array<Attendance>
     mentorID: number
     facultyName: string
+    classroomID: number
 }
 
 
@@ -135,7 +136,8 @@ export default function Page() {
                 "teamID": team?.tid,
                 "attendanceList":attendanceList,
                 "mentorID":user?.uid,
-                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
+                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`,
+                "classroomID":team.classId,
             }))
         });
     }

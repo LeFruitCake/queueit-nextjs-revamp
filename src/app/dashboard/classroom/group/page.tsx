@@ -26,6 +26,7 @@ interface MeetingPackage{
     teamID: number
     mentorID: number
     facultyName: string
+    classroomID: number
 }
 
 interface ModifyAttendanceGradeEntryProps{
@@ -131,7 +132,8 @@ const page = () => {
                 "teamID": team?.tid,
                 "attendanceList":attendanceList,
                 "mentorID":user?.uid,
-                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
+                "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`,
+                "classroomID":team?.classId
             }
 
             fetch(`${QUEUEIT_URL}/meeting/teamMeetings/spontaneous`,{

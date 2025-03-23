@@ -83,6 +83,7 @@ const StudentEnqueueModal: React.FC<StudentEnqueueModalProps> = ({ modalToggle, 
                         "teamID":team?.tid,
                         "teamName":team?.groupName,
                         "classReference":`${classroom?.courseCode.toLocaleUpperCase()} - ${classroom?.section.toUpperCase()}`,
+                        "classroomID":classroom?.cid,
                         "attendanceList":attendanceList,
                     }
                 ),

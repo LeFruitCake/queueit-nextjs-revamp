@@ -76,9 +76,9 @@ export default function page() {
     }
     
 
-    if(loading || (authContext.user === null)){
+    if(loading || (authContext.user !== null)){
         return(
-            <CatLoader loading={loading || (authContext.user === null)}/>
+            <CatLoader loading={loading || (authContext.user !== null)}/>
         )
     }else{
         return (

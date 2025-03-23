@@ -24,8 +24,12 @@ const page = () => {
     const router = useRouter()
     const faculty = useFacultyContext().Faculty
     const [loading,setLoading] = useState<boolean>(false)
+    const userLoading = useUserContext().loading
 
     useEffect(()=>{
+      if(userLoading){
+        return;
+      }
       if(!user){
         router.push('/login')
       }
@@ -36,6 +40,9 @@ const page = () => {
     },[])
 
     useEffect(()=>{
+      if(userLoading){
+        return;
+      }
       setLoading(true)
       if((user?.uid && user?.role == UserType.FACULTY) || faculty?.uid){
         fetch(`${QUEUEIT_URL}/faculty/getQueueingManager/${user?.role == UserType.FACULTY?user.uid:faculty?.uid}`)
@@ -57,10 +64,11 @@ const page = () => {
           setLoading(false)
         })
       }else{
+        console.log(`role: ${user?.role} and uid: ${user?.uid}`)
         setLoading(false)
         toast.error("Could not refer to the right queueing manager.")
       }
-    },[])
+    },[user])
 
     useEffect(()=>{
       if (client) {

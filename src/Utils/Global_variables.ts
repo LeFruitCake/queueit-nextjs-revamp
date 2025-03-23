@@ -7,6 +7,31 @@ export const dpurple = "#7D57FC"
 export const SPEAR_URL = "http://localhost:8080"
 export const QUEUEIT_URL = "http://localhost:8081"
 
+export interface DonutDataset{
+    label:string
+    data: Array<number>
+    backgroundColor:Array<string>
+}
+
+export interface DataPoint{
+    x:number
+    y:number
+}
+
+export interface ScatterPlotObservation{
+    label:string
+    data: Array<DataPoint>
+    backgroundColor:string
+}
+
+export interface ScatterChartData{
+    datasets: Array<ScatterPlotObservation>
+}
+
+export interface DonutChartData{
+    datasets:Array<DonutDataset>
+}
+
 
 //user given when querying to spear db using id.
 export interface UserRetrieved{

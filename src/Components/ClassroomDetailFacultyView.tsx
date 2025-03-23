@@ -4,7 +4,7 @@ import BackButton from './BackButton'
 import { Avatar, Button, IconButton, Modal, Typography } from '@mui/material'
 import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
-import { dpurple, lgreen, SPEAR_URL } from '@/Utils/Global_variables';
+import { DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import person from '../../public/images/pointingUpwardPerson.png'
@@ -13,12 +13,59 @@ import whiteSquiggly from '../../public/images/squiggly-white.png'
 import GroupBar from './GroupBar';
 import { useTeamsContext } from '@/Contexts/TeamsContext';
 import { toast } from 'react-toastify';
+import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
+import SickIcon from '@mui/icons-material/Sick';
+import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
+
+import medalOne from '../../public/images/1st_Place_Medal.png'
+import medalTwo from '../../public/images/2nd_Place_Medal.png'
+import medalThree from '../../public/images/3rd_Place_Medal.png'
+import DonutChart from './DonutChart';
+import ScatterChart from './ScatterChart';
+import CatLoader from './CatLoader';
+
+interface LowestEngagement{
+    teamName:string
+    meetingCount:number
+}
+
+interface StudentAtRiskEntry{
+    firstname:string
+    lastname:string
+    attendanceCount:string
+    gradeAverage:number
+    attendanceRate:number
+}
+
+interface TopTeam{
+    teamName:string
+    gradeAverage:number
+}
+
+interface PieChartCoord{
+    data:Array<number>
+    backgroundColor:Array<string>
+}
+
+interface PieChartDataEntry{
+    labels:Array<string>
+    datasets:Array<PieChartCoord>
+}
+
+interface AnalyticsResult{
+    lowestEngagementDTO:Array<LowestEngagement>
+    atRiskForKickOuts:Array<StudentAtRiskEntry>
+    topTeams:Array<TopTeam>
+    pieChartData:PieChartDataEntry
+    scatterPlotDataset:ScatterChartData
+}
 
 const GroupDetailAdviserView = () => {
     const {Teams, setTeams} = useTeamsContext();
     const classroomContext = useClassroomContext().classroom
     const [classroom, setClassroom] = useState(classroomContext)
     const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
+    const [analyticsData, setAnalyticsData] = useState<AnalyticsResult | undefined>()
     const openViewEnrolleesModal = ()=>{
     setViewEnrolleesModalOpen(true)
     }
@@ -31,6 +78,49 @@ const GroupDetailAdviserView = () => {
         setClassroom(classroomContext)
     }
     },[classroomContext,router])
+
+    // const scatterdata = {
+    //     datasets: [
+    //       {
+    //         label: "Scatter Dataset",
+    //         data: [
+    //           { x: 10, y: 3 },
+    //         ],
+    //         backgroundColor: "rgba(75, 192, 192, 0.5)",
+    //       },
+    //       {
+    //         label: "ANADA WAN",
+    //         data: [
+    //           { x: 6, y: 4.1 },
+    //         ],
+    //         backgroundColor: "red",
+    //       },
+    //       {
+    //         label: "Spear",
+    //         data: [
+    //           { x: 0, y: 0 },
+    //         ],
+    //         backgroundColor: "green",
+    //       },
+    //       {
+    //         label: "Queueit",
+    //         data: [
+    //           { x: 0, y: 0 },
+    //         ],
+    //         backgroundColor: "blue",
+    //       },
+    //     ],
+    //   };
+
+    // const data:DonutChartData = {
+    //     labels: ["Label 1", "Label 2", "Label 3", "Label 4", "Label 5"],
+    //     datasets: [
+    //         {
+    //         data: [12, 24, 18, 10, 15],
+    //         backgroundColor: ["#74B652", "#94C773", "#56941E", "#A569BD", "#F5B041"],
+    //         },
+    //     ],
+    //   };
 
 
     useEffect(()=>{
@@ -53,45 +143,136 @@ const GroupDetailAdviserView = () => {
                 toast.error("Caught an exception while fetching teams.")
                 console.log(err)
             })
+
+
+            fetch(`${QUEUEIT_URL}/faculty/classroomAnalytics/${classroom.cid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:AnalyticsResult = await res.json();
+                    console.log(response)
+                    setAnalyticsData(response);
+                }else{
+                    console.log("Failed to retrieve analytics.")
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
         }
     },[classroom])
 
-    return (
-        <div className='bg-dpurple flex flex-col flex-grow w-full h-full relative mt-5 rounded-md'>
-            <img src={person.src} alt="person" className='absolute hidden lg:block xl:block left-0 bottom-0' style={{height:'70%', zIndex:2}} />
-            <img className='hidden lg:block xl:block' src={whiteSquiggly.src} alt="conductor" style={{position:'absolute', height:'25%', bottom:190, left:350, zIndex:1}}/>
-            <img className='hidden lg:block xl:block' src={whiteStar.src} alt="conductor" style={{position:'absolute', height:'10%', bottom:350, left:50}}/>
-            <div className='p-3'>
-            <BackButton/>
-            </div>
-            <Typography variant='h4' className='text-white text-center text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
-            <Typography variant='h2' className='text-white text-center text-lg font-bold'>{classroom?.courseDescription}</Typography>
-            <a onClick={openViewEnrolleesModal} className='text-white text-center text-lg cursor-pointer' style={{textDecoration:'underline'}}>View enrolled students</a>
-            <Modal open={viewEnrolleesModalOpen} onClose={closeViewEnrolleesModal}>
-            <div style={{position:'absolute', top:'50%', left:'50%', transform:'translate(-50%, -50%)'}} className='p-5 w-2/3 md:w-1/2 lg:w-1/2 xl:w-1/2 bg-white rounded-md flex flex-col gap-10'>
-                <Typography variant='h5' sx={{color:dpurple, textAlign:'center'}}>Enrolled Students</Typography>
-                <div className='flex flex-grow flex-col h-96 overflow-y-auto p-3 gap-3'>
-                {sampleGroupMembers.map((member, index)=>(
-                    <div className=' md:bg-gray-100 lg:bg-gray-100 xl:bg-gray-100 flex gap-5 p-5 items-center rounded-md' key={index}>
-                        <Avatar {...stringAvatar(`${member.firstname} ${member.lastname}`)}/>
-                        <div>
-                        <Typography fontWeight='bold' variant='subtitle1'>{`${capitalizeFirstLetter(member.firstname)} ${capitalizeFirstLetter(member.lastname)}`}</Typography>
-                        <Typography style={{textDecoration:'underline'}} variant='caption'>{member.email}</Typography>
+    if(!Teams && !analyticsData){
+        return(
+            <CatLoader loading={!Teams && !analyticsData}/>
+        )
+    }else{
+        return (
+            <div className='flex flex-col flex-grow w-full h-fit relative mt-5 rounded-md p-6 gap-6' style={{backgroundColor:'#F4F7FE'}}>
+    
+                {/* classroom general information */}
+                <div className='h-fit flex w-full p-3 bg-dpurple justify-between items-center rounded-md'>
+                    <div className='flex gap-12 items-center '>
+                        <BackButton/>
+                        <div className='flex flex-col gap-3'>
+                        <Typography variant='h5' className='text-white text-lg font-bold'>{classroom?.courseDescription}</Typography>
+                        <Typography variant='caption' className='text-white text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
                         </div>
                     </div>
-                ))}
+                    <Button sx={{backgroundColor:lgreen, color:'black', textTransform:'none', fontWeight:'bold', padding:'0.5em 2em'}}>Class Record</Button>
                 </div>
-                <Button onClick={closeViewEnrolleesModal} sx={{backgroundColor:dpurple, color:'white', width:'fit-content', padding:'1em 1.5em', alignSelf:'center'}}>Close</Button>
-            </div>
-            </Modal>
-            <div className='w-full h-full lg:w-1/2 xl:w-1/2 border-red-500 flex-grow p-3 flex flex-col gap-5 overflow-auto' style={{alignSelf:'end'}}> 
-            {Teams?.map((team,index)=>(
-                <GroupBar key={index} team={team} index={index}/>
-            ))}
-            </div>
-        </div>
     
-  )
+                {/* 2nd row charts */}
+                <div className='w-full flex gap-6'>
+    
+                    {/* team perfomance rankings */}
+                    <div className='bg-white p-6 flex-1 rounded-md gap-12 flex flex-col'>
+                        <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Top ${analyticsData?.topTeams.length} Teams`}</Typography>
+                        {analyticsData?.topTeams?
+                            <div className='w-full flex items-end'>
+                                {
+                                    analyticsData?.topTeams.length >= 2?
+                                    <div className='bg-gradient-to-b from-dpurple to-white h-48 flex-1 relative rounded-md rounded-tr-none'>
+                                        <img src={medalTwo.src} alt="2nd place medal" style={{margin:'0 auto'}}/>
+                                        <div className='flex-grow flex flex-col items-center justify-center p-3'>
+                                            <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.teamName}</Typography>
+                                            <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.gradeAverage}</Typography>
+                                        </div>
+                                    </div>
+                                    :
+                                    <></>
+                                }
+                                <div className='bg-gradient-to-b from-lgreen to-white h-64 flex-1 relative rounded-md flex flex-col'>
+                                    <img src={medalOne.src} alt="1st place medal" style={{margin:'0 auto'}}/>
+                                    <div className='flex-grow flex flex-col items-center justify-center p-3'>
+                                        <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.teamName}</Typography>
+                                        <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.gradeAverage}</Typography>
+                                    </div>
+                                </div>
+                                {
+                                    analyticsData?.topTeams.length >= 3?
+                                    <div className='bg-gradient-to-b from-dpurple to-white h-32 flex-1 relative rounded-md rounded-tl-none'>
+                                        <img src={medalThree.src} alt="3rd place medal" style={{margin:'0 auto'}}/>
+                                        <div className='flex-grow flex flex-col items-center justify-center p-3'>
+                                            <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.teamName}</Typography>
+                                            <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.gradeAverage}</Typography>
+                                        </div>
+                                    </div>
+                                    :
+                                    <></>
+                                }
+                            </div>
+                            :
+                            <></>
+                        }
+                    </div>
+    
+    
+                    
+                    <div className='flex-1 rounded-md flex gap-3 bg-white items-center'>
+                        <ScatterChart dataset={analyticsData.scatterPlotDataset} chartTitle='Teams Performance Indicator'/>
+                    </div>
+                </div>
+    
+                <div className='w-full flex gap-6'>
+                    <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement</Typography>
+                        <div className='flex-grow flex items-center justify-between'>
+                            
+                        </div>
+                    </div>
+                    <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <SickIcon fontSize='small' className='text-notlushred'/> Low Performant Students </Typography>
+                        <div className='flex-grow flex items-center justify-between'>
+                            
+                        </div>
+                    </div>
+                </div>
+                {/* <div className='w-full flex gap-6'>
+                    <div className='bg-white min-h-40 p-3 rounded-md flex-1 flex flex-col'>
+                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <KeyboardDoubleArrowDownIcon fontSize='small' className='text-notlushred'/> Teams With Declining Performance</Typography>
+                        <div className='flex-grow flex items-center justify-between'>
+                            
+                        </div>
+                    </div>
+                </div> */}
+    
+                <div className='flex gap-6 w-full'>
+                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 flex-grow'>
+                    <Typography>Teams</Typography>
+                    {Teams?.map((team,index)=>(
+                        <GroupBar key={index} team={team} index={index}/>
+                    ))}
+                   </div>
+                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 w-1/3 aspect-square'>
+                        <DonutChart chartData={analyticsData.pieChartData} chartTitle='Mentor Performance'/>
+                   </div>
+                </div>
+    
+                
+            </div>
+        
+        )
+    }
 }
 
 export default GroupDetailAdviserView
