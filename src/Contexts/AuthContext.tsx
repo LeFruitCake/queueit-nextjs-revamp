@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User } from '../Utils/Global_variables';
+import { User, UserType } from '../Utils/Global_variables';
 import { faculty, student, user2 } from '@/Sample_Data/SampleData1';
 import { extractFirstnameLastnameFromEmail } from '../Utils/Utility_functions';
 import { jwtDecode } from 'jwt-decode';
@@ -11,6 +11,7 @@ interface UserContextType {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
+  loading: boolean
 }
 
 // Create the context
@@ -20,15 +21,8 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const router = useRouter()
   // Initialize user state from localStorage if available
-  const [user, setUser ] = useState<User | null>(() => {
-    const storedUser  = localStorage.getItem('user');
-    return storedUser  ? JSON.parse(storedUser ) : null; // Parse the stored user or return default student
-  });
-
-  //for development
-  // const [user, setUser ] = useState<User | null>(faculty);
-  // const [user, setUser ] = useState<User | null>(student);
-  // const [user, setUser ] = useState<User | null>(user2);
+  const [user, setUser ] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true); // Track loading state
 
   const login = (userData: User) => {
     setUser (userData);
@@ -42,18 +36,41 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     router.push('/login')
   };
 
+  useEffect(() => {
+    // Retrieve user from localStorage when the component mounts
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+    setLoading(false); // Mark as finished loading
+  }, []);
+
   // Sync user state with localStorage on change
   useEffect(() => {
-    if (user) {
-      // const userWithClasses = {...user, enrolledClasses: Array.from(user.enrolledClasses)}
-      localStorage.setItem('user',JSON.stringify(user))
-    } else {
-      localStorage.removeItem('user');
+    if (loading) return; // Wait until loading is complete
+
+    if (user && window.location.pathname.startsWith("/login")) {
+      localStorage.setItem("user", JSON.stringify(user));
+    } else if (!user) {
+      console.log(`I will log you out. even though ${user}`);
+      localStorage.removeItem("user");
+      router.push("/login");
+    }else if(user && user.role !== UserType.FACULTY){
+      if(
+        window.location.pathname.startsWith('/availability')
+        ||
+        window.location.pathname.includes("summary")
+        ||
+        window.location.pathname.includes('/mentorClassroom')
+      ){
+        router.push("/nt404")
+      }
+      
     }
-  }, [user]);
+  }, [user, loading]);
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider value={{ user, login, logout, loading }}>
       {children}
     </UserContext.Provider>
   );

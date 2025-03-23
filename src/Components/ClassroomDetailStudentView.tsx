@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import BackButton from './BackButton'   
 import { randomAvatar, randomGroupImage, randomSeason } from '@/Utils/Utility_functions'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
@@ -25,6 +25,7 @@ const GroupDetailStudentView = () => {
     const user = useUserContext().user
     const groupContext = useTeamContext()
     const {Meetings,setMeetings} = useMeetingsContext();
+    const groupAvatar = useRef<string>(randomGroupImage())
     const [project, setProject] = useState<ProjectProposal | undefined>(undefined)
     const [mentor, setMentor] = useState<UserRetrieved | undefined>(undefined)
     const [season, setSeason] = useState<string>() 
@@ -151,7 +152,7 @@ const GroupDetailStudentView = () => {
                         <div onClick={handleOpenModal} className='flex-1 border-2 border-black bg-white rounded-lg flex flex-col justify-around p-5  '>
                             <Typography variant='h5' fontWeight='bold' textAlign='center'>{groupContext.Team?<>Team {groupContext.Team.groupName}</>:<>Groups</>}</Typography>
                             <div className='flex flex-col w-1/2 items-center justify-center mx-auto relative'>
-                                {groupContext.Team?<img src={randomGroupImage()} alt="groupIcon" style={{height:'50%'}} />:<PersonSearchIcon sx={{fontSize:'5em'}}/>}
+                                {groupContext.Team?<img src={groupAvatar.current} alt="groupIcon" style={{height:'50%'}} />:<PersonSearchIcon sx={{fontSize:'5em'}}/>}
                                 {groupContext.Team?
                                     // <Typography variant='h6' fontWeight='bold' textAlign='center'>{`[${groupContext.Team.projectName}]`}</Typography>
                                     <></>

@@ -9,7 +9,7 @@ import { capitalizeFirstLetter, randomAvatar, randomSeason } from '@/Utils/Utili
 import { useWebSocket } from '@/WebSocket/WebSocketContext'
 import { Button, Typography } from '@mui/material'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
 interface FacultyAvailabilityCardProps{
@@ -24,7 +24,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
     const client = useWebSocket()
     const [queueingManager, setQueueingManager] = useState<QueueingManager>()
     const setLocalStorageQueueingManager = useQueueingManagerContext().setQueueingManager
-    const [avatar, setAvatar] = useState<string>()
+    const avatar = useRef<string>(randomAvatar())
     const facultyContext = useFacultyContext()
     const team = useTeamContext().Team
     const classroom = useClassroomContext().classroom
@@ -76,7 +76,6 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
                     toast.error("Caught an exception while fetching Faculty active status.")
                 })
             }
-            setAvatar(randomAvatar())
             fetchFacultyStatus()
         }
     },[facultyID])
@@ -144,7 +143,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
             <Typography variant='h6' fontWeight='bold' textAlign='center'>{facultyDesignation}</Typography>
             <div>
                 <div>
-                    <img src={avatar} alt="randomAvatar" className='h-40 aspect-square'/>
+                    <img src={avatar.current} alt="randomAvatar" className='h-40 aspect-square'/>
                 </div>
                 <Typography variant='h5' fontWeight='bold' textAlign='center'>{`${capitalizeFirstLetter(facultyFirstname?facultyFirstname:'')} ${capitalizeFirstLetter(facultyLastname?facultyLastname:'')}`}</Typography>
             </div>

@@ -15,7 +15,10 @@ export default function Page() {
     const [classes, setClasses] = useState<Classes | undefined>(undefined); 
     const [mentoredClass, setMentoredClass] = useState<MentoredClasses | undefined>(undefined); 
 
+    const loading = useUserContext().loading
+
     useEffect(() => {
+        if(loading){return;}
         if (!user) {
             router.push('/login');
             return; 

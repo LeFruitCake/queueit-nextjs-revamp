@@ -442,9 +442,9 @@ export default function Page() {
         );
     };
 
-    if(loading){
+    if(loading || user == null || user.role !== UserType.FACULTY){
         return(
-            <CatLoader loading={loading}/>
+            <CatLoader loading={loading || user == null || user.role !== UserType.FACULTY}/>
         )
     }else{
         return (

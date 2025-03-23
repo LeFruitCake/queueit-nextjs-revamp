@@ -10,6 +10,7 @@ import { Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import catLoader from '../../../../../../public/loaders/catloader.gif'
+import CatLoader from '@/Components/CatLoader';
 
 const Page = () => {
     const user = useUserContext().user;
@@ -19,6 +20,8 @@ const Page = () => {
     const [uniqueNames, setUniqueNames] = useState<Set<string>>(new Set());
     const [uniqueMeetings, setUniqueMeetings] = useState<Set<number>>(new Set());
     const [table, setTable] = useState<string[][]>([]);
+
+    const loading = useUserContext().loading
 
 
     const fetchClassroom = () => {
@@ -123,81 +126,87 @@ const Page = () => {
         }
     }, [uniqueMeetings, uniqueNames, ReportSummary]);
 
-    return (
-        <BaseComponent>
-            <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
-                <div className='flex gap-6 items-center'>
-                    <div>
-                        <BackButton />
+    if(loading || !team || !classroom){
+        return(
+            <CatLoader loading={loading || !team || !classroom}/>
+        )
+    }else{
+        return (
+            <BaseComponent>
+                <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
+                    <div className='flex gap-6 items-center'>
+                        <div>
+                            <BackButton />
+                        </div>
+                        <div className='flex flex-col gap-3'>
+                            <Typography variant='h2' color='white' fontWeight="bold">{team?.groupName}</Typography>
+                            <Typography variant='h6' color='white'>{`${classroom?.courseDescription} - ${classroom?.courseCode}`}</Typography>
+                        </div>
                     </div>
-                    <div className='flex flex-col gap-3'>
-                        <Typography variant='h2' color='white' fontWeight="bold">{team?.groupName}</Typography>
-                        <Typography variant='h6' color='white'>{`${classroom?.courseDescription} - ${classroom?.courseCode}`}</Typography>
-                    </div>
-                </div>
-                {table && table.length > 0 && (
-                    <div className='flex-1 bg-white overflow-auto relative'>
-                        <table style={{ borderCollapse: 'separate', borderSpacing: '0em' }} className='h-full w-full bg-black'>
-                            <thead className='sticky top-0 z-10'>
-                                <tr className='h-28'>
-                                    {table[0].map((header, index) => (
-                                        <th key={index} style={{ width: '20em' }}>
-                                            <div
-                                                style={{ backgroundColor: '#E9E2FF' }}
-                                                className={`flex-1 h-full flex items-center rounded-sm justify-center`}
-                                            >
-                                                <Typography textAlign={'center'} variant={header === 'Names' ? 'h6' : 'caption'} fontWeight={header === 'Names' ? 'bold' : ''}>
-                                                    {header}
-                                                </Typography>
-                                            </div>
-                                        </th>
-                                    ))}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {table.slice(1, table.length - 1).map((row, rowIndex) => (
-                                    <tr key={rowIndex} className='h-20'>
-                                        {row.map((cell, cellIndex) => (
-                                            <td key={cellIndex}>
-                                                <div 
-                                                    className='flex-1 h-full rounded-sm flex justify-center items-center flex-col' 
-                                                    style={{ backgroundColor: typeof cell === 'string' && cell.startsWith("Meeting") ? '#E9E2FF' : 'white' }}
+                    {table && table.length > 0 && (
+                        <div className='flex-1 bg-white overflow-auto relative'>
+                            <table style={{ borderCollapse: 'separate', borderSpacing: '0em' }} className='h-full w-full bg-black'>
+                                <thead className='sticky top-0 z-10'>
+                                    <tr className='h-28'>
+                                        {table[0].map((header, index) => (
+                                            <th key={index} style={{ width: '20em' }}>
+                                                <div
+                                                    style={{ backgroundColor: '#E9E2FF' }}
+                                                    className={`flex-1 h-full flex items-center rounded-sm justify-center`}
                                                 >
-                                                    <Typography variant='h6' fontWeight={"bold"}>
-                                                        {cell}
+                                                    <Typography textAlign={'center'} variant={header === 'Names' ? 'h6' : 'caption'} fontWeight={header === 'Names' ? 'bold' : ''}>
+                                                        {header}
                                                     </Typography>
-                                                    {typeof cell === 'string' && cell.startsWith("Meeting") ? (
-                                                        <Typography variant='caption' color='gray'>
-                                                            {new Date(
-                                                                ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber == cellIndex + 1)?.meetingDate
-                                                            ).toDateString()}
-                                                        </Typography>
-                                                    ) : (
-                                                        <></>
-                                                    )}
                                                 </div>
-                                            </td>
+                                            </th>
                                         ))}
                                     </tr>
-                                ))}
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    {table[table.length - 1].map((footerCell, index) => (
-                                        <th className='bg-lgreen font-bold py-6' style={{ border: 'solid 1px black' }} key={index}>
-                                            {footerCell}
-                                        </th>
+                                </thead>
+                                <tbody>
+                                    {table.slice(1, table.length - 1).map((row, rowIndex) => (
+                                        <tr key={rowIndex} className='h-20'>
+                                            {row.map((cell, cellIndex) => (
+                                                <td key={cellIndex}>
+                                                    <div 
+                                                        className='flex-1 h-full rounded-sm flex justify-center items-center flex-col' 
+                                                        style={{ backgroundColor: typeof cell === 'string' && cell.startsWith("Meeting") ? '#E9E2FF' : 'white' }}
+                                                    >
+                                                        <Typography variant='h6' fontWeight={"bold"}>
+                                                            {cell}
+                                                        </Typography>
+                                                        {typeof cell === 'string' && cell.startsWith("Meeting") ? (
+                                                            <Typography variant='caption' color='gray'>
+                                                                {new Date(
+                                                                    ReportSummary?.reportSummaryEntryList.find(entry => entry.meetingNumber == cellIndex + 1)?.meetingDate
+                                                                ).toDateString()}
+                                                            </Typography>
+                                                        ) : (
+                                                            <></>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            ))}
+                                        </tr>
                                     ))}
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                
-                )}
-
-            </div>
-        </BaseComponent>
-    );
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        {table[table.length - 1].map((footerCell, index) => (
+                                            <th className='bg-lgreen font-bold py-6' style={{ border: 'solid 1px black' }} key={index}>
+                                                {footerCell}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    
+                    )}
+    
+                </div>
+            </BaseComponent>
+        );
+    }
 };
 
 export default Page;
