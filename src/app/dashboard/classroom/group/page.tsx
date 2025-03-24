@@ -3,7 +3,7 @@ import BackButton from '@/Components/BackButton'
 import BaseComponent from '@/Components/BaseComponent'
 import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, IconButton, Tooltip, Typography } from '@mui/material'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { Attendance, AttendanceStatus, dpurple, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation'
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
 import CatLoader from '@/Components/CatLoader'
 import ModifyAttendanceGradeEntry from '@/Components/ModifyAttendanceGradeEntry'
+import HistogramChart from '@/Components/Histogram'
+import RadarChart from '@/Components/RadarChart'
 
 interface MeetingPackage{
     attendanceList: Array<Attendance>
@@ -40,7 +42,7 @@ const page = () => {
     const team = useTeamContext().Team
     const [mentorAvatar, setMentorAvatar] = useState<string>()
     // const [meetings, setMeetings] = useState(1)
-    const quote = randomQuotes()
+    const quote = useRef<string>(null)
     const [mentor, setMentor] = useState<User>()
     const {Meetings,setMeetings} = useMeetingsContext();
     const router = useRouter();
@@ -77,6 +79,7 @@ const page = () => {
     },[team])
 
     useEffect(()=>{
+        quote.current = randomQuotes().quote
         if(team){
             fetch(`${QUEUEIT_URL}/meeting/teamMeetings/${team.tid}`)
             .then(async(res)=>{
@@ -222,13 +225,21 @@ const page = () => {
                         </div>
 
                         <div className='py-10 w-full'>
-                            <Typography textAlign={"center"} variant='h5' fontWeight='bold' color='white'>Members</Typography>
-                            <div className='flex justify-start md:justify-center lg:justify-center gap-3 w-full overflow-auto py-3'>
+                            <Typography textAlign={"center"} variant='h4' fontWeight='bold' color='white'>Members</Typography>
+                            <div className='flex justify-start md:justify-center lg:justify-center gap-8 w-full overflow-auto py-3'>
                                 {team?.memberIds.map((member, index)=>(
                                     <div key={index}>
                                         <MemberProfile  memberID={member}/>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                        <div className='w-full h-96 flex gap-6'>
+                            <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
+                                <HistogramChart/>
+                            </div>
+                            <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
+                                <RadarChart/>
                             </div>
                         </div>
                     </div>

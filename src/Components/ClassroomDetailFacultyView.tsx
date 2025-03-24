@@ -107,14 +107,33 @@ const GroupDetailAdviserView = () => {
                 if(res.ok){
                     const response:AnalyticsResult = await res.json();
                     const teacherNames = new Set<string>
-                    const studentIDs = new Set<number>
-                    const teamIDs = new Set<number>
+                    // const studentIDs = new Set<number>
+                    const teamNames = new Set<string>
                     Teams?.map((team)=>{
                         teacherNames.add(team.adviserName)
-                        team.memberIds.map((id)=>{
-                            studentIDs.add(id)
-                        })
-                        teamIDs.add(team.tid)
+                        // team.memberIds.map((id)=>{
+                        //     studentIDs.add(id)
+                        // })
+                        teamNames.add(team.groupName)
+                    })
+                    teacherNames.forEach(name=>{
+                        if(!response.pieChartData.labels.includes(name)){
+                            response.pieChartData.labels.push(name);
+                            response.pieChartData.datasets[0].backgroundColor.push('silver')
+                            response.pieChartData.datasets[0].data.push(0)
+                        }
+                    })
+                    teamNames.forEach(teamName=>{
+                        if(!response.scatterPlotDataset.datasets.filter(dataset => dataset.label == teamName).length){
+                            response.scatterPlotDataset.datasets.push({
+                                "backgroundColor":'silver',
+                                "data":[{
+                                    "x":0,
+                                    "y":0
+                                }],
+                                "label":teamName
+                            })
+                        }
                     })
                     setAnalyticsData(response);
                 }else{
