@@ -119,14 +119,14 @@ const GroupDetailAdviserView = () => {
                     teacherNames.forEach(name=>{
                         if(!response.pieChartData.labels.includes(name)){
                             response.pieChartData.labels.push(name);
-                            response.pieChartData.datasets[0].backgroundColor.push('silver')
+                            response.pieChartData.datasets[0].backgroundColor.push('red')
                             response.pieChartData.datasets[0].data.push(0)
                         }
                     })
                     teamNames.forEach(teamName=>{
                         if(!response.scatterPlotDataset.datasets.filter(dataset => dataset.label == teamName).length){
                             response.scatterPlotDataset.datasets.push({
-                                "backgroundColor":'silver',
+                                "backgroundColor":'red',
                                 "data":[{
                                     "x":0,
                                     "y":0
