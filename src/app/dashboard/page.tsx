@@ -1,5 +1,6 @@
 "use client";
 import BaseComponent from '@/Components/BaseComponent';
+import CatLoader from '@/Components/CatLoader';
 import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
 import { useUserContext } from '@/Contexts/AuthContext';
@@ -88,7 +89,7 @@ export default function Page() {
                     <ClassroomList classrooms={classes} mentoredClassrooms={mentoredClass} />
                 </BaseComponent>
             ) : (
-                <>Loading...</>
+                <CatLoader loading={!user}/>
             )}
         </div>
     );

@@ -13,11 +13,14 @@ const GradesContext = createContext<GradesContextType | undefined>(undefined);
 
 // Create a provider component
 export const GradesProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Grades, setGrades] = useState<Array<Grade> | undefined>(() => {
-    // Retrieve Grades from localStorage if available
+  const [Grades, setGrades] = useState<Array<Grade> | null>(null);
+
+  useEffect(()=>{
     const storedGrades = localStorage.getItem('Grades');
-    return storedGrades ? JSON.parse(storedGrades) : undefined;
-  });
+    if(storedGrades){
+      setGrades(JSON.parse(storedGrades))
+    }
+  },[])
 
   useEffect(() => {
     // Store Grades in localStorage whenever it changes

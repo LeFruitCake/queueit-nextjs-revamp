@@ -23,7 +23,7 @@ const page = () => {
     const classroom = useClassroomContext().classroom
     const router = useRouter()
     const faculty = useFacultyContext().Faculty
-    const [loading,setLoading] = useState<boolean>(false)
+    const [loading,setLoading] = useState<boolean>(true)
     const userLoading = useUserContext().loading
 
     useEffect(()=>{
@@ -53,8 +53,8 @@ const page = () => {
               setQueueingManager(response)
               break;
             default:
-              const responseText = await res.text()
-              toast.error(responseText)
+              // const responseText = await res.text()
+              // toast.error(responseText)
           }
         })
         .catch((err)=>{
@@ -114,24 +114,31 @@ const page = () => {
         };
       }
     },[client])
-    return (
-      <BaseComponent opacity={0.25}>
-        {
-          loading?
-            <CatLoader loading={loading}/>:
-              !QueueingManager && user?.role == UserType.STUDENT?
-                <NotFound>
-                  <Typography sx={{color:dpurple}} variant='h6' fontWeight={"bold"}>Queueing Manager Not Found</Typography>
-                  <Typography textAlign={"center"} variant='caption' color='gray'>We do not think the queueing manager you are referring to has not been established.</Typography>
-                </NotFound>
-                :
-                user?.role == UserType.FACULTY?
-                  <QueueingPageFacultyView/>
+
+    if(loading){
+      return(
+        <CatLoader loading={loading}/>
+      )
+    }else{
+      return (
+        <BaseComponent opacity={0.25}>
+          {
+            loading?
+              <CatLoader loading={loading}/>:
+                !QueueingManager && user?.role == UserType.STUDENT?
+                  <NotFound>
+                    <Typography sx={{color:dpurple}} variant='h6' fontWeight={"bold"}>Faculty hidden</Typography>
+                    <Typography textAlign={"center"} variant='caption' color='gray'>We do not think the faculty you are referring to is not ready.</Typography>
+                  </NotFound>
                   :
-                  <QueueingPageStudentView/>
-        }
-      </BaseComponent>
-    )
+                  user?.role == UserType.FACULTY?
+                    <QueueingPageFacultyView/>
+                    :
+                    <QueueingPageStudentView/>
+          }
+        </BaseComponent>
+      )
+    }
 }
 
 export default page

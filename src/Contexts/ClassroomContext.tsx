@@ -3,17 +3,21 @@ import React, { createContext, useContext, useState, ReactNode, useEffect } from
 import { Classes } from '../Utils/Global_variables';
  
 interface ClassroomContextType {
-  classroom: Classes | undefined;
+  classroom: Classes | undefined | null;
   setClassroom: (classroom: Classes) => void;
 }
  
 const ClassroomContext = createContext<ClassroomContextType | undefined>(undefined);
  
 export const ClassroomProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [classroom, setClassroom] = useState<Classes | undefined>(() => { 
+  const [classroom, setClassroom] = useState<Classes | null>(null);
+
+  useEffect(()=>{
     const storedClassroom = localStorage.getItem('classroom');
-    return storedClassroom ? JSON.parse(storedClassroom) : undefined;
-  });
+    if(storedClassroom){
+      setClassroom(JSON.parse(storedClassroom))
+    }
+  },[])
 
   useEffect(() => { 
     if (classroom) {

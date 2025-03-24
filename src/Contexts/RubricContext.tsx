@@ -4,7 +4,7 @@ import { Rubric } from '../Utils/Global_variables';
 
 // Define the context type
 interface RubricContextType {
-  Rubric: Rubric | undefined;
+  Rubric: Rubric | undefined | null;
   setRubric: (Rubric: Rubric | undefined) => void;
 }
 
@@ -13,11 +13,14 @@ const RubricContext = createContext<RubricContextType | undefined>(undefined);
 
 // Create a provider component
 export const RubricProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Rubric, setRubric] = useState<Rubric | undefined>(() => {
-    // Retrieve Rubric from localStorage if available
+  const [Rubric, setRubric] = useState<Rubric | null>(null);
+
+  useEffect(()=>{
     const storedRubric = localStorage.getItem('Rubric');
-    return storedRubric ? JSON.parse(storedRubric) : undefined;
-  });
+    if(storedRubric){
+      setRubric(JSON.parse(storedRubric))
+    }
+  },[])
 
   useEffect(() => {
     // Store Rubric in localStorage whenever it changes

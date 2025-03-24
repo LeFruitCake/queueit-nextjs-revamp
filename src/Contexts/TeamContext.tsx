@@ -4,7 +4,7 @@ import { Team } from '../Utils/Global_variables';
 
 // Define the context type
 interface TeamContextType {
-  Team: Team | undefined;
+  Team: Team | undefined | null;
   setTeam: (Team: Team | undefined) => void;
 }
 
@@ -13,11 +13,14 @@ const TeamContext = createContext<TeamContextType | undefined>(undefined);
 
 // Create a provider component
 export const TeamProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Team, setTeam] = useState<Team | undefined>(() => {
-    // Retrieve Team from localStorage if available
+  const [Team, setTeam] = useState<Team | null>(null);
+
+  useEffect(()=>{
     const storedTeam = localStorage.getItem('Team');
-    return storedTeam ? JSON.parse(storedTeam) : undefined;
-  });
+    if(storedTeam){
+      setTeam(JSON.parse(storedTeam))
+    }
+  },[])
 
   useEffect(() => {
     // Store Team in localStorage whenever it changes

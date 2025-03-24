@@ -3,7 +3,7 @@ import { SPEAR_URL, User } from '@/Utils/Global_variables'
 import { capitalizeFirstLetter, randomAvatar, stringAvatar } from '@/Utils/Utility_functions'
 import { Avatar, CircularProgress, Typography } from '@mui/material'
 import { error } from 'console'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { toast } from 'react-toastify'
 
 interface MemberProfileProps{
@@ -12,6 +12,7 @@ interface MemberProfileProps{
 
 const MemberProfile:React.FC<MemberProfileProps> = ({memberID}) => {
     const [studentDetails, setStudentDetails] = useState<User>()
+    const avatar = useRef(randomAvatar())
     const user=useUserContext().user
     useEffect(()=>{
         fetch(`${SPEAR_URL}/get-student/${memberID}`,{
@@ -42,7 +43,7 @@ const MemberProfile:React.FC<MemberProfileProps> = ({memberID}) => {
     return (
         <div className='bg-white rounded-md flex justify-center items-center flex-col w-60 p-6 overflow-hidden'>
             <div>
-                <img src={randomAvatar()} alt="avatar" />
+                <img src={avatar.current} alt="avatar" />
             </div>
             {studentDetails?
                 <Typography fontWeight='bold' variant='subtitle1'>{`${capitalizeFirstLetter(studentDetails?.firstname)} ${capitalizeFirstLetter(studentDetails?.lastname)}`}</Typography>

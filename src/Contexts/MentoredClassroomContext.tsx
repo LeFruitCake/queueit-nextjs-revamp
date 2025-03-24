@@ -3,17 +3,21 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { MentoredClasses } from "../Utils/Global_variables";
  
 interface MentoredClassroomContextType {
-  mentoredClassroom: MentoredClasses | undefined;
+  mentoredClassroom: MentoredClasses | undefined | null;
   setMentoredClassroom: (mentoredClassroom: MentoredClasses) => void;
 }
  
 const MentoredClassroomContext = createContext<MentoredClassroomContextType | undefined>(undefined);
  
 export const MentoredClassroomProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [mentoredClassroom, setMentoredClassroom] = useState<MentoredClasses | undefined>(() => {
+  const [mentoredClassroom, setMentoredClassroom] = useState<MentoredClasses | null>(null);
+
+  useEffect(()=>{
     const storedClassroom = localStorage.getItem("mentoredClassroom");
-    return storedClassroom ? JSON.parse(storedClassroom) : undefined;
-  });
+    if(storedClassroom){
+      setMentoredClassroom(JSON.parse(storedClassroom))
+    }
+  },[])
 
   useEffect(() => {
     if (mentoredClassroom) {

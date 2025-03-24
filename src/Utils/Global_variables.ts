@@ -163,6 +163,7 @@ export interface Faculty{
 
 export interface Team{
     tid:number
+    adviserName:string
     groupName:string
     projectName:string
     projectId:number

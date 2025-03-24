@@ -1,6 +1,6 @@
 "use client"
 import BaseComponent from '@/Components/BaseComponent'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { UserType } from '@/Utils/Global_variables'
 import ClassroomDetailStudentView from '@/Components/ClassroomDetailStudentView'
 import ClassroomDetailFacultyView from '@/Components/ClassroomDetailFacultyView'
@@ -8,20 +8,20 @@ import { useUserContext } from '@/Contexts/AuthContext'
 import { useClassroomContext } from '@/Contexts/ClassroomContext'
 import NotFound from '@/Components/NotFound'
 import { Typography } from '@mui/material'
+import CatLoader from '@/Components/CatLoader'
 
 
 const page = () => {
   const user = useUserContext().user
   const classroom = useClassroomContext().classroom
-  if(!classroom){
+  const [loading, setLoading] = useState(true)
+  useEffect(()=>{
+    if(!classroom){return}
+    setLoading(false)
+  },[classroom])
+  if(loading){
     return(
-      <BaseComponent>
-        <NotFound>
-          <Typography>
-            Classroom not found.
-          </Typography>
-        </NotFound>
-      </BaseComponent>
+      <CatLoader loading={loading}/>
     )
   }else{
     return (

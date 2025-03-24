@@ -4,7 +4,7 @@ import { Faculty} from '../Utils/Global_variables';
 
 // Define the context type
 interface FacultyContextType {
-  Faculty: Faculty | undefined;
+  Faculty: Faculty | undefined | null;
   setFaculty: (Faculty: Faculty) => void;
 }
 
@@ -13,11 +13,14 @@ const FacultyContext = createContext<FacultyContextType | undefined>(undefined);
 
 // Create a provider component
 export const FacultyProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Faculty, setFaculty] = useState<Faculty | undefined>(() => {
-    // Retrieve Faculty from localStorage if available
+  const [Faculty, setFaculty] = useState<Faculty | null>(null);
+
+  useEffect(()=>{
     const storedFaculty = localStorage.getItem('Faculty');
-    return storedFaculty ? JSON.parse(storedFaculty) : undefined;
-  });
+    if(storedFaculty){
+      setFaculty(JSON.parse(storedFaculty))
+    }
+  },[])
 
   useEffect(() => {
     // Store Faculty in localStorage whenever it changes

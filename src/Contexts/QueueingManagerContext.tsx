@@ -4,7 +4,7 @@ import { QueueingManager } from '../Utils/Global_variables';
 
 // Define the context type
 interface QueueingManagerContextType {
-  QueueingManager: QueueingManager | undefined;
+  QueueingManager: QueueingManager | undefined | null;
   setQueueingManager: (QueueingManager: QueueingManager) => void;
 }
 
@@ -13,11 +13,14 @@ const QueueingManagerContext = createContext<QueueingManagerContextType | undefi
 
 // Create a provider component
 export const QueueingManagerProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [QueueingManager, setQueueingManager] = useState<QueueingManager | undefined>(() => {
-    // Retrieve QueueingManager from localStorage if available
+  const [QueueingManager, setQueueingManager] = useState<QueueingManager | null>(null);
+
+  useEffect(()=>{
     const storedQueueingManager = localStorage.getItem('QueueingManager');
-    return storedQueueingManager ? JSON.parse(storedQueueingManager) : undefined;
-  });
+    if(storedQueueingManager){
+      setQueueingManager(JSON.parse(storedQueueingManager))
+    }
+  },[])
 
   useEffect(() => {
     // Store QueueingManager in localStorage whenever it changes

@@ -4,7 +4,7 @@ import { ReportSummary } from '../Utils/Global_variables';
 
 // Define the context type
 interface ReportSummaryContextType {
-  ReportSummary: ReportSummary | undefined;
+  ReportSummary: ReportSummary | undefined | null;
   setReportSummary: (ReportSummary: ReportSummary | undefined) => void;
 }
 
@@ -13,11 +13,14 @@ const ReportSummaryContext = createContext<ReportSummaryContextType | undefined>
 
 // Create a provider component
 export const ReportSummaryProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [ReportSummary, setReportSummary] = useState<ReportSummary | undefined>(() => {
-    // Retrieve ReportSummary from localStorage if available
+  const [ReportSummary, setReportSummary] = useState<ReportSummary | null>(null);
+
+  useEffect(()=>{
     const storedReportSummary = localStorage.getItem('ReportSummary');
-    return storedReportSummary ? JSON.parse(storedReportSummary) : undefined;
-  });
+    if(storedReportSummary){
+      setReportSummary(JSON.parse(storedReportSummary))
+    }
+  },[])
 
   useEffect(() => {
     // Store ReportSummary in localStorage whenever it changes

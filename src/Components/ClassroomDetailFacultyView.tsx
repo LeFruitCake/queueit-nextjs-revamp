@@ -1,10 +1,10 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import BackButton from './BackButton'
-import { Avatar, Button, IconButton, Modal, Typography } from '@mui/material'
+import { Avatar, Button, CircularProgress, IconButton, Modal, Typography } from '@mui/material'
 import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
-import { DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL } from '@/Utils/Global_variables';
+import { DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL, Team } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import person from '../../public/images/pointingUpwardPerson.png'
@@ -60,6 +60,7 @@ interface AnalyticsResult{
     scatterPlotDataset:ScatterChartData
 }
 
+
 const GroupDetailAdviserView = () => {
     const {Teams, setTeams} = useTeamsContext();
     const classroomContext = useClassroomContext().classroom
@@ -79,49 +80,6 @@ const GroupDetailAdviserView = () => {
     }
     },[classroomContext,router])
 
-    // const scatterdata = {
-    //     datasets: [
-    //       {
-    //         label: "Scatter Dataset",
-    //         data: [
-    //           { x: 10, y: 3 },
-    //         ],
-    //         backgroundColor: "rgba(75, 192, 192, 0.5)",
-    //       },
-    //       {
-    //         label: "ANADA WAN",
-    //         data: [
-    //           { x: 6, y: 4.1 },
-    //         ],
-    //         backgroundColor: "red",
-    //       },
-    //       {
-    //         label: "Spear",
-    //         data: [
-    //           { x: 0, y: 0 },
-    //         ],
-    //         backgroundColor: "green",
-    //       },
-    //       {
-    //         label: "Queueit",
-    //         data: [
-    //           { x: 0, y: 0 },
-    //         ],
-    //         backgroundColor: "blue",
-    //       },
-    //     ],
-    //   };
-
-    // const data:DonutChartData = {
-    //     labels: ["Label 1", "Label 2", "Label 3", "Label 4", "Label 5"],
-    //     datasets: [
-    //         {
-    //         data: [12, 24, 18, 10, 15],
-    //         backgroundColor: ["#74B652", "#94C773", "#56941E", "#A569BD", "#F5B041"],
-    //         },
-    //     ],
-    //   };
-
 
     useEffect(()=>{
         if(classroom){
@@ -129,7 +87,7 @@ const GroupDetailAdviserView = () => {
             .then( async (res)=>{
                 switch(res.status){
                     case 200:
-                        const response = await res.json(); 
+                        const response:Array<Team> = await res.json(); 
                         setTeams(response)
                         break;
                     case 404:
@@ -144,12 +102,20 @@ const GroupDetailAdviserView = () => {
                 console.log(err)
             })
 
-
             fetch(`${QUEUEIT_URL}/faculty/classroomAnalytics/${classroom.cid}`)
             .then(async(res)=>{
                 if(res.ok){
                     const response:AnalyticsResult = await res.json();
-                    console.log(response)
+                    const teacherNames = new Set<string>
+                    const studentIDs = new Set<number>
+                    const teamIDs = new Set<number>
+                    Teams?.map((team)=>{
+                        teacherNames.add(team.adviserName)
+                        team.memberIds.map((id)=>{
+                            studentIDs.add(id)
+                        })
+                        teamIDs.add(team.tid)
+                    })
                     setAnalyticsData(response);
                 }else{
                     console.log("Failed to retrieve analytics.")
@@ -159,6 +125,7 @@ const GroupDetailAdviserView = () => {
                 console.log(err)
             })
         }
+        
     },[classroom])
 
     if(!Teams && !analyticsData){
@@ -186,7 +153,7 @@ const GroupDetailAdviserView = () => {
     
                     {/* team perfomance rankings */}
                     <div className='bg-white p-6 flex-1 rounded-md gap-12 flex flex-col'>
-                        <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Top ${analyticsData?.topTeams.length} Teams`}</Typography>
+                        <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Top Teams`}</Typography>
                         {analyticsData?.topTeams?
                             <div className='w-full flex items-end'>
                                 {
@@ -229,23 +196,38 @@ const GroupDetailAdviserView = () => {
     
                     
                     <div className='flex-1 rounded-md flex gap-3 bg-white items-center'>
-                        <ScatterChart dataset={analyticsData.scatterPlotDataset} chartTitle='Teams Performance Indicator'/>
+                        {
+                            analyticsData?.scatterPlotDataset?
+                            <ScatterChart dataset={analyticsData?.scatterPlotDataset} chartTitle='Teams Performance Indicator'/>
+                            :
+                            <CircularProgress/>
+                        }
                     </div>
                 </div>
     
                 <div className='w-full flex gap-6'>
-                    <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement</Typography>
-                        <div className='flex-grow flex items-center justify-between'>
-                            
+                    {
+                        analyticsData?.lowestEngagementDTO?.length?
+                        <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement</Typography>
+                            <div className='flex-grow flex items-center justify-between'>
+                                
+                            </div>
                         </div>
-                    </div>
-                    <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <SickIcon fontSize='small' className='text-notlushred'/> Low Performant Students </Typography>
-                        <div className='flex-grow flex items-center justify-between'>
-                            
+                        :
+                        <></>
+                    }
+                    {
+                        analyticsData?.atRiskForKickOuts.length?
+                        <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <SickIcon fontSize='small' className='text-notlushred'/> Low Performant Students </Typography>
+                            <div className='flex-grow flex items-center justify-between'>
+                                
+                            </div>
                         </div>
-                    </div>
+                        :
+                        <></>
+                    }
                 </div>
                 {/* <div className='w-full flex gap-6'>
                     <div className='bg-white min-h-40 p-3 rounded-md flex-1 flex flex-col'>
@@ -257,14 +239,19 @@ const GroupDetailAdviserView = () => {
                 </div> */}
     
                 <div className='flex gap-6 w-full'>
-                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 flex-grow'>
-                    <Typography>Teams</Typography>
-                    {Teams?.map((team,index)=>(
-                        <GroupBar key={index} team={team} index={index}/>
-                    ))}
+                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 flex-grow overflow-auto'>
+                        <Typography variant='h6' fontWeight={"bold"}>Teams</Typography>
+                        {Teams?.map((team,index)=>(
+                            <GroupBar key={index} team={team} index={index}/>
+                        ))}
                    </div>
-                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 w-1/3 aspect-square'>
-                        <DonutChart chartData={analyticsData.pieChartData} chartTitle='Mentor Performance'/>
+                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 w-1/3 aspect-square h-fit'>
+                        {
+                            analyticsData?.pieChartData?
+                            <DonutChart chartData={analyticsData?.pieChartData} chartTitle='Mentor Performance'/>
+                            :
+                            <CircularProgress/>
+                        }
                    </div>
                 </div>
     

@@ -13,11 +13,14 @@ const RubricsContext = createContext<RubricsContextType | undefined>(undefined);
 
 // Create a provider component
 export const RubricsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Rubrics, setRubrics] = useState<Array<Rubric> | undefined>(() => {
-    // Retrieve Rubrics from localStorage if available
+  const [Rubrics, setRubrics] = useState<Array<Rubric> | null>(null);
+
+  useEffect(()=>{
     const storedRubrics = localStorage.getItem('Rubrics');
-    return storedRubrics ? JSON.parse(storedRubrics) : undefined;
-  });
+    if(storedRubrics){
+      setRubrics(JSON.parse(storedRubrics))
+    }
+  },[])
 
   useEffect(() => {
     // Store Rubrics in localStorage whenever it changes

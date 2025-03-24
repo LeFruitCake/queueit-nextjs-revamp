@@ -1,8 +1,8 @@
 "use client"
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import logo from '../../public/images/logo.png'
-import { Avatar, Badge, Drawer, IconButton, Menu, MenuItem } from '@mui/material'
+import { Avatar, Badge, Drawer, IconButton, Menu, MenuItem, Typography } from '@mui/material'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useRouter } from 'next/navigation';
@@ -14,11 +14,12 @@ import Notification from './Notification';
 import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext';
 import { toast } from 'react-toastify';
 import { useFacultyContext } from '@/Contexts/FacultyContext';
+import catLoader from '../../public/loaders/catloader.gif'
 
 const Navbar = () => {
     const user = useUserContext().user
     const client = useWebSocket();
-    const location = window.location
+    const location = useRef<Location>(null)
     const userContext = useUserContext()
     const router = useRouter()
     const [avatarAnchorEl, setAvatarAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -28,6 +29,12 @@ const Navbar = () => {
     const [toggleDrawer, setToggleDrawer] = useState(false)
     const [notifications, setNotifications] = useState<Array<NotificationRecipient>>([]);
     const setFaculty = useFacultyContext().setFaculty
+
+    useEffect(()=>{
+        if(typeof window !== "undefined"){
+            location.current = window.location
+        }
+    },[])
     const handleAvatarClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         setAvatarAnchorEl(event.currentTarget);
     };
@@ -140,10 +147,10 @@ const Navbar = () => {
             {userContext.user?.role == UserType.FACULTY?
                 <>
                     <nav className='hidden md:flex lg:flex xl:flex ' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
-                        <a href='/dashboard' className={`nav-a-tag${location.pathname.includes('/dashboard')  ? '-active' : ''}`}>Home</a>
-                        <a href='/queue' className={`nav-a-tag${location.pathname.includes('/queue')  ? '-active' : ''}`}>Queue</a>
-                        <a href='/availability' className={`nav-a-tag${location.pathname.includes('/availability') ? '-active' : ''}`}>Availability</a>
-                        <a href='/rubrics' className={`nav-a-tag${location.pathname.includes('/rubrics') ? '-active' : ''}`}>Rubrics</a>
+                        <a href='/dashboard' className={`nav-a-tag${location.current?.pathname?.includes('/dashboard')  ? '-active' : ''}`}>Home</a>
+                        <a href='/queue' className={`nav-a-tag${location.current?.pathname?.includes('/queue')  ? '-active' : ''}`}>Queue</a>
+                        <a href='/availability' className={`nav-a-tag${location.current?.pathname?.includes('/availability') ? '-active' : ''}`}>Availability</a>
+                        <a href='/rubrics' className={`nav-a-tag${location.current?.pathname?.includes('/rubrics') ? '-active' : ''}`}>Rubrics</a>
                     </nav>
                     <div className='block md:hidden lg:hidden xl:hidden'>
                         <IconButton onClick={()=>{setToggleDrawer(true)}}>
@@ -151,10 +158,9 @@ const Navbar = () => {
                         </IconButton>
                         <Drawer open={toggleDrawer} onClose={()=>{setToggleDrawer(false)}}>
                         <nav className='flex flex-col gap-3 p-5' style={{backgroundColor:'rgb(243, 243, 243)', borderRadius:'15px'}}>
-                            <a href='/dashboard' className={`nav-a-tag${location.pathname.includes('/dashboard')  ? '-active' : ''}`}>Home</a>
-                            <a href='/queue' className={`nav-a-tag${location.pathname.includes('/queue')  ? '-active' : ''}`}>Queue</a>
-                            <a href='/availability' className={`nav-a-tag${location.pathname.includes('/availability') ? '-active' : ''}`}>Availability</a>
-                            <a href='/rubrics' className={`nav-a-tag${location.pathname.includes('/rubrics') ? '-active' : ''}`}>Rubrics</a>
+                            <a href='/dashboard' className={`nav-a-tag${location.current?.pathname?.includes('/dashboard')  ? '-active' : ''}`}>Home</a>
+                            <a href='/queue' className={`nav-a-tag${location.current?.pathname?.includes('/queue')  ? '-active' : ''}`}>Queue</a>
+                            <a href='/availability' className={`nav-a-tag${location.current?.pathname?.includes('/rubrics') ? '-active' : ''}`}>Rubrics</a>
                         </nav>
                         </Drawer>
                     </div>
@@ -216,11 +222,20 @@ const Navbar = () => {
                         horizontal:'right'
                     }}
                 >
-                    <div className='flex flex-col gap-3'>
-                        {notifications?.map((notification,index)=>(
-                            <Notification action={handleNotificationRedirectionClick} key={index} notification={notification}/>
-                        ))}
-                    </div>
+                    {
+                        notifications.length > 0?
+
+                        <div className='flex flex-col gap-3'>
+                            {notifications?.map((notification,index)=>(
+                                <Notification action={handleNotificationRedirectionClick} key={index} notification={notification}/>
+                            ))}
+                        </div>
+                        :
+                        <div className='flex flex-col gap-3 items-center justify-center'>
+                            <img src={catLoader.src} alt="cat" />
+                            <Typography variant='caption' color='gray'>No notifications to show.</Typography>
+                        </div>
+                    }
                 </Menu>
             </div>
         </div>

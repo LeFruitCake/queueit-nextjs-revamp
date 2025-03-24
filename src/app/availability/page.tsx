@@ -444,9 +444,9 @@ export default function Page() {
         );
     };
 
-    if(loading || user == null || user.role !== UserType.FACULTY){
+    if(loading || user == null || user.role !== UserType.FACULTY || !appointments){
         return(
-            <CatLoader loading={loading || user == null || user.role !== UserType.FACULTY}/>
+            <CatLoader loading={loading || user == null || user.role !== UserType.FACULTY || !appointments}/>
         )
     }else{
         return (
@@ -480,8 +480,8 @@ export default function Page() {
                                 }}
                                 eventContent={(eventInfo) => {
                                     // console.log(eventInfo)
-                                    const startTime = eventInfo.event.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                                    const endTime = eventInfo.event.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    const startTime = eventInfo?.event?.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                                    const endTime = eventInfo?.event?.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                                     const meetingStatus = eventInfo.event.extendedProps.meetingStatus
                                     const groupName = eventInfo.event._def.extendedProps.teamName;
     

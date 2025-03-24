@@ -4,7 +4,7 @@ import { Meeting, MeetingBoardHistoryEntry } from '../Utils/Global_variables';
 
 // Define the context type
 interface MeetingsContextType {
-  Meetings: Array<MeetingBoardHistoryEntry> | undefined;
+  Meetings: Array<MeetingBoardHistoryEntry> | undefined | null;
   setMeetings: (Meetings: Array<MeetingBoardHistoryEntry> | undefined) => void;
 }
 
@@ -13,11 +13,14 @@ const MeetingsContext = createContext<MeetingsContextType | undefined>(undefined
 
 // Create a provider component
 export const MeetingsProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [Meetings, setMeetings] = useState<Array<MeetingBoardHistoryEntry> | undefined>(() => {
-    // Retrieve Meetings from localStorage if available
+  const [Meetings, setMeetings] = useState<Array<MeetingBoardHistoryEntry> | null>(null);
+
+  useEffect(()=>{
     const storedMeetings = localStorage.getItem('Meetings');
-    return storedMeetings ? JSON.parse(storedMeetings) : undefined;
-  });
+    if(storedMeetings){
+      setMeetings(JSON.parse(storedMeetings))
+    }
+  },[])
 
   useEffect(() => {
     // Store Meetings in localStorage whenever it changes
