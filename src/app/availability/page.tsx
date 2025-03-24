@@ -287,7 +287,7 @@ export default function Page() {
                 if(res.ok){
                     
                     const response = await res.json();
-                    // console.log(response)
+                    console.log(response)
                     setAppointments(response)
                 }else{
                     toast.error("Server error while fetching appointments")
@@ -663,19 +663,19 @@ export default function Page() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                     <Typography variant="body1">Date: </Typography>
                                     <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                        {selectedEvent.start.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                                        {selectedEvent?.start?.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
                                     </Typography>
                                 </div><hr />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                     <Typography variant="body1">Start Time: </Typography>
                                     <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                        {selectedEvent.start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {selectedEvent?.start?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </Typography>
                                 </div><hr />
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                     <Typography variant="body1">End Time: </Typography>
                                     <Typography variant="body1" style={{ textAlign: 'right', fontWeight: 'bold' }}>
-                                        {selectedEvent.end.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        {selectedEvent?.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </Typography>
                                 </div>
                                 {selectedEvent.meetingStatus != MeetingStatus.SCHEDULED?
