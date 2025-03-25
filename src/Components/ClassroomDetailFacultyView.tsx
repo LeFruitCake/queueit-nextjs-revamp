@@ -67,6 +67,7 @@ const GroupDetailAdviserView = () => {
     const [classroom, setClassroom] = useState(classroomContext)
     const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
     const [analyticsData, setAnalyticsData] = useState<AnalyticsResult | undefined>()
+    const [dummyAnalytics, setDummyAnalytics] = useState<AnalyticsResult | undefined>()
     const openViewEnrolleesModal = ()=>{
     setViewEnrolleesModalOpen(true)
     }
@@ -106,36 +107,9 @@ const GroupDetailAdviserView = () => {
             .then(async(res)=>{
                 if(res.ok){
                     const response:AnalyticsResult = await res.json();
-                    const teacherNames = new Set<string>
-                    // const studentIDs = new Set<number>
-                    const teamNames = new Set<string>
-                    Teams?.map((team)=>{
-                        teacherNames.add(team.adviserName)
-                        // team.memberIds.map((id)=>{
-                        //     studentIDs.add(id)
-                        // })
-                        teamNames.add(team.groupName)
-                    })
-                    teacherNames.forEach(name=>{
-                        if(!response.pieChartData.labels.includes(name)){
-                            response.pieChartData.labels.push(name);
-                            response.pieChartData.datasets[0].backgroundColor.push('red')
-                            response.pieChartData.datasets[0].data.push(0)
-                        }
-                    })
-                    teamNames.forEach(teamName=>{
-                        if(!response.scatterPlotDataset.datasets.filter(dataset => dataset.label == teamName).length){
-                            response.scatterPlotDataset.datasets.push({
-                                "backgroundColor":'red',
-                                "data":[{
-                                    "x":0,
-                                    "y":0
-                                }],
-                                "label":teamName
-                            })
-                        }
-                    })
-                    setAnalyticsData(response);
+                    
+                    console.log(response)
+                    setDummyAnalytics(response);
                 }else{
                     console.log("Failed to retrieve analytics.")
                 }
@@ -146,6 +120,45 @@ const GroupDetailAdviserView = () => {
         }
         
     },[classroom])
+
+    useEffect(() => {
+        const updateAnalytics = async () => {
+            if (!dummyAnalytics) return;
+    
+            let foo: AnalyticsResult = JSON.parse(JSON.stringify(dummyAnalytics));
+            const teacherNames = new Set<string>();
+            const teamNames = new Set<string>();
+    
+            Teams?.forEach((team) => {
+                teacherNames.add(team.adviserName);
+                teamNames.add(team.groupName);
+            });
+    
+            for (const name of teacherNames) {
+                if (!foo.pieChartData.labels.includes(name)) {
+                    foo.pieChartData.labels.push(name);
+                    foo.pieChartData.datasets[0].backgroundColor.push('red');
+                    foo.pieChartData.datasets[0].data.push(0);
+                }
+            }
+    
+            for (const teamName of teamNames) {
+                if (!foo.scatterPlotDataset.datasets.some(dataset => dataset.label === teamName)) {
+                    foo.scatterPlotDataset.datasets.push({
+                        "backgroundColor": 'red',
+                        "data": [{ "x": 0, "y": 0 }],
+                        "label": teamName
+                    });
+                }
+            }
+    
+            // console.log("Updated foo:", foo);
+            setAnalyticsData(foo);
+        };
+    
+        updateAnalytics();
+    }, [dummyAnalytics, Teams]); // Dependencies to trigger update
+    
 
     if(!Teams && !analyticsData){
         return(
