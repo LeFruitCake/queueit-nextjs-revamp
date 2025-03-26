@@ -125,7 +125,7 @@ export default function page() {
               value={rubric.title}
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder="Rubric Title"
-              style={{fontSize:'2.5em', fontWeight:'bold', color:'black', width:'100%'}}
+              style={{fontSize:'2.5em', fontWeight:'bold', color:'black', width:'100%', border: 'none', outline: 'none',}}
             />
             <TextField
             value={rubric.description}
@@ -135,7 +135,7 @@ export default function page() {
             multiline
             placeholder="Description"
             InputProps={{ disableUnderline: true }}
-            className="text-gray-500 ml-12"
+            className="text-gray-500 ml-1"
           />
           </div>
         </div>
