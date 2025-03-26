@@ -36,7 +36,7 @@ const GroupDetailAdviserView = () => {
 
     useEffect(()=>{
         if(classroom){
-            fetch(`${SPEAR_URL}/mentor/classroom/${classroom?.cid}/teams/${user.uid}`)
+            fetch(`${SPEAR_URL}/mentor/classroom/${classroom?.cid}/teams/${user?.uid}`)
             .then( async (res)=>{
                 switch(res.status){
                     case 200:

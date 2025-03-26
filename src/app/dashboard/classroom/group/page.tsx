@@ -2,7 +2,7 @@
 import BackButton from '@/Components/BackButton'
 import BaseComponent from '@/Components/BaseComponent'
 import { useTeamContext } from '@/Contexts/TeamContext'
-import { Button, IconButton, Tooltip, Typography } from '@mui/material'
+import { Button, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
 import { Attendance, AttendanceStatus, dpurple, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
@@ -37,6 +37,28 @@ interface ModifyAttendanceGradeEntryProps{
     studentLastname:string
 }
 
+
+interface DataEntry{
+    data: Array<number>
+    backgroundColor: Array<string>
+}
+
+interface RadarData{
+    labels: Array<string>
+    datasets: Array<DataEntry>
+}
+
+interface HistogramData{
+    labels: Array<string>
+    datasets: Array<DataEntry>
+}
+
+interface GroupAnalytics{
+    histogramData: HistogramData
+    radarData: RadarData
+}
+
+
 const page = () => {
     const user = useUserContext().user
     const team = useTeamContext().Team
@@ -47,6 +69,28 @@ const page = () => {
     const {Meetings,setMeetings} = useMeetingsContext();
     const router = useRouter();
     const {QueueingManager, setQueueingManager} = useQueueingManagerContext()
+
+    const [teamAnalytics,setTeamAnalytics] = useState<GroupAnalytics>()
+    
+    useEffect(()=>{
+        if(team){
+            fetch(`${QUEUEIT_URL}/faculty/teamAnalytics/${team.tid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:GroupAnalytics = await res.json()
+                    console.log(response)
+                    response.histogramData.datasets[0].label = "Number Of Presence in Meetings"
+                    response.radarData.datasets[0].label = "Performance Web"
+                    setTeamAnalytics(response)
+                }else{
+                    console.log(res.status)
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        }
+    },[team])
 
     useEffect(()=>{
         if(team?.adviserId){
@@ -236,10 +280,18 @@ const page = () => {
                         </div>
                         <div className='w-full h-96 flex gap-6'>
                             <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
-                                <HistogramChart/>
+                                {teamAnalytics?.histogramData?
+                                    <HistogramChart data={teamAnalytics?.histogramData}/>
+                                    :
+                                    <CircularProgress/>
+                                }
                             </div>
                             <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
-                                <RadarChart/>
+                                {teamAnalytics?.radarData?
+                                    <RadarChart data={teamAnalytics?.radarData}/>
+                                    :
+                                    <CircularProgress/>
+                                }
                             </div>
                         </div>
                     </div>

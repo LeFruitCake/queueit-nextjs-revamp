@@ -5,28 +5,49 @@ import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Title, 
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const RadarChart = () => {
-  const data = {
-    labels: ['Speed', 'Strength', 'Agility', 'Endurance'],
-    datasets: [
-      {
-        label: 'Team Performance',
-        data: [8, 7, 9, 6],
-        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-        borderColor: 'rgba(54, 162, 235, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+interface DataEntry{
+  data: Array<number>
+  backgroundColor: Array<string>
+}
+
+interface RadarData{
+  labels: Array<string>
+  datasets: Array<DataEntry>
+}
+
+interface RadarChartProps{
+  data:RadarData
+}
+
+const RadarChart:React.FC<RadarChartProps> = ({data}) => {
+  // const data = {
+  //   labels: ['Speed', 'Strength', 'Agility', 'Endurance'],
+  //   datasets: [
+  //     {
+  //       label: 'Team Performance',
+  //       data: [8, 7, 9, 6],
+  //       backgroundColor: 'rgba(54, 162, 235, 0.2)',
+  //       borderColor: 'rgba(54, 162, 235, 1)',
+  //       borderWidth: 1,
+  //     },
+  //   ],
+  // };
 
   const options = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       r: {
         beginAtZero: true,
+        min: 0, // Set minimum value to 0
+        max: 5, // Set maximum value to 5
+        ticks: {
+          stepSize: 1, // Optional: Ensures steps of 1 unit
+        },
       },
     },
   };
+  
 
   return <Radar data={data} options={options} />;
 };

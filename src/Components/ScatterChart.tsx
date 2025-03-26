@@ -20,6 +20,7 @@ interface ScatterChartProps{
 const ScatterChart:React.FC<ScatterChartProps> = ({dataset, chartTitle}) => {
     const options = {
         responsive: true,
+        maintainAspectRatio: false,
         plugins: {
           legend: {
             position: "top",
@@ -40,6 +41,8 @@ const ScatterChart:React.FC<ScatterChartProps> = ({dataset, chartTitle}) => {
             }
           },
           y: {
+            min:0,
+            max:5,
             beginAtZero: true,
             title:{
                 display:true,

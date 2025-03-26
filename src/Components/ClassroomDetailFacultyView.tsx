@@ -106,15 +106,17 @@ const GroupDetailAdviserView = () => {
             .then(async(res)=>{
                 if(res.ok){
                     const response:AnalyticsResult = await res.json();
+                    console.log(response)
                     const teacherNames = new Set<string>
                     // const studentIDs = new Set<number>
                     const teamNames = new Set<string>
                     Teams?.map((team)=>{
-                        teacherNames.add(team.adviserName)
-                        // team.memberIds.map((id)=>{
-                        //     studentIDs.add(id)
-                        // })
-                        teamNames.add(team.groupName)
+                        if(team.adviserName != null){
+                            teacherNames.add(team.adviserName)
+                        }
+                        if(team.groupName != null){
+                            teamNames.add(team.groupName)
+                        }
                     })
                     teacherNames.forEach(name=>{
                         if(!response.pieChartData.labels.includes(name)){
@@ -173,34 +175,34 @@ const GroupDetailAdviserView = () => {
                     {/* team perfomance rankings */}
                     <div className='bg-white p-6 flex-1 rounded-md gap-12 flex flex-col'>
                         <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Top Teams`}</Typography>
-                        {analyticsData?.topTeams?
+                        {analyticsData?.topTeams && (analyticsData?.topTeams[0]?.gradeAverage != 0 || analyticsData?.topTeams[0]?.gradeAverage != null || analyticsData?.topTeams[0]?.gradeAverage != undefined)?
                             <div className='w-full flex items-end'>
                                 {
-                                    analyticsData?.topTeams.length >= 2?
-                                    <div className='bg-gradient-to-b from-dpurple to-white h-48 flex-1 relative rounded-md rounded-tr-none'>
+                                    analyticsData?.topTeams.length >= 2 && analyticsData.topTeams[1].gradeAverage != 0?
+                                    <div className='bg-gradient-to-b overflow-hidden from-dpurple to-white h-48 flex-1 relative rounded-md rounded-tr-none'>
                                         <img src={medalTwo.src} alt="2nd place medal" style={{margin:'0 auto'}}/>
                                         <div className='flex-grow flex flex-col items-center justify-center p-3'>
-                                            <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.teamName}</Typography>
-                                            <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.gradeAverage}</Typography>
+                                            <Typography variant='caption' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.teamName}</Typography>
+                                            <Typography variant='h6' fontWeight={"bold"}>{analyticsData?.topTeams[1]?.gradeAverage}</Typography>
                                         </div>
                                     </div>
                                     :
                                     <></>
                                 }
-                                <div className='bg-gradient-to-b from-lgreen to-white h-64 flex-1 relative rounded-md flex flex-col'>
+                                <div className='bg-gradient-to-b overflow-hidden from-lgreen to-white h-64 flex-1 relative rounded-md flex flex-col'>
                                     <img src={medalOne.src} alt="1st place medal" style={{margin:'0 auto'}}/>
                                     <div className='flex-grow flex flex-col items-center justify-center p-3'>
-                                        <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.teamName}</Typography>
-                                        <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.gradeAverage}</Typography>
+                                        <Typography variant='caption' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.teamName}</Typography>
+                                        <Typography variant='h6' fontWeight={"bold"}>{analyticsData?.topTeams[0]?.gradeAverage}</Typography>
                                     </div>
                                 </div>
                                 {
-                                    analyticsData?.topTeams.length >= 3?
-                                    <div className='bg-gradient-to-b from-dpurple to-white h-32 flex-1 relative rounded-md rounded-tl-none'>
+                                    analyticsData?.topTeams.length >= 3 && analyticsData.topTeams[2].gradeAverage != 0?
+                                    <div className='bg-gradient-to-b overflow-hidden from-dpurple to-white h-32 flex-1 relative rounded-md rounded-tl-none'>
                                         <img src={medalThree.src} alt="3rd place medal" style={{margin:'0 auto'}}/>
                                         <div className='flex-grow flex flex-col items-center justify-center p-3'>
-                                            <Typography variant='h5' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.teamName}</Typography>
-                                            <Typography variant='subtitle1' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.gradeAverage}</Typography>
+                                            <Typography variant='caption' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.teamName}</Typography>
+                                            <Typography variant='h6' fontWeight={"bold"}>{analyticsData?.topTeams[2]?.gradeAverage}</Typography>
                                         </div>
                                     </div>
                                     :
