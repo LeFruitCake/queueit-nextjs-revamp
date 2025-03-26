@@ -138,7 +138,7 @@ const GroupDetailAdviserView = () => {
                             })
                         }
                     })
-                    setAnalyticsData(response);
+                    setDummyAnalytics(response);
                 }else{
                     console.log("Failed to retrieve analytics.")
                 }
