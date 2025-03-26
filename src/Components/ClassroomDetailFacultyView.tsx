@@ -67,6 +67,7 @@ const GroupDetailAdviserView = () => {
     const [classroom, setClassroom] = useState(classroomContext)
     const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
     const [analyticsData, setAnalyticsData] = useState<AnalyticsResult | undefined>()
+    const [dummyAnalytics, setDummyAnalytics] = useState<AnalyticsResult | undefined>()
     const openViewEnrolleesModal = ()=>{
     setViewEnrolleesModalOpen(true)
     }
@@ -149,6 +150,45 @@ const GroupDetailAdviserView = () => {
         
     },[classroom])
 
+    useEffect(() => {
+        const updateAnalytics = async () => {
+            if (!dummyAnalytics) return;
+    
+            let foo: AnalyticsResult = JSON.parse(JSON.stringify(dummyAnalytics));
+            const teacherNames = new Set<string>();
+            const teamNames = new Set<string>();
+    
+            Teams?.forEach((team) => {
+                teacherNames.add(team.adviserName);
+                teamNames.add(team.groupName);
+            });
+    
+            for (const name of teacherNames) {
+                if (!foo.pieChartData.labels.includes(name)) {
+                    foo.pieChartData.labels.push(name);
+                    foo.pieChartData.datasets[0].backgroundColor.push('red');
+                    foo.pieChartData.datasets[0].data.push(0);
+                }
+            }
+    
+            for (const teamName of teamNames) {
+                if (!foo.scatterPlotDataset.datasets.some(dataset => dataset.label === teamName)) {
+                    foo.scatterPlotDataset.datasets.push({
+                        "backgroundColor": 'red',
+                        "data": [{ "x": 0, "y": 0 }],
+                        "label": teamName
+                    });
+                }
+            }
+    
+            // console.log("Updated foo:", foo);
+            setAnalyticsData(foo);
+        };
+    
+        updateAnalytics();
+    }, [dummyAnalytics, Teams]); // Dependencies to trigger update
+    
+
     if(!Teams && !analyticsData){
         return(
             <CatLoader loading={!Teams && !analyticsData}/>
@@ -166,7 +206,7 @@ const GroupDetailAdviserView = () => {
                         <Typography variant='caption' className='text-white text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
                         </div>
                     </div>
-                    <Button sx={{backgroundColor:lgreen, color:'black', textTransform:'none', fontWeight:'bold', padding:'0.5em 2em'}}>Class Record</Button>
+                    <Button onClick={()=>{router.push("/dashboard/classroom/summary")}} sx={{backgroundColor:lgreen, color:'black', textTransform:'none', fontWeight:'bold', padding:'0.5em 2em'}}>Class Record</Button>
                 </div>
     
                 {/* 2nd row charts */}
