@@ -201,11 +201,11 @@ const QueueingPageFacultyView = () => {
     };
 
     const concludeMeeting = ()=>{
-        if(grades?.length == 0){
-            toast.error("You have yet to grade anybody.")
-        }else{
+        // if(grades?.length == 0){
+        //     toast.error("You have yet to grade anybody.")
+        // }else{
             console.log(queueingManager?.meeting?.queueingEntry.attendanceList)
-            fetch(`${QUEUEIT_URL}/faculty/concludeMeeting`,{
+            fetch(`${QUEUEIT_URL}/faculty/concludeMeeting/${queueingManager?.meeting?.meetingID}`,{
                 body:JSON.stringify({
                     grades:grades,
                     notedAssignedTasks:notedAssignedTasks,
@@ -237,7 +237,7 @@ const QueueingPageFacultyView = () => {
                 toast.error("Something went wrong during admittance.")
                 console.log(err)
             })
-        }
+        // }
     }
 
     return (

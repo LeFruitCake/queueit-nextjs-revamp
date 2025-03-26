@@ -266,6 +266,7 @@ export enum MeetingStatus{
     STARTED_AUTOMATED = "STARTED_AUTOMATED",
     SCHEDULED = "SCHEDULED",
     STARTED_MANUALLY = "STARTED_MANUALLY",
+    FOLLOWUP_MEETING = "FOLLOWUP_MEETING"
 }
 
 export interface Meeting{

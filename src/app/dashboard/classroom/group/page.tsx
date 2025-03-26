@@ -270,7 +270,8 @@ const page = () => {
                             <IconButton onClick={()=>{router.push("/dashboard/classroom/group/summary")}} sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'end', '&:hover':{backgroundColor:'yellowgreen'}, textTransform:'none'}}><AssessmentIcon fontSize='small'/><p style={{fontSize:'16px'}}>Generate Summary</p></IconButton>
                             {Meetings?.map((historyEntry, index) => {
                                 const isAttended = historyEntry.meetingStatus === MeetingStatus.ATTENDED_QUEUEING_CONDUCTED || 
-                                                historyEntry.meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED;
+                                                historyEntry.meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED ||
+                                                historyEntry.meetingStatus === MeetingStatus.FOLLOWUP_MEETING;
 
                                 return isAttended ? (
                                     <div key={index} style={{ backgroundColor: '#1D1D1C' }} className="p-10 flex flex-col gap-3 rounded-md">
@@ -278,7 +279,7 @@ const page = () => {
                                             {`Meeting #${++attendedIndex}`} {/* Increment only for attended meetings */}
                                         </Typography>
                                         <Typography variant="h6" color="white">{new Date(historyEntry?.start).toDateString()}</Typography>
-                                        <Typography variant='caption' color={dpurple}>{historyEntry.meetingStatus}</Typography>
+                                        <Typography variant='caption' color={historyEntry.meetingStatus === MeetingStatus.FOLLOWUP_MEETING?'warning':dpurple}>{historyEntry.meetingStatus}</Typography>
                                         <div className="flex gap-3">
                                             {historyEntry?.attendanceList.map((attendanceEntry, idx) => (
                                                 <Tooltip 
@@ -336,7 +337,7 @@ const page = () => {
                                                 <Typography variant="caption" color="primary" fontWeight="bold">System automated meeting is expected.</Typography>
                                             ) : historyEntry.meetingStatus === MeetingStatus.SET_MANUALLY ? (
                                                 <Typography variant="caption" color="primary" fontWeight="bold">Mentor created an appointment for {new Date(historyEntry.end).toDateString()}.</Typography>
-                                            ) : (
+                                            ) :(
                                                 <Typography variant="subtitle2" color="success" fontWeight="bold">Ongoing</Typography>
                                             )}
                                         </div>
