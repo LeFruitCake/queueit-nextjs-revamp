@@ -7,10 +7,12 @@ import { useTeamContext } from '@/Contexts/TeamContext';
 import { Classes, dpurple, lgreen, QUEUEIT_URL, ReportSummaryEntry, SPEAR_URL } from '@/Utils/Global_variables';
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { toast } from 'react-toastify';
 import catLoader from '../../../../../../public/loaders/catloader.gif'
 import CatLoader from '@/Components/CatLoader';
+import ExportToExcelButton from '@/Components/ExportToExcelButton';
+import { useDownloadExcel } from 'react-export-table-to-excel';
 
 const Page = () => {
     const user = useUserContext().user;
@@ -20,6 +22,7 @@ const Page = () => {
     const [uniqueNames, setUniqueNames] = useState<Set<string>>(new Set());
     const [uniqueMeetings, setUniqueMeetings] = useState<Set<number>>(new Set());
     const [table, setTable] = useState<string[][]>([]);
+    const tableref= useRef(null)
 
     const loading = useUserContext().loading
 
@@ -126,6 +129,12 @@ const Page = () => {
         }
     }, [uniqueMeetings, uniqueNames, ReportSummary]);
 
+    const {onDownload} = useDownloadExcel({
+        currentTableRef:tableref.current,
+        filename:`${team?.groupName}_summary`,
+        sheet:`${team?.groupName}`
+    })
+
     if(loading || !team || !classroom){
         return(
             <CatLoader loading={loading || !team || !classroom}/>
@@ -142,10 +151,13 @@ const Page = () => {
                             <Typography variant='h2' color='white' fontWeight="bold">{team?.groupName}</Typography>
                             <Typography variant='h6' color='white'>{`${classroom?.courseDescription} - ${classroom?.courseCode}`}</Typography>
                         </div>
+                        <div className='ml-auto'>
+                            <ExportToExcelButton onClick={onDownload}/>
+                        </div>
                     </div>
                     {table && table.length > 0 && (
                         <div className='flex-1 bg-white overflow-auto relative'>
-                            <table style={{ borderCollapse: 'separate', borderSpacing: '0em' }} className='h-full w-full bg-black'>
+                            <table style={{ borderCollapse: 'separate', borderSpacing: '0em' }} className='h-full w-full bg-black' ref={tableref}>
                                 <thead className='sticky top-0 z-10'>
                                     <tr className='h-28'>
                                         {table[0].map((header, index) => (
@@ -188,8 +200,6 @@ const Page = () => {
                                             ))}
                                         </tr>
                                     ))}
-                                </tbody>
-                                <tfoot>
                                     <tr>
                                         {table[table.length - 1].map((footerCell, index) => (
                                             <th className='bg-lgreen font-bold py-6' style={{ border: 'solid 1px black' }} key={index}>
@@ -197,7 +207,16 @@ const Page = () => {
                                             </th>
                                         ))}
                                     </tr>
-                                </tfoot>
+                                </tbody>
+                                {/* <tfoot>
+                                    <tr>
+                                        {table[table.length - 1].map((footerCell, index) => (
+                                            <th className='bg-lgreen font-bold py-6' style={{ border: 'solid 1px black' }} key={index}>
+                                                {footerCell}
+                                            </th>
+                                        ))}
+                                    </tr>
+                                </tfoot> */}
                             </table>
                         </div>
                     

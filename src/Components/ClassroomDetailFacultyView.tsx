@@ -177,7 +177,7 @@ const GroupDetailAdviserView = () => {
                         <Typography variant='caption' className='text-white text-lg'>{`${classroom?.courseCode} - ${classroom?.section}`}</Typography>
                         </div>
                     </div>
-                    <Button sx={{backgroundColor:lgreen, color:'black', textTransform:'none', fontWeight:'bold', padding:'0.5em 2em'}}>Class Record</Button>
+                    <Button onClick={()=>{router.push("/dashboard/classroom/summary")}} sx={{backgroundColor:lgreen, color:'black', textTransform:'none', fontWeight:'bold', padding:'0.5em 2em'}}>Class Record</Button>
                 </div>
     
                 {/* 2nd row charts */}
