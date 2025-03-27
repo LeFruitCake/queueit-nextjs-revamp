@@ -10,26 +10,27 @@ import SearchIcon from '@mui/icons-material/Search';
 import ExportToExcelButton from '@/Components/ExportToExcelButton';
 import { toast } from 'react-toastify';
 import { dpurple, lgreen, QUEUEIT_URL } from '@/Utils/Global_variables';
+import CatLoader from '@/Components/CatLoader';
 
 const Page = () => {
     const user = useUserContext().user;
     const { classroom } = useClassroomContext();
     const tableref = useRef(null);
-    const [originalData, setOriginalData] = useState([]); // Store original data
+    const [originalData, setOriginalData] = useState([]); 
     const [filteredData, setFilteredData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortCategory, setSortCategory] = useState("All Category");
+    const loading = useUserContext().loading
 
-    // Fetch class records function
     const fetchClassRecords = async () => {
-        if (!classroom?.cid) return; // Ensure classroom ID is available
+        if (!classroom?.cid) return;
     
         try {
             const response = await fetch(`${QUEUEIT_URL}/faculty/generateClassRecord/${classroom.cid}`);
             if (response.ok) {
                 const data = await response.json();
-                setOriginalData(data); // Store original data
-                setFilteredData(data); // Set filtered data to original data
+                setOriginalData(data); 
+                setFilteredData(data);
             } else {
                 toast.error("Failed to fetch class records");
             }
@@ -38,7 +39,6 @@ const Page = () => {
         }
     };
 
-    // Call fetchClassRecords when the component mounts
     React.useEffect(() => {
         fetchClassRecords();
     }, [classroom]);
@@ -88,68 +88,74 @@ const Page = () => {
         sheet: `${classroom?.courseCode}_${classroom?.section}`
     });
 
-    return (
-        <BaseComponent>
-            <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
-                <div className='flex gap-6 items-center'>
-                    <BackButton />
-                    <div className='flex flex-col gap-3'>
-                        <Typography variant='h2' color='white' fontWeight='bold'>Section Grades</Typography>
-                        <Typography variant='h6' color='white'>Total Students: {filteredData.length}</Typography>
+    if(loading || !classroom){
+        return(
+            <CatLoader loading={loading || !classroom}/>
+        )
+    }else{
+        return (
+            <BaseComponent>
+                <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
+                    <div className='flex gap-6 items-center'>
+                        <BackButton />
+                        <div className='flex flex-col gap-3'>
+                            <Typography variant='h2' color='white' fontWeight='bold'>Section Grades</Typography>
+                            <Typography variant='h6' color='white'>Total Students: {filteredData.length}</Typography>
+                        </div>
+                        <div className='ml-auto'>
+                            <ExportToExcelButton onClick={onDownload} />
+                        </div>
                     </div>
-                    <div className='ml-auto'>
-                        <ExportToExcelButton onClick={onDownload} />
+                    <div className='flex justify-between items-center mb-4 p-4 bg-white rounded-md'>
+                        <TextField
+                            variant='outlined'
+                            placeholder='Search...'
+                            value={searchTerm}
+                            onChange={handleSearch}
+                            sx={{ width: '30%' }}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position='start'>
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                )
+                            }}
+                        />
+                        <Select
+                            value={sortCategory}
+                            onChange={handleSort}
+                            displayEmpty
+                            sx={{ minWidth: 150 }}
+                        >
+                            <MenuItem value="All Category">All Category</MenuItem>
+                            <MenuItem value="Group Name">Group Name</MenuItem>
+                            <MenuItem value="Grade">Grade</MenuItem>
+                        </Select>
                     </div>
-                </div>
-                <div className='flex justify-between items-center mb-4 p-4 bg-white rounded-md'>
-                    <TextField
-                        variant='outlined'
-                        placeholder='Search...'
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        sx={{ width: '30%' }}
-                        InputProps={{
-                            startAdornment: (
-                                <InputAdornment position='start'>
-                                    <SearchIcon />
-                                </InputAdornment>
-                            )
-                        }}
-                    />
-                    <Select
-                        value={sortCategory}
-                        onChange={handleSort}
-                        displayEmpty
-                        sx={{ minWidth: 150 }}
-                    >
-                        <MenuItem value="All Category">All Category</MenuItem>
-                        <MenuItem value="Group Name">Group Name</MenuItem>
-                        <MenuItem value="Grade">Grade</MenuItem>
-                    </Select>
-                </div>
-                <div className='flex-1 bg-white overflow-auto relative'>
-                    <table className='w-full border-collapse' ref={tableref}>
-                        <thead className='sticky top-0 z-10 bg-gray-200'>
-                            <tr>
-                                <th className='p-4 border'>STUDENT NAME</th>
-                                <th className='p-4 border'>GROUP NAME</th>
-                                <th className='p-4 border'>GRADE</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredData.map((row, index) => (
-                                <tr key={index} className='border-b'>
-                                    <td className='p-4 border'>{row.studentName}</td>
-                                    <td className='p-4 border'>{row.teamName}</td>
-                                    <td className='p-4 border'>{row.gradeAverage}</td>
+                    <div className='flex-1 bg-white overflow-auto relative'>
+                        <table className='w-full border-collapse' ref={tableref}>
+                            <thead className='sticky top-0 z-10 bg-gray-200'>
+                                <tr>
+                                    <th className='p-4 border'>STUDENT NAME</th>
+                                    <th className='p-4 border'>GROUP NAME</th>
+                                    <th className='p-4 border'>GRADE</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredData.map((row, index) => (
+                                    <tr key={index} className='border-b'>
+                                        <td className='p-4 border'>{row.studentName}</td>
+                                        <td className='p-4 border'>{row.teamName}</td>
+                                        <td className='p-4 border'>{row.gradeAverage}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-        </BaseComponent>
-    );
+            </BaseComponent>
+        );
+    }
 };
 
 export default Page;
