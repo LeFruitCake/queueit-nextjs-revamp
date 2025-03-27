@@ -2,195 +2,103 @@
 import BackButton from '@/Components/BackButton';
 import BaseComponent from '@/Components/BaseComponent';
 import { useUserContext } from '@/Contexts/AuthContext';
-import { useReportSummaryContext } from '@/Contexts/ReportSummaryContext';
-import { useTeamContext } from '@/Contexts/TeamContext';
-import { Classes, dpurple, lgreen, QUEUEIT_URL, ReportSummaryEntry, SPEAR_URL } from '@/Utils/Global_variables';
-import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
-import { Typography, TextField, InputAdornment, MenuItem, Select, Button } from '@mui/material';
-import React, { useEffect, useState, useRef } from 'react';
-import { toast } from 'react-toastify';
-import catLoader from '../../../../../../public/loaders/catloader.gif'
-import ExportToExcelButton from '@/Components/ExportToExcelButton';
+import { useClassroomContext } from '@/Contexts/ClassroomContext';
+import { Typography, TextField, InputAdornment, MenuItem, Select } from '@mui/material';
+import React, { useState, useRef } from 'react';
 import { useDownloadExcel } from 'react-export-table-to-excel';
 import SearchIcon from '@mui/icons-material/Search';
+import ExportToExcelButton from '@/Components/ExportToExcelButton';
+import { toast } from 'react-toastify';
+import { dpurple, lgreen, QUEUEIT_URL } from '@/Utils/Global_variables';
 
 const Page = () => {
     const user = useUserContext().user;
-    const team = useTeamContext().Team;
-    const [classroom, setClassroom] = useState<Classes>();
-    const { ReportSummary, setReportSummary } = useReportSummaryContext();
-    const [uniqueNames, setUniqueNames] = useState<Set<string>>(new Set());
-    const [uniqueMeetings, setUniqueMeetings] = useState<Set<number>>(new Set());
-    const [table, setTable] = useState<string[][]>([]);
-    const tableref= useRef(null)
+    const { classroom } = useClassroomContext();
+    const tableref = useRef(null);
+    const [originalData, setOriginalData] = useState([]); // Store original data
     const [filteredData, setFilteredData] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortCategory, setSortCategory] = useState("All Category");
 
-
-    const fetchClassroom = () => {
-        fetch(`${SPEAR_URL}/class/${team?.classId}`)
-            .then(async (res) => {
-                if (res.ok) {
-                    const response = await res.json();
-                    setClassroom(response);
-                }
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    };
-
-    const fetchReportSummary = () => {
-        fetch(`${QUEUEIT_URL}/meeting/teamMeetings/generateSummary/${team?.tid}`)
-            .then(async (res) => {
-                if (res.ok) {
-                    const response = await res.json();
-                    setReportSummary(response);
-                } else {
-                    toast.error("Server error");
-                }
-            })
-            .catch((err) => {
-                toast.error("Caught an exception while fetching Report Summary");
-            });
-    };
-
-    useEffect(() => {
-        if (!classroom) {
-            fetchClassroom();
-        } else {
-            if(team?.adviserId == user?.uid || (classroom.firstname == capitalizeFirstLetter(user?.firstname) && classroom.lastname == capitalizeFirstLetter(user?.lastname) ||  (user?.uid !== undefined && team?.memberIds?.includes(user.uid)) )){
-                fetchReportSummary();
+    // Fetch class records function
+    const fetchClassRecords = async () => {
+        if (!classroom?.cid) return; // Ensure classroom ID is available
+    
+        try {
+            const response = await fetch(`${QUEUEIT_URL}/faculty/generateClassRecord/${classroom.cid}`);
+            if (response.ok) {
+                const data = await response.json();
+                setOriginalData(data); // Store original data
+                setFilteredData(data); // Set filtered data to original data
+            } else {
+                toast.error("Failed to fetch class records");
             }
+        } catch (error) {
+            toast.error("Caught an exception while fetching class records");
         }
+    };
+
+    // Call fetchClassRecords when the component mounts
+    React.useEffect(() => {
+        fetchClassRecords();
     }, [classroom]);
 
-    useEffect(() => {
-        if (ReportSummary) {
-            const names = new Set<string>();
-            const meetings = new Set<number>();
-            ReportSummary.reportSummaryEntryList.forEach((entry) => {
-                names.add(entry.studentName);
-                meetings.add(entry.meetingNumber);
-            });
-            setUniqueNames(names);
-            setUniqueMeetings(meetings);
-        }
-    }, [ReportSummary]);
-
-    useEffect(() => {
-        if (uniqueMeetings && uniqueNames && ReportSummary) {
-            const meetingsArray = Array.from(uniqueMeetings);
-            const namesArray = Array.from(uniqueNames);
-            let matrix = [];
-
-            for (let i = 0; i < meetingsArray.length + 2; i++) {
-                const row = [];
-                switch (i) {
-                    case 0:
-                        row.push("Names");
-                        namesArray.forEach(name => row.push(name));
-                        break;
-
-                    case meetingsArray.length + 1:
-                        row.push("Final Grade");
-                        namesArray.forEach((name, colIndex) => {
-                            let totalGrade = 0;
-                            let count = 0;
-
-                            matrix.forEach((dataRow, rowIndex) => {
-                                if (rowIndex !== 0 && rowIndex !== meetingsArray.length + 1) {
-                                    const grade = dataRow[colIndex + 1];
-                                    if (typeof grade === 'number') {
-                                        totalGrade += grade;
-                                        count++;
-                                    }
-                                }
-                            });
-
-                            const average = count > 0 ? (totalGrade / count).toFixed(1) : "N/A";
-                            row.push(average);
-                        });
-                        break;
-
-                    default:
-                        row.push(`Meeting #${meetingsArray[i - 1]}`);
-                        namesArray.forEach(name => {
-                            const entry = ReportSummary.reportSummaryEntryList.find(
-                                item => item.studentName === name && item.meetingNumber === meetingsArray[i - 1]
-                            );
-                            row.push(entry ? entry.gradeAverage : "N/A");
-                        });
-                }
-                matrix.push(row);
-            }
-
-            setTable(matrix)
-        }
-    }, [uniqueMeetings, uniqueNames, ReportSummary]);
-
-    const {onDownload} = useDownloadExcel({
-        currentTableRef:tableref.current,
-        filename:`${classroom?.courseCode}_${classroom?.section}_classroomSummary`,
-        sheet:`${team?.groupName}`
-    })
-
-    useEffect(() => {
-        if (ReportSummary) {
-            const transformedData = ReportSummary.reportSummaryEntryList.map(entry => ({
-                studentName: entry.studentName,
-                groupName: `${team?.groupName}` || "N/A",
-                grade: entry.gradeAverage
-            }));
-            setFilteredData(transformedData);
-        }
-    }, [ReportSummary]);
-
+    // Handle search functionality
     const handleSearch = (e) => {
         const value = e.target.value.toLowerCase();
         setSearchTerm(value);
-        const filtered = ReportSummary.reportSummaryEntryList.filter(entry =>
-            entry.studentName.toLowerCase().includes(value) ||
-            team?.groupName.toLowerCase().includes(value) ||
-            entry.gradeAverage.toString().includes(value)
-        ).map(entry => ({
-            studentName: entry.studentName,
-            groupName: team?.groupName || "N/A",
-            grade: entry.gradeAverage
-        }));
-        setFilteredData(filtered);
+
+        if (value === "") {
+            setFilteredData(originalData); // Reset to original data if search term is empty
+        } else {
+            const filtered = originalData.filter(row =>
+                row.studentName.toLowerCase().includes(value) ||
+                row.teamName.toLowerCase().includes(value) ||
+                row.gradeAverage.toString().includes(value)
+            );
+            setFilteredData(filtered);
+        }
     };
 
+    // Handle sorting functionality
     const handleSort = (event) => {
         const category = event.target.value;
         setSortCategory(category);
         let sortedData = [...filteredData];
 
         if (category === "All Category") {
-            sortedData.sort((a, b) => a.studentName.localeCompare(b.studentName));
+            sortedData.sort((a, b) => a.studentName.localeCompare(b.studentName, undefined, { sensitivity: 'base' }));
         } else if (category === "Group Name") {
-            sortedData.sort((a, b) => a.groupName.localeCompare(b.groupName));
+            sortedData.sort((a, b) => {
+                const groupComparison = a.teamName.localeCompare(b.teamName, undefined, { sensitivity: 'base' });
+                if (groupComparison !== 0) {
+                    return groupComparison;
+                }
+                return a.studentName.localeCompare(b.studentName, undefined, { sensitivity: 'base' });
+            });
         } else if (category === "Grade") {
-            sortedData.sort((a, b) => b.grade - a.grade);
+            sortedData.sort((a, b) => (a.gradeAverage === "N/A" ? 1 : b.gradeAverage === "N/A" ? -1 : a.gradeAverage - b.gradeAverage));
         }
-
         setFilteredData(sortedData);
     };
+
+    const { onDownload } = useDownloadExcel({
+        currentTableRef: tableref.current,
+        filename: `${classroom?.courseCode}_${classroom?.section}_classroomSummary`,
+        sheet: `${classroom?.courseCode}_${classroom?.section}`
+    });
 
     return (
         <BaseComponent>
             <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
                 <div className='flex gap-6 items-center'>
-                    <div>
-                        <BackButton />
-                    </div>
+                    <BackButton />
                     <div className='flex flex-col gap-3'>
-                        <Typography variant='h2' color='white' fontWeight="bold">Section Grades</Typography>
-                        <Typography variant='h6' color='white'>Total Students: {uniqueNames.size}</Typography>
+                        <Typography variant='h2' color='white' fontWeight='bold'>Section Grades</Typography>
+                        <Typography variant='h6' color='white'>Total Students: {filteredData.length}</Typography>
                     </div>
                     <div className='ml-auto'>
-                        <ExportToExcelButton onClick={onDownload}/>
+                        <ExportToExcelButton onClick={onDownload} />
                     </div>
                 </div>
                 <div className='flex justify-between items-center mb-4 p-4 bg-white rounded-md'>
@@ -232,8 +140,8 @@ const Page = () => {
                             {filteredData.map((row, index) => (
                                 <tr key={index} className='border-b'>
                                     <td className='p-4 border'>{row.studentName}</td>
-                                    <td className='p-4 border'>{row.groupName}</td>
-                                    <td className='p-4 border'>{row.grade}</td>
+                                    <td className='p-4 border'>{row.teamName}</td>
+                                    <td className='p-4 border'>{row.gradeAverage}</td>
                                 </tr>
                             ))}
                         </tbody>
