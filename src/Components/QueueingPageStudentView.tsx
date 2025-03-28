@@ -1,7 +1,7 @@
 "use client"
 import { useFacultyContext } from '@/Contexts/FacultyContext'
 import { dpurple, QueueingManager, QUEUEIT_URL } from '@/Utils/Global_variables';
-import { capitalizeFirstLetter, randomAvatar, randomGroupImage } from '@/Utils/Utility_functions';
+import { capitalizeFirstLetter, randomAvatar, randomGroupImage, convertTo12HourFormat  } from '@/Utils/Utility_functions';
 import { Typography } from '@mui/material';
 import React, { useEffect, useState } from 'react'
 import CurrentlyTending from './CurrentlyTending';
@@ -193,7 +193,9 @@ const QueueingPageStudentView = () => {
                 <div className='w-full h-28 bg-dpurple p-3 rounded-md relative flex'>
                     <img src={avatar} alt="avatar" style={{height:'100%'}} />
                     <Typography className='flex items-center' variant='h6' color='white' fontWeight='bold' textAlign='center'>{`${capitalizeFirstLetter(faculty?faculty.firstname:'')} ${capitalizeFirstLetter(faculty?faculty.lastname:'')}`}</Typography>
-                    <Typography sx={{flex:1, justifyContent:'end', color:'white'}} className='w-full  text-end flex items-center'>Queueing ends at 3:00 PM</Typography>
+                    <Typography sx={{flex:1, justifyContent:'end', color:'white'}} className='w-full  text-end flex items-center'>
+                        {queueingManager?.timeEnds ? `Queueing ends at ${convertTo12HourFormat(queueingManager.timeEnds)}` : "Open Time"}
+                    </Typography>
                 </div>
                 <div className='w-full h-28 rounded-md relative flex border-2 border-black bg-white justify-between p-3 items-center'>
                     <Typography variant='h6'>Current Time</Typography>
