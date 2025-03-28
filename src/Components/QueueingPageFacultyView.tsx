@@ -28,6 +28,7 @@ const QueueingPageFacultyView = () => {
     const setGrades = useGradesContext().setGrades
     const [notedAssignedTasks, setNotedAssignedTasks] = useState("")
     const [impedimentsEncountered, setImpedimentsEncountered] = useState("")
+    const [isFollowUp, setIsFollowUp] = useState<boolean>(false)
     const openQueueing = ()=>{
         if(queueingManager?.isActive){
             toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
@@ -201,17 +202,19 @@ const QueueingPageFacultyView = () => {
     };
 
     const concludeMeeting = ()=>{
-        // if(grades?.length == 0){
-        //     toast.error("You have yet to grade anybody.")
-        // }else{
+        if(grades?.length == 0 && isFollowUp === false){
+            toast.error("You have yet to grade anybody. If this meeting has no grades, check the is follow up checkbox below.")
+        }else{
             console.log(queueingManager?.meeting?.queueingEntry.attendanceList)
+            console.log(isFollowUp)
             fetch(`${QUEUEIT_URL}/faculty/concludeMeeting/${queueingManager?.meeting?.meetingID}`,{
                 body:JSON.stringify({
                     grades:grades,
                     notedAssignedTasks:notedAssignedTasks,
                     impedimentsEncountered:impedimentsEncountered,
                     attendanceList:queueingManager?.meeting?.queueingEntry.attendanceList,
-                    queueingManagerID:queueingManager?.queueingManagerID
+                    queueingManagerID:queueingManager?.queueingManagerID,
+                    isFollowup:isFollowUp ?? false
                 }),
                 method:'POST',
                 headers:{
@@ -237,7 +240,7 @@ const QueueingPageFacultyView = () => {
                 toast.error("Something went wrong during admittance.")
                 console.log(err)
             })
-        // }
+        }
     }
 
     return (
@@ -252,7 +255,7 @@ const QueueingPageFacultyView = () => {
                         <CurrentlyTending concludeMeeting={concludeMeeting} meeting={queueingManager.meeting} />
                         {
                             queueingManager.meeting?
-                            <MeetingBoard setImpedimentsEncountered={setImpedimentsEncountered} setNotedAssignedTasks={setNotedAssignedTasks} updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
+                            <MeetingBoard isFollowUp={isFollowUp} setIsFollowUp={setIsFollowUp} setImpedimentsEncountered={setImpedimentsEncountered} setNotedAssignedTasks={setNotedAssignedTasks} updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
                             :
                             <Chat adviser={user} chat={null}/>
                         }

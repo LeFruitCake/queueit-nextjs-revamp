@@ -5,45 +5,51 @@ import ClassroomList from '@/Components/ClassroomList';
 import GreetingBar from '@/Components/GreetingBar';
 import { useUserContext } from '@/Contexts/AuthContext';
 import { Classes, MentoredClasses, SPEAR_URL, UserType } from '@/Utils/Global_variables';
-import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 
 export default function Page() {
     const userContext = useUserContext();
-    const user = userContext.user;
+    const { user, loading } = userContext;
     const router = useRouter();
-    const [classes, setClasses] = useState<Classes | undefined>(undefined); 
-    const [mentoredClass, setMentoredClass] = useState<MentoredClasses | undefined>(undefined); 
-
-    const loading = useUserContext().loading
+    
+    const [facultyName, setFacultyName] = useState("Unknown User");
+    const [studentName, setStudentName] = useState("Unknown User");
+    const [classes, setClasses] = useState<Classes | undefined>(undefined);
+    const [mentoredClass, setMentoredClass] = useState<MentoredClasses | undefined>(undefined);
 
     useEffect(() => {
-        if(loading){return;}
+        if (loading) return;
         if (!user) {
             router.push('/login');
-            return; 
+            return;
         }
+
+        const fetchUserData = async () => {
+            try {
+                if (user.role === UserType.FACULTY) {
+                    const response = await fetch(`http://localhost:8080/get-teacher/${user.uid}`);
+                    const data = await response.json();
+                    setFacultyName(data.firstname || "Unknown User");
+                } else if (user.role === UserType.STUDENT) {
+                    const response = await fetch(`http://localhost:8080/get-student/${user.uid}`);
+                    const data = await response.json();
+                    setStudentName(data.firstname || "Unknown User");
+                }
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
 
         const fetchClasses = async () => {
             try {
                 let classResponse, mentoredResponse;
 
                 if (user.role === UserType.STUDENT) {
-                    classResponse = await fetch(`${SPEAR_URL}/student/${user.uid}/enrolled-classes`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    classResponse = await fetch(`${SPEAR_URL}/student/${user.uid}/enrolled-classes`);
                 } else if (user.role === UserType.FACULTY) {
-                    classResponse = await fetch(`${SPEAR_URL}/teacher/classes-created/${user.uid}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
-
-                    mentoredResponse = await fetch(`${SPEAR_URL}/mentor/classrooms/${user.uid}`, {
-                        method: 'GET',
-                        headers: { 'Content-Type': 'application/json' },
-                    });
+                    classResponse = await fetch(`${SPEAR_URL}/teacher/classes-created/${user.uid}`);
+                    mentoredResponse = await fetch(`${SPEAR_URL}/mentor/classrooms/${user.uid}`);
                 }
 
                 if (classResponse?.ok) {
@@ -62,8 +68,9 @@ export default function Page() {
             }
         };
 
+        fetchUserData();
         fetchClasses();
-    }, [user]);
+    }, [user, loading]);
 
     useEffect(() => {
         if (classes) {
@@ -82,14 +89,14 @@ export default function Page() {
     }, [mentoredClass]);
 
     return (
-        <div className='h-screen overflow-auto'>
+        <div className="h-screen overflow-auto">
             {user ? (
                 <BaseComponent>
-                    <GreetingBar name={user.role === UserType.FACULTY ? `Teacher ${capitalizeFirstLetter(user.firstname)}` : capitalizeFirstLetter(user.firstname)} />
+                    <GreetingBar name={user.role === UserType.FACULTY ? `Teacher ${facultyName}` : studentName} />
                     <ClassroomList classrooms={classes} mentoredClassrooms={mentoredClass} />
                 </BaseComponent>
             ) : (
-                <CatLoader loading={!user}/>
+                <CatLoader loading={!user} />
             )}
         </div>
     );

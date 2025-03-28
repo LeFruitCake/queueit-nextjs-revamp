@@ -104,16 +104,23 @@ const Navbar = () => {
                 toast.error("Caught an exception while fetching faculty details.")
             })
         }
-        router.replace(notification.notification.redirectedUrl)
+        if(notification.notification.redirectedUrl){
+            router.replace(notification.notification.redirectedUrl)
+        }
     }
 
     const notificationSound = '/sounds/alert.wav';
 
     useEffect(()=>{
-        if(client){
+        if(client && user){
             const notificationSubscription = client.subscribe(`/topic/notification/${user?.uid}`, (message) => {
                 const receivedMessage:NotificationRecipient = JSON.parse(message.body);
-                setNotifications((prev)=>[receivedMessage, ...prev])
+                setNotifications((prev) => {
+                    if (!prev.some(notif => notif.notificationRecipientID === receivedMessage.notificationRecipientID)) {
+                        return [receivedMessage, ...prev];
+                    }
+                    return prev;
+                });
                 const audio = new Audio(notificationSound)
                 audio.play().catch(err => console.error("Audio play failed:",err));
             });
@@ -124,13 +131,17 @@ const Navbar = () => {
     },[client])
 
     useEffect(()=>{
-        if(user){
+        if(user && notifications.length == 0){
             fetch(`${QUEUEIT_URL}/notifications/${user.uid}`)
             .then(async(res)=>{
                 if(res.ok){
                     const response:Array<NotificationRecipient> = await res.json();
-                    // console.log(response)
-                    setNotifications((prev)=>[...response, ...prev])
+                    console.log(response)
+                    setNotifications((prev) => {
+                        const existingIDs = new Set(prev.map(n => n.notificationRecipientID));
+                        const newNotifications = response.filter(n => !existingIDs.has(n.notificationRecipientID));
+                        return [...newNotifications, ...prev]; // Only add new notifications
+                    });
                 }else{
                     console.log("could not retrieve notifications.")
                 }
