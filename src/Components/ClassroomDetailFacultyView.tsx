@@ -22,6 +22,8 @@ import medalTwo from '../../public/images/2nd_Place_Medal.png'
 import medalThree from '../../public/images/3rd_Place_Medal.png'
 import DonutChart from './DonutChart';
 import ScatterChart from './ScatterChart';
+import LowEngagementChart from './LowEngagementChart';
+import LowPerformantStudentsChart from './LowPerformantStudentsChart';
 import CatLoader from './CatLoader';
 
 interface LowestEngagement{
@@ -259,7 +261,7 @@ const GroupDetailAdviserView = () => {
                     <div className='flex-1 rounded-md flex gap-3 bg-white items-center'>
                         {
                             analyticsData?.scatterPlotDataset?
-                            <ScatterChart dataset={analyticsData?.scatterPlotDataset} chartTitle='Teams Performance Indicator'/>
+                            <ScatterChart dataset={analyticsData?.scatterPlotDataset} chartTitle='Teams Performance Indicator'  style={{ objectFit: 'contain' }}/>
                             :
                             <CircularProgress/>
                         }
@@ -267,28 +269,46 @@ const GroupDetailAdviserView = () => {
                 </div>
     
                 <div className='w-full flex gap-6'>
-                    {
-                        analyticsData?.lowestEngagementDTO?.length?
-                        <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement</Typography>
-                            <div className='flex-grow flex items-center justify-between'>
-                                
+                    {/* {
+                        analyticsData?.lowestEngagementDTO?.length ? */}
+                        <div className='bg-white min-h-20 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
+                                <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement
+                            </Typography>
+                            <div className='flex-grow flex min-h-40 max-h-80 items-center justify-center'>
+                                {
+                                    analyticsData?.lowestEngagementDTO?.length ? 
+                                    <LowEngagementChart data={analyticsData.lowestEngagementDTO} style={{ height: '100%', width: '100%', objectFit: 'contain' }} />
+                                    :
+                                    <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
+                                        Teams are doing great.
+                                    </Typography>
+                                }
                             </div>
                         </div>
-                        :
+                        {/* :
                         <></>
-                    }
-                    {
-                        analyticsData?.atRiskForKickOuts.length?
-                        <div className='bg-white min-h-40 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <SickIcon fontSize='small' className='text-notlushred'/> Low Performant Students </Typography>
-                            <div className='flex-grow flex items-center justify-between'>
-                                
+                    } */}
+                    {/* {
+                        analyticsData?.atRiskForKickOuts.length ? */}
+                        <div className='bg-white min-h-20 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
+                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
+                                <SickIcon fontSize='small' className='text-notlushred'/> Low-Performing Students 
+                            </Typography>
+                            <div className='flex-grow flex min-h-40 max-h-80 items-center justify-center'>
+                                {
+                                    analyticsData?.atRiskForKickOuts.length ? 
+                                    <LowPerformantStudentsChart data={analyticsData.atRiskForKickOuts} style={{ height: '100%', width: '100%', objectFit: 'contain' }} />
+                                    :
+                                    <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
+                                        Students are doing great.
+                                    </Typography>
+                                }
                             </div>
                         </div>
-                        :
+                        {/* :
                         <></>
-                    }
+                    } */}
                 </div>
                 {/* <div className='w-full flex gap-6'>
                     <div className='bg-white min-h-40 p-3 rounded-md flex-1 flex flex-col'>
