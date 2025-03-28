@@ -43,11 +43,11 @@ const QueueingPageFacultyView = () => {
                     cateredClassrooms.push(classroom.cid)
                 })
                 console.log(cateredClassrooms)
-                console.log(`timeStop: ${standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${cateredClassrooms}`)
+                console.log(`timeStop: ${timeStop === 0? '0':standardizeTime(timeStop)} queueingLimit: ${queueingLimit} filter: ${cateredClassrooms}`)
                 fetch(`${QUEUEIT_URL}/faculty/openQueueing`,{
                     body:JSON.stringify({
                         "facultyID":user?.uid,
-                        "timeEnds":standardizeTime(timeStop),
+                        "timeEnds":timeStop === 0? null:standardizeTime(timeStop),
                         "cateringLimit":queueingLimit,
                         "cateredClassrooms":cateredClassrooms,
                         "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
