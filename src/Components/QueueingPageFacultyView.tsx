@@ -28,6 +28,7 @@ const QueueingPageFacultyView = () => {
     const setGrades = useGradesContext().setGrades
     const [notedAssignedTasks, setNotedAssignedTasks] = useState("")
     const [impedimentsEncountered, setImpedimentsEncountered] = useState("")
+    const [isFollowUp, setIsFollowUp] = useState<boolean>(false)
     const openQueueing = ()=>{
         if(queueingManager?.isActive){
             toast.error("Queueing is already open.", {autoClose:2000, style:{fontWeight:'bold'}});
@@ -205,13 +206,15 @@ const QueueingPageFacultyView = () => {
         //     toast.error("You have yet to grade anybody.")
         // }else{
             console.log(queueingManager?.meeting?.queueingEntry.attendanceList)
+            console.log(isFollowUp)
             fetch(`${QUEUEIT_URL}/faculty/concludeMeeting/${queueingManager?.meeting?.meetingID}`,{
                 body:JSON.stringify({
                     grades:grades,
                     notedAssignedTasks:notedAssignedTasks,
                     impedimentsEncountered:impedimentsEncountered,
                     attendanceList:queueingManager?.meeting?.queueingEntry.attendanceList,
-                    queueingManagerID:queueingManager?.queueingManagerID
+                    queueingManagerID:queueingManager?.queueingManagerID,
+                    isFollowup:isFollowUp ?? false
                 }),
                 method:'POST',
                 headers:{
@@ -252,7 +255,7 @@ const QueueingPageFacultyView = () => {
                         <CurrentlyTending concludeMeeting={concludeMeeting} meeting={queueingManager.meeting} />
                         {
                             queueingManager.meeting?
-                            <MeetingBoard setImpedimentsEncountered={setImpedimentsEncountered} setNotedAssignedTasks={setNotedAssignedTasks} updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
+                            <MeetingBoard isFollowUp={isFollowUp} setIsFollowUp={setIsFollowUp} setImpedimentsEncountered={setImpedimentsEncountered} setNotedAssignedTasks={setNotedAssignedTasks} updateAttendanceStatus={updateAttendanceStatus} meeting={queueingManager.meeting}/>
                             :
                             <Chat adviser={user} chat={null}/>
                         }

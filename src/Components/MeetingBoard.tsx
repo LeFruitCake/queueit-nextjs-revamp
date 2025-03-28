@@ -16,9 +16,11 @@ interface MeetingBoardProps{
     updateAttendanceStatus: Function
     setImpedimentsEncountered: Function
     setNotedAssignedTasks: Function
+    setIsFollowUp: Function
+    isFollowUp: boolean
 }
 
-const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus, setImpedimentsEncountered, setNotedAssignedTasks}) => {
+const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStatus, setImpedimentsEncountered, setNotedAssignedTasks,setIsFollowUp, isFollowUp}) => {
     const {Rubric, setRubric} = useRubricContext()
     const [selectRubricModalOpen, setSelectRubricModalOpen] = useState(false);
     const [evaluationModalOpen, setEvaluationModalOpen] = useState(false);
@@ -27,7 +29,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
     const [impedimentNote, setImpedimentNote] = useState("");
     
     useEffect(()=>{
-        if(!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID){
+        if((!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID) && !isFollowUp){
             let tempGrades:Array<Grade> = []
             Rubric?.criteria.forEach(criterion => {
                 console.log(criterion.title)
@@ -43,7 +45,8 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
             });
             setGrades(tempGrades);
         }
-    },[Rubric])
+        console.log(isFollowUp)
+    },[Rubric, isFollowUp])
 
     const getUniqueStudents = () => {
         return meeting.queueingEntry.attendanceList.map((student) => ({
@@ -155,11 +158,19 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                     </div>
                 </div> 
                 <div className='flex flex-col p-3'>
-                    <div className='px-3 font-bold'>
-                        Student Evaluation
-                    </div>
-                    <div className='text-gray-500 px-3 w-full lg:w-1/2 xl:w-1/2'>
-                        Find a suitable rubric to evaluate team members and provide ratings for each member based on their contributions.
+                    <div className='flex justify-between items-center'>
+                        <div className='flex flex-col gap-3'>
+                            <div className='px-3 font-bold'>
+                                Student Evaluation
+                            </div>
+                            <div className='text-gray-500 px-3 w-full lg:w-1/2 xl:w-1/2'>
+                                Find a suitable rubric to evaluate team members and provide ratings for each member based on their contributions.
+                            </div>
+                        </div>
+                        <div className='border-2 bg-dpurple text-white p-3 flex gap-3 items-center'>
+                            <label htmlFor="isFollowUp">Is Follow Up?</label>
+                            <input type="checkbox" name="isFollowUp" id="isFollowUp" onChange={(e)=>{setIsFollowUp(e.target.checked)}} />
+                        </div>
                     </div>
                     <div className='flex-grow flex flex-col lg:flex-row xl:flex-row gap-3 px-3'>
                         <table className='w-full mt-3'>
@@ -180,7 +191,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                         </table>
                         <div className='w-full lg:w-1/4 xl:w-1/4 flex flex-col items-center justify-center gap-5'>
                             <div className='text-center'>{Rubric?<Typography variant='h6' fontWeight={"bold"}>{Rubric.title}</Typography>:<>No Rubric selected</>}</div>
-                            <Button onClick={()=>{setEvaluationModalOpen(true)}} disabled={Rubric?false:true} sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
+                            <Button onClick={()=>{setEvaluationModalOpen(true)}} disabled={isFollowUp?true:false} sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
                             <p onClick={()=>{setSelectRubricModalOpen(true)}} className='text-center cursor-pointer' style={{color:dpurple, textDecoration:'underline'}}>{Rubric?<>Change Rubric</>:<>Choose Rubric Now</>}</p>
                         </div>
                     </div>
