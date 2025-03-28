@@ -49,6 +49,14 @@ export function standardizeTime(time){
   return fooTime
 }
 
+export const convertTo12HourFormat = (timeString) => {
+  const [hours, minutes] = timeString.split(':').map(Number);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const formattedHours = hours % 12 || 12; // Convert to 12-hour format
+  const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+  return `${formattedHours}:${formattedMinutes} ${ampm}`;
+};
+
 export function randomPerson() {
     // Generate a random index between 0 and the length of the array - 1
     const randomNumber = Math.floor(Math.random() * PersonArray.length);
