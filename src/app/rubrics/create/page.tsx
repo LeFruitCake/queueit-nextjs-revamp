@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react"; 
 import { useRouter } from "next/navigation";
-import BaseComponent from "@/Components/BaseComponent";
-import BackButton from "@/Components/BackButton";
+import BaseComponent from "@/Components/BaseComponent"; 
 import {
   TextField,
   Button,
@@ -12,10 +11,8 @@ import {
   DialogActions,
   Checkbox,
   FormControlLabel,
-  Typography,
-  Divider,
-  IconButton,
-  colors,
+  Typography, 
+  IconButton, 
   Tooltip,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle'; 
@@ -24,12 +21,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import { dpurple, QUEUEIT_URL, RubricDTO } from "@/Utils/Global_variables";
 import { toast } from "react-toastify";
 import IndexEnumerator from "@/Components/IndexEnumerator";
-import { useUserContext } from "@/Contexts/AuthContext";
-import { capitalizeFirstLetter } from "@/Utils/Utility_functions";
+import { useUserContext } from "@/Contexts/AuthContext"; 
 
 export default function page() {
   const user = useUserContext().user
   const router = useRouter();
+  const [facultyName, setFacultyName] = useState("Unknown User");
   const [rubric, setRubric] = useState<RubricDTO|null>({
     title: "",
     description: "",
@@ -72,6 +69,23 @@ export default function page() {
   const handleSaveTemplateOpen = () => setSaveTemplateOpen(true);
   const handleSaveTemplateClose = () => setSaveTemplateOpen(false);
 
+  useEffect(() => { 
+  if (!user?.uid) return; // Ensure user ID exists before fetching
+
+  fetch(`http://localhost:8080/get-teacher/${user.uid}`) 
+    .then(response => response.json())
+    .then(data => {
+      const firstName = data.firstname || "";
+      const lastName = data.lastname || "";
+      setFacultyName(firstName && lastName ? `${firstName} ${lastName}` : "Unknown User");
+    })
+    .catch(error => {
+      console.error("Error fetching user data:", error);
+      setFacultyName("Unknown User");
+    }); 
+}, [user]);  
+ 
+
   const handleSaveRubric = () => {
     if(rubric?.title == "" || rubric?.title == null || rubric?.title == undefined){
       toast.error("Rubric title must not be empty.")
@@ -93,7 +107,7 @@ export default function page() {
           "criteria":rubric.criteria,
           "isPrivate":isPrivate,
           "userID":user?.uid,
-          "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
+          "facultyName": facultyName
         }),
         headers:{
           'Content-Type':'application/json'

@@ -1,8 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BaseComponent from "@/Components/BaseComponent";
-import BackButton from "@/Components/BackButton";
 import {
   TextField,
   Button,
@@ -13,9 +12,7 @@ import {
   Checkbox,
   FormControlLabel,
   Typography,
-  Divider,
   IconButton,
-  colors, 
   Tooltip,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
@@ -26,20 +23,56 @@ import { toast } from "react-toastify";
 import IndexEnumerator from "@/Components/IndexEnumerator";
 import { useUserContext } from "@/Contexts/AuthContext";
 import { capitalizeFirstLetter } from "@/Utils/Utility_functions";
-import { useRubricContext } from "@/Contexts/RubricContext";
+import { useRubricContext } from "@/Contexts/RubricContext"; 
+import CatLoader from '@/Components/CatLoader';
 
-export default function page() {
-  const user = useUserContext().user
+export default function Page() {
+  const user = useUserContext().user;
   const router = useRouter();
-  const [rubric, setRubric] = useState<Rubric|null|undefined>(useRubricContext().Rubric); 
-  const [isPrivate, setisPrivate] = useState(rubric?.isPrivate);
+  const rubricContext = useRubricContext();
+  const [rubric, setRubric] = useState<Rubric>({
+    id: 0,
+    title: "",
+    description: "",
+    criteria: [],
+    isPrivate: true,
+    userID: 0,
+    facultyName: ""
+  });
+  const [isPrivate, setIsPrivate] = useState(true);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [facultyName, setFacultyName] = useState("Unknown User");
 
-  const handleChange = (field, value) => {
+  useEffect(() => {
+    if (rubricContext.Rubric) {
+      setRubric(rubricContext.Rubric);
+      setIsPrivate(rubricContext.Rubric.isPrivate);
+    }
+    setLoading(false);
+  }, [rubricContext.Rubric]);
+
+  useEffect(() => { 
+    if (!user?.uid) return; // Ensure user ID exists before fetching
+  
+    fetch(`http://localhost:8080/get-teacher/${user.uid}`) 
+      .then(response => response.json())
+      .then(data => {
+        const firstName = data.firstname || "";
+        const lastName = data.lastname || "";
+        setFacultyName(firstName && lastName ? `${firstName} ${lastName}` : "Unknown User");
+      })
+      .catch(error => {
+        console.error("Error fetching user data:", error);
+        setFacultyName("Unknown User");
+      }); 
+  }, [user]);
+
+  const handleChange = (field: string, value: string) => {
     setRubric((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleCriteriaChange = (index, field, value) => {
+  const handleCriteriaChange = (index: number, field: string, value: string) => {
     const updatedCriteria = [...rubric.criteria];
     updatedCriteria[index][field] = value;
     setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
@@ -53,59 +86,51 @@ export default function page() {
   };
 
   const handleAddCriterion = () => {
-    if(rubric?.criteria.length != 0 && rubric?.criteria[rubric.criteria.length-1].title == ""){
-      toast.error("Criterion title must not be empty.")
-    }else{
+    if (rubric?.criteria.length !== 0 && rubric?.criteria[rubric.criteria.length-1].title === "") {
+      toast.error("Criterion title must not be empty.");
+    } else {
       setRubric((prev) => ({
         ...prev,
         criteria: [...prev.criteria, { title: "", description: "" }],
       }));
     }
-    
   };
 
   const handleSaveTemplateOpen = () => setSaveTemplateOpen(true);
   const handleSaveTemplateClose = () => setSaveTemplateOpen(false);
 
   const handleUpdateRubric = () => {
-    if(rubric?.title == "" || rubric?.title == null || rubric?.title == undefined){
-      toast.error("Rubric title must not be empty.")
-    }else if(rubric.criteria.length == 0){
-      toast.error("Criteria must atleast contain one criterion.")
-    }else if(rubric?.criteria[rubric.criteria.length-1].title == ""){
-      toast.error("Please remove the empty criterion.")
-    }
-    else{
-      console.log("Rubric Saved:", rubric);
-      console.log(`isprivate: ${isPrivate}`) 
-      
-
-      fetch(`${QUEUEIT_URL}/rubrics/update`,{
-        method:'PUT',
-        body:JSON.stringify({
-          "id":rubric.id,
-          "title":rubric.title,
-          "description":rubric.description,
-          "criteria":rubric.criteria,
-          "isPrivate":isPrivate,
-          "userID":user?.uid,
-          "facultyName":`${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`
+    if (!rubric?.title) {
+      toast.error("Rubric title must not be empty.");
+    } else if (rubric.criteria.length === 0) {
+      toast.error("Criteria must contain at least one criterion.");
+    } else if (rubric.criteria[rubric.criteria.length-1].title === "") {
+      toast.error("Please remove the empty criterion.");
+    } else {
+      fetch(`${QUEUEIT_URL}/rubrics/update`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          "id": rubric.id,
+          "title": rubric.title,
+          "description": rubric.description,
+          "criteria": rubric.criteria,
+          "isPrivate": isPrivate,
+          "userID": user?.uid,
+          "facultyName": facultyName
         }),
-        headers:{
-          'Content-Type':'application/json'
+        headers: {
+          'Content-Type': 'application/json'
         },
-        
       })
-      .then((res)=>{
+      .then((res) => {
         setSaveTemplateOpen(false);
         router.push("/rubrics");
-        toast.success("Rubric updated successfully.")
-        console.log(res)
+        toast.success("Rubric updated successfully.");
       })
-      .catch((err)=>{
-        toast.error("caught an error")
-        console.log(err)
-      })
+      .catch((err) => {
+        toast.error("Error updating rubric");
+        console.error(err);
+      });
     }
   };
 
@@ -121,7 +146,7 @@ export default function page() {
       criteria: rubric.criteria,
       isPrivate: true,  
       userID: user?.uid,
-      facultyName: `${capitalizeFirstLetter(user?.firstname)} ${capitalizeFirstLetter(user?.lastname)}`,
+      facultyName: facultyName
     };
   
     fetch(`${QUEUEIT_URL}/rubrics/create`, {
@@ -141,40 +166,51 @@ export default function page() {
         console.error(err);
       });
   };
-  
+
+  if (loading) {
+    return (
+      <BaseComponent>
+        <div className="flex justify-center items-center h-screen">
+          <CatLoader />
+        </div>
+      </BaseComponent>
+    );
+  }
 
   return (
     <BaseComponent>
       <div className="bg-white w-full min-h-screen flex flex-col relative rounded-md px-10 py-6 border-2 border-black overflow-auto">
         <div className="flex items-center gap-x-10">
           <div className="flex items-start h-full">
-            <IconButton onClick={()=>{router.back()}} sx={{backgroundColor:'black','&:hover':{backgroundColor:'#333'}}}><WestIcon sx={{color:'white'}}/></IconButton>
+            <IconButton 
+              onClick={() => router.back()} 
+              sx={{backgroundColor: 'black', '&:hover': {backgroundColor: '#333'}}}
+            >
+              <WestIcon sx={{color: 'white'}}/>
+            </IconButton>
           </div>
-          <div className="flex flex-col h-full max-h-72 overflow-auto gap-3 items-start justify-start w-full">
+          <div className="flex flex-col h-full max-h-72 gap-3 items-start justify-start w-full">
             <input
               value={rubric.title}
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder="Rubric Title"
-              style={{fontSize:'2.5em', fontWeight:'bold', color:'black', width:'100%'}}
+              style={{fontSize: '2.5em', fontWeight: 'bold', color: 'black', width: '100%'}}
             />
             <TextField
-            value={rubric.description}
-            onChange={(e) => handleChange("description", e.target.value)}
-            fullWidth
-            variant="standard"
-            multiline
-            placeholder="Description"
-            InputProps={{ disableUnderline: true }}
-            className="text-gray-500 ml-12"
-          />
+              value={rubric.description}
+              onChange={(e) => handleChange("description", e.target.value)}
+              fullWidth
+              variant="standard"
+              multiline
+              placeholder="Description"
+              InputProps={{ disableUnderline: true }}
+              className="text-gray-500 ml-1"
+            />
           </div>
         </div>
 
-        
-
         <div className="p-6 rounded-lg mt-10 flex-1 overflow-auto">
           <Typography variant="h5" fontWeight={"bold"}>Criteria</Typography>
-          {/* <Divider/> */}
           {rubric.criteria.map((criterion, index) => (
             <div key={index} className="border-b p-4 mb-2 flex gap-5 w-full items-center">
               <IndexEnumerator index={index+1}/>
@@ -184,7 +220,7 @@ export default function page() {
                   onChange={(e) => handleCriteriaChange(index, "title", e.target.value)}
                   variant="standard"
                   placeholder="Insert Criterion"
-                  InputProps={{ disableUnderline: true, sx:{fontSize:'1.5em'} }}
+                  InputProps={{ disableUnderline: true, sx: {fontSize: '1.5em'} }}
                   className="font-semibold"
                 />
                 <TextField
@@ -197,61 +233,61 @@ export default function page() {
                   className="text-gray-600"
                 />
               </div>
-              {rubric?.userID == user?.uid?
-                <div>
-                  <Tooltip title="Remove Criterion" arrow>
-                    <IconButton onClick={() => handleRemoveCriterion(index)}>
-                      <CancelIcon sx={{ color: "black" }} />
-                    </IconButton>
-                  </Tooltip> 
-                </div>
-                :
-                <></>
-              }
+              {rubric?.userID === user?.uid && (
+                <Tooltip title="Remove Criterion" arrow>
+                  <IconButton onClick={() => handleRemoveCriterion(index)}>
+                    <CancelIcon sx={{ color: "black" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
             </div>
           ))}
 
-          {rubric?.userID == user?.uid?
+          {rubric?.userID === user?.uid && (
             <button
               onClick={handleAddCriterion}
               className="mt-4 px-4 py-2 bg-[black] text-white rounded-md hover:bg-[#353535] transition flex gap-3"
             >
               <AddCircleIcon/> Add Criterion
             </button>
-            :<></>
-          }
+          )}
         </div>
 
-        {
-          rubric?.userID == user?.uid?
+        {rubric?.userID === user?.uid ? (
           <div className="flex justify-center w-full gap-5 mt-6">
-            <Button sx={{textTransform:'none'}} onClick={() => router.push("/rubrics")} style={{ color: "#000" }}>
+            <Button 
+              sx={{textTransform: 'none'}} 
+              onClick={() => router.push("/rubrics")} 
+              style={{ color: "#000" }}
+            >
               Cancel
             </Button>
-            <Button sx={{textTransform:'none'}}
+            <Button 
+              sx={{textTransform: 'none'}}
               onClick={handleSaveTemplateOpen}
-              style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
+              style={{ background: dpurple, color: "#fff", padding: '0.5em 2.5em' }}
             >
               Save
             </Button>
           </div>
-          :
+        ) : (
           <div className="flex justify-center w-full gap-5 mt-6">
-            <Button sx={{textTransform:'none'}}
+            <Button 
+              sx={{textTransform: 'none'}}
               onClick={handleCreateCopy}
-              style={{ background: dpurple, color: "#fff", padding:'0.5em 2.5em' }}
+              style={{ background: dpurple, color: "#fff", padding: '0.5em 2.5em' }}
             >
               Create a copy
             </Button>
           </div>
-        }
+        )}
 
         <Dialog open={saveTemplateOpen} onClose={handleSaveTemplateClose} fullWidth maxWidth="sm">
-          <DialogTitle className="text-[#7D57FC] font-bold">Save New Rubric</DialogTitle>
+          <DialogTitle className="text-[#7D57FC] font-bold">Save Rubric</DialogTitle>
           <DialogContent>
             <p className="text-gray-600">Would you like to make this rubric template public?</p>
             <FormControlLabel
-              control={<Checkbox checked={!isPrivate} onChange={(e) => setisPrivate(!isPrivate)} />}
+              control={<Checkbox checked={!isPrivate} onChange={(e) => setIsPrivate(!e.target.checked)} />}
               label="Make this template public"
             />
           </DialogContent>
