@@ -259,7 +259,7 @@ const page = () => {
                                 <Typography variant='h4' color='white' fontWeight='bold'>{team?.groupName}</Typography>
                                 <div className='text-white flex items-end gap-1'>
                                     <Typography variant='caption'>Consultation Schedule:</Typography>
-                                    <Typography variant='subtitle2' fontWeight='bold'>11:00 AM - 12:00 PM</Typography>
+                                    <Typography variant='subtitle2' fontWeight='bold'>{team?.scheduledDay} {team?.start} - {team?.end}</Typography>
                                 </div>
                             </div>
                             <IconButton onClick={()=>{meetNow()}} sx={{color:'black', backgroundColor:lgreen, borderRadius:'5px', display:'flex', gap:'5px', alignSelf:'center', '&:hover':{backgroundColor:'yellowgreen'}}} >
