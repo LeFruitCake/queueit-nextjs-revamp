@@ -3,7 +3,7 @@ import { dpurple, Grade, Meeting, QueueingEntry, Team } from '@/Utils/Global_var
 import React, { useEffect, useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import HistoryBoard from './HistoryBoard'
-import { Button, Typography } from '@mui/material'
+import { Button, Tooltip, Typography } from '@mui/material'
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions'
 import { useRubricContext } from '@/Contexts/RubricContext'
 import SelectRubricModal from './SelectRubricModal'
@@ -167,10 +167,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                                 Find a suitable rubric to evaluate team members and provide ratings for each member based on their contributions.
                             </div>
                         </div>
-                        <div className='border-2 bg-dpurple text-white p-3 flex gap-3 items-center'>
-                            <label htmlFor="isFollowUp">Is Follow Up?</label>
-                            <input type="checkbox" name="isFollowUp" id="isFollowUp" onChange={(e)=>{setIsFollowUp(e.target.checked)}} />
-                        </div>
+                        <Tooltip title="Mark this as check if this meeting session is considered as just a follow up session. Grades not recorded.">
+                            <div className='border-2 bg-dpurple text-white p-3 flex gap-3 items-center text-xs rounded-md'>
+                                <label htmlFor="isFollowUp">Is Follow Up?</label>
+                                <input type="checkbox" name="isFollowUp" id="isFollowUp" onChange={(e)=>{setIsFollowUp(e.target.checked)}} />
+                            </div>
+                        </Tooltip>
                     </div>
                     <div className='flex-grow flex flex-col lg:flex-row xl:flex-row gap-3 px-3'>
                         <table className='w-full mt-3'>
