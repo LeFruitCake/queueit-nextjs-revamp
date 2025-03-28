@@ -193,7 +193,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                         </table>
                         <div className='w-full lg:w-1/4 xl:w-1/4 flex flex-col items-center justify-center gap-5'>
                             <div className='text-center'>{Rubric?<Typography variant='h6' fontWeight={"bold"}>{Rubric.title}</Typography>:<>No Rubric selected</>}</div>
-                            <Button onClick={()=>{setEvaluationModalOpen(true)}} disabled={isFollowUp?true:false} sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
+                            <Button onClick={()=>{setEvaluationModalOpen(true)}} disabled={!Rubric || isFollowUp} sx={{backgroundColor:dpurple, color:'white',paddingY:'1.5em'}}>Evaluate Now</Button>
                             <p onClick={()=>{setSelectRubricModalOpen(true)}} className='text-center cursor-pointer' style={{color:dpurple, textDecoration:'underline'}}>{Rubric?<>Change Rubric</>:<>Choose Rubric Now</>}</p>
                         </div>
                     </div>

@@ -183,7 +183,7 @@ const page = () => {
                 "classroomID":team?.classId
             }
 
-            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/spontaneous`,{
+            fetch(`${QUEUEIT_URL}/meeting/teamMeetings/spontaneous/${user?.uid}`,{
                 body:JSON.stringify(
                     meetingPackage
                 ),
