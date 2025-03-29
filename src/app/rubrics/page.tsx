@@ -53,7 +53,7 @@ export default function Page() {
           <CreateRubricButton />
         </div>
 
-        <div className="relative pt-10 flex flex-wrap gap-8">
+        <div className="relative pt-10 flex flex-wrap gap-10 p-5">
           {filteredRubrics?.length > 0 ? (
             filteredRubrics.map((rubric) => (
               <RubricCard key={rubric.id} onClickAction={RubricCardAction} rubric={rubric} />

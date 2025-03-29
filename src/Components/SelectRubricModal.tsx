@@ -46,7 +46,7 @@ const SelectRubricModal:React.FC<SelectRubricModalProps> = ({open=true,setOpen})
                 <Typography textAlign={"center"} variant='h4' fontWeight={"bold"}>Choose a rubric that best fits the evaluation.</Typography>
                 <RubricHeader/>
                 {Rubrics?
-                    <div className='flex gap-6'>
+                    <div className='relative flex flex-wrap gap-8 justify-around'>
                         {Rubrics.map((rubric,index)=>(
                             <RubricCard onClickAction={RubricCardAction} key={index} rubric={rubric}/>
                         ))}

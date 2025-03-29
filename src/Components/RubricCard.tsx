@@ -49,7 +49,7 @@ const RubricCard:React.FC<RubricCardProps> = ({ rubric,onClickAction }) => {
       <div
         onClick={() => {onClickAction(rubric);}}  
         className="relative bg-white rounded-lg border-2 border-black hover:border-2 hover:bg-lgreen cursor-pointer px-5 py-3 flex flex-col  justify-between h-full  "
-        style={{ width: "280px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
+        style={{ width: "270px", boxShadow: "5px 5px 0px 1px rgba(0, 0, 0,1)", height: "220px" }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
