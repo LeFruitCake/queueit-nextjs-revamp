@@ -49,21 +49,19 @@ const ClassroomList: React.FC<ClassroomListProps> = ({ classrooms, mentoredClass
                     </div>
                 </div> 
 
-                <div className='p-10'>
-                    <Typography variant='h4' style={{ fontWeight: 'bold' }}>
-                        {user?.role === UserType.FACULTY ? 'Mentored Class' : ''}
-                    </Typography>
+                {mentoredClassrooms?.length > 0 && (
+                    <div className='p-10'>
+                        <Typography variant='h4' style={{ fontWeight: 'bold' }}>
+                            {user?.role === UserType.FACULTY ? 'Mentees' : ''}
+                        </Typography>
 
-                    <div className='flex flex-wrap gap-12 pt-10 '>
-                        {mentoredClassrooms?.length ? (
-                            mentoredClassrooms.map((mentoredClass, index) => (
+                        <div className='flex flex-wrap gap-12 pt-10'>
+                            {mentoredClassrooms.map((mentoredClass, index) => (
                                 <ClassroomCard key={index} classroom={mentoredClass} type="mentored" />
-                            ))
-                        ) : (
-                            <div></div>
-                        )}
+                            ))}
+                        </div>
                     </div>
-                </div> 
+                )} 
         </div>
     );
 };

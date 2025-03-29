@@ -141,7 +141,7 @@ const FacultyAvailabilityCard:React.FC<FacultyAvailabilityCardProps> = ({faculty
     return (
         <div className='bg-white h-full w-full flex flex-col relative items-center justify-around border-2 border-black rounded-lg py-5'>
             <Typography variant='h6' fontWeight='bold' textAlign='center'>{facultyDesignation}</Typography>
-            <div>
+            <div className='flex flex-col items-center justify-center'>
                 <div>
                     <img src={avatar.current} alt="randomAvatar" className='h-40 aspect-square'/>
                 </div>
