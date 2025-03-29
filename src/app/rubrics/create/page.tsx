@@ -14,6 +14,7 @@ import {
   Typography, 
   IconButton, 
   Tooltip,
+  Switch,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle'; 
 import WestIcon from '@mui/icons-material/West';
@@ -32,6 +33,7 @@ export default function page() {
     description: "",
     criteria: [],
     isPrivate:true,
+    isWeighted:false,
   });
 
   const [isPrivate, setIsPrivate] = useState(true);
@@ -43,8 +45,28 @@ export default function page() {
 
   const handleCriteriaChange = (index, field, value) => {
     const updatedCriteria = [...rubric.criteria];
-    updatedCriteria[index][field] = value;
-    setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+  
+    // Update the weight first
+    if (field === "weight" && rubric?.isWeighted) {
+      updatedCriteria[index][field] = value;
+  
+      // Calculate the sum of weights after updating
+      let sum = updatedCriteria.reduce((acc, criterion) => {
+        return acc + (criterion.weight || 0); // Ensure to handle undefined weights
+      }, 0);
+  
+      // Check the sum and show toast if necessary
+      if (sum < 0 || sum > 100) {
+        toast.error("Sum of weights must not exceed 100%",{autoClose:1000});
+      } else {
+        // Only update the rubric if the sum is valid
+        setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+      }
+    } else {
+      // For other fields, just update the criteria
+      updatedCriteria[index][field] = value;
+      setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+    }
   };
 
   const handleRemoveCriterion = (index: number) => {
@@ -60,7 +82,7 @@ export default function page() {
     }else{
       setRubric((prev) => ({
         ...prev,
-        criteria: [...prev.criteria, { title: "", description: "" }],
+        criteria: [...prev.criteria, { title: "", description: "",weight: undefined }],
       }));
     }
     
@@ -97,7 +119,6 @@ export default function page() {
     else{
       console.log("Rubric Saved:", rubric);
       // toast.success("Rubric saved.")
-      
 
       fetch(`${QUEUEIT_URL}/rubrics/create`,{
         method:'POST',
@@ -107,18 +128,23 @@ export default function page() {
           "criteria":rubric.criteria,
           "isPrivate":isPrivate,
           "userID":user?.uid,
-          "facultyName": facultyName
+          "facultyName": facultyName,
+          "isWeighted":rubric.isWeighted
         }),
         headers:{
           'Content-Type':'application/json'
         },
         
       })
-      .then((res)=>{
-        setSaveTemplateOpen(false);
-        router.push("/rubrics");
-        toast.success("Rubric created successfully.")
-        console.log(res)
+      .then(async(res)=>{
+        if(res.ok){
+          setSaveTemplateOpen(false);
+          router.push("/rubrics");
+          toast.success("Rubric created successfully.")
+        }else{
+          const err_text = await res.text()
+          toast.error(err_text)
+        }
       })
       .catch((err)=>{
         toast.error("caught an error")
@@ -136,13 +162,13 @@ export default function page() {
           </div>
           <div className="flex flex-col h-full gap-3 items-start justify-start w-full">
             <input
-              value={rubric.title}
+              value={rubric?.title}
               onChange={(e) => handleChange("title", e.target.value)}
               placeholder="Rubric Title"
               style={{fontSize:'2.5em', fontWeight:'bold', color:'black', width:'100%', border: 'none', outline: 'none',}}
             />
             <TextField
-            value={rubric.description}
+            value={rubric?.description}
             onChange={(e) => handleChange("description", e.target.value)}
             fullWidth
             variant="standard"
@@ -150,8 +176,13 @@ export default function page() {
             placeholder="Description"
             InputProps={{ disableUnderline: true }}
             className="text-gray-500 ml-1"
-          />
+            />
           </div>
+          <Tooltip title="Mark this as check if this rubric has weights on each criterion.">
+              <div className='p-3 flex gap-3 items-center text-xs rounded-md'>
+                  <FormControlLabel control={<Switch onChange={(e)=>{setRubric((prev)=>({...prev, isWeighted:e.target.checked}))}}/>} label="Weighted"/>
+              </div>
+          </Tooltip>
         </div>
 
         
@@ -159,8 +190,8 @@ export default function page() {
         <div className="p-6 rounded-lg mt-10">
           <Typography variant="h5" fontWeight={"bold"}>Criteria</Typography>
           {/* <Divider/> */}
-          {rubric.criteria.map((criterion, index) => (
-            <div key={index} className="border-b p-4 mb-2 flex gap-5 w-full items-center">
+          {rubric?.criteria.map((criterion, index) => (
+            <div key={index} className="border-b p-4 mb-2 flex gap-5 w-full items-start">
               <IndexEnumerator index={index+1}/>
               <div className="flex flex-1 flex-col gap-2">
                 <TextField
@@ -180,14 +211,20 @@ export default function page() {
                   InputProps={{ disableUnderline: true }}
                   className="text-gray-600"
                 />
+                {
+                  rubric.isWeighted?
+                  <span className="flex gap-3 items-center">
+                    <Typography variant="caption" color="gray">{`Weight (%)`}</Typography><input min={1} max={100} onChange={(e)=>handleCriteriaChange(index,"weight",parseFloat(e.target.value) || 0)} hidden={!rubric?.isWeighted} defaultValue={undefined} className="border-b-2 border-gray-300 p-1 w-fit " type="number" name="weight" id="weight"/>
+                  </span>
+                  :
+                  <></>
+                }
               </div>
-              <div>
               <Tooltip title="Remove Criterion" arrow>
                 <IconButton onClick={() => handleRemoveCriterion(index)}>
-                  <CancelIcon sx={{ color: "black" }} />
+                  <CancelIcon  color="error" />
                 </IconButton>
               </Tooltip> 
-              </div>
             </div>
           ))}
 

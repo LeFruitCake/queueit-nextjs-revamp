@@ -14,6 +14,7 @@ import {
   Typography,
   IconButton,
   Tooltip,
+  Switch,
 } from "@mui/material";
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import { dpurple, QUEUEIT_URL, Rubric, RubricDTO } from "@/Utils/Global_variables";
@@ -37,7 +38,8 @@ export default function Page() {
     criteria: [],
     isPrivate: true,
     userID: 0,
-    facultyName: ""
+    facultyName: "",
+    isWeighted:false
   });
   const [isPrivate, setIsPrivate] = useState(true);
   const [saveTemplateOpen, setSaveTemplateOpen] = useState(false);
@@ -46,6 +48,7 @@ export default function Page() {
 
   useEffect(() => {
     if (rubricContext.Rubric) {
+      console.log(rubricContext.Rubric)
       setRubric(rubricContext.Rubric);
       setIsPrivate(rubricContext.Rubric.isPrivate);
     }
@@ -72,10 +75,32 @@ export default function Page() {
     setRubric((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleCriteriaChange = (index: number, field: string, value: string) => {
+  const handleCriteriaChange = (index, field, value) => {
+    
     const updatedCriteria = [...rubric.criteria];
-    updatedCriteria[index][field] = value;
-    setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+  
+    // Update the weight first
+    if (field === "weight" && rubric?.isWeighted) {
+      console.log(rubric)
+      updatedCriteria[index][field] = value;
+  
+      // Calculate the sum of weights after updating
+      let sum = updatedCriteria.reduce((acc, criterion) => {
+        return acc + (criterion.weight || 0); // Ensure to handle undefined weights
+      }, 0);
+  
+      // Check the sum and show toast if necessary
+      if (sum < 0 || sum > 100) {
+        toast.error("Sum of weights must not exceed 100%",{autoClose:1000});
+      } else {
+        // Only update the rubric if the sum is valid
+        setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+      }
+    } else {
+      // For other fields, just update the criteria
+      updatedCriteria[index][field] = value;
+      setRubric((prev) => ({ ...prev, criteria: updatedCriteria }));
+    }
   };
 
   const handleRemoveCriterion = (index: number) => {
@@ -91,7 +116,7 @@ export default function Page() {
     } else {
       setRubric((prev) => ({
         ...prev,
-        criteria: [...prev.criteria, { title: "", description: "" }],
+        criteria: [...prev.criteria, { title: "", description: "", weight: undefined }],
       }));
     }
   };
@@ -116,16 +141,22 @@ export default function Page() {
           "criteria": rubric.criteria,
           "isPrivate": isPrivate,
           "userID": user?.uid,
-          "facultyName": facultyName
+          "facultyName": facultyName,
+          "isWeighted":rubric.isWeighted
         }),
         headers: {
           'Content-Type': 'application/json'
         },
       })
-      .then((res) => {
-        setSaveTemplateOpen(false);
-        router.push("/rubrics");
-        toast.success("Rubric updated successfully.");
+      .then(async(res) => {
+        if(res.ok){
+          setSaveTemplateOpen(false);
+          router.push("/rubrics");
+          toast.success("Rubric updated successfully.");
+        }else{
+          const err_text = await res.text()
+          toast.error(err_text)
+        }
       })
       .catch((err) => {
         toast.error("Error updating rubric");
@@ -146,7 +177,8 @@ export default function Page() {
       criteria: rubric.criteria,
       isPrivate: true,  
       userID: user?.uid,
-      facultyName: facultyName
+      facultyName: facultyName,
+      isWeighted: rubric.isWeighted
     };
   
     fetch(`${QUEUEIT_URL}/rubrics/create`, {
@@ -171,7 +203,7 @@ export default function Page() {
     return (
       <BaseComponent>
         <div className="flex justify-center items-center h-screen">
-          <CatLoader />
+          <CatLoader loading={true} />
         </div>
       </BaseComponent>
     );
@@ -189,23 +221,35 @@ export default function Page() {
               <WestIcon sx={{color: 'white'}}/>
             </IconButton>
           </div>
-          <div className="flex flex-col h-full max-h-72 gap-3 items-start justify-start w-full">
-            <input
-              value={rubric.title}
-              onChange={(e) => handleChange("title", e.target.value)}
-              placeholder="Rubric Title"
-              style={{fontSize: '2.5em', fontWeight: 'bold', color: 'black', width: '100%'}}
-            />
-            <TextField
-              value={rubric.description}
-              onChange={(e) => handleChange("description", e.target.value)}
-              fullWidth
-              variant="standard"
-              multiline
-              placeholder="Description"
-              InputProps={{ disableUnderline: true }}
-              className="text-gray-500 ml-1"
-            />
+          <div className="flex h-full max-h-72 gap-3 items-start justify-start w-full">
+            <div className="flex flex-col h-full gap-3 items-start justify-start w-full">
+              <input
+                value={rubric.title}
+                onChange={(e) => handleChange("title", e.target.value)}
+                placeholder="Rubric Title"
+                style={{fontSize: '2.5em', fontWeight: 'bold', color: 'black', width: '100%'}}
+              />
+              <TextField
+                value={rubric.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                fullWidth
+                variant="standard"
+                multiline
+                placeholder="Description"
+                InputProps={{ disableUnderline: true }}
+                className="text-gray-500 ml-1"
+              />
+            </div>
+            
+            {rubric.userID === user?.uid?
+              <Tooltip title="Mark this as check if this rubric has weights on each criterion.">
+                <div className='p-3 flex gap-3 items-center text-xs rounded-md'>
+                    <FormControlLabel control={<Switch checked={rubric?.isWeighted !== undefined ? rubric?.isWeighted : false} onChange={(e)=>{setRubric((prev)=>({...prev, isWeighted:e.target.checked}))}}/>} label="Weighted"/>
+                </div>
+              </Tooltip>
+              :
+              <></>
+            }
           </div>
         </div>
 
@@ -232,6 +276,14 @@ export default function Page() {
                   InputProps={{ disableUnderline: true }}
                   className="text-gray-600"
                 />
+                {
+                  rubric.isWeighted?
+                  <span className="flex gap-3 items-center">
+                    <Typography variant="caption" color="gray">{`Weight (%)`}</Typography><input min={1} max={100} onChange={(e)=>handleCriteriaChange(index,"weight",parseFloat(e.target.value) || 0)} hidden={!rubric?.isWeighted} defaultValue={criterion.weight?criterion.weight:undefined} className="border-b-2 border-gray-300 p-1 w-fit " type="number" name="weight" id="weight"/>
+                  </span>
+                  :
+                  <></>
+                }
               </div>
               {rubric?.userID === user?.uid && (
                 <Tooltip title="Remove Criterion" arrow>
