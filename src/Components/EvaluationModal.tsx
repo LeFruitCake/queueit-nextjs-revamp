@@ -4,7 +4,7 @@ import { Chip, Modal, Slider, Typography } from '@mui/material';
 import React from 'react';
 import IndexEnumerator from './IndexEnumerator';
 import { capitalizeFirstLetter } from '@/Utils/Utility_functions';
-import { AttendanceStatus, lgreen } from '@/Utils/Global_variables';
+import { AttendanceStatus, Criterion, lgreen } from '@/Utils/Global_variables';
 import rocket from '../../public/images/rocket-thumb.png';
 import { useGradesContext } from '@/Contexts/GradesContext';
 
@@ -19,15 +19,20 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
     const { Grades, setGrades } = useGradesContext();
 
     // Function to handle slider change
-    const handleSliderChange = (studentName: string, newValue: number, criterionID: number) => {
-        setGrades(prevGrades => 
-            prevGrades.map(grade => 
-                grade.studentName === studentName && grade.criterionID === criterionID
-                    ? { ...grade, grade: newValue } // Update the grade
-                    : grade // Return the original grade
-            )
-        );
-    };
+    const handleSliderChange = (studentName: string, newValue: number, criterion: any) => {
+    setGrades(prevGrades =>
+        prevGrades.map(grade =>
+            grade.studentName === studentName && grade.criterionID === criterion.criterionID
+                ? {
+                    ...grade,
+                    grade: newValue, 
+                    weightedGrade: (newValue * (criterion.weight / 100)) // Apply weight
+                }
+                : grade
+        )
+    );
+};
+
 
     const marks = [
         { value: 0, label: '0' },
@@ -48,7 +53,7 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
                                 <IndexEnumerator index={index + 1} />
                             </div>
                             <div className='flex flex-col gap-3'>
-                                <Typography variant='h4' fontWeight={"bold"}>{criterion.title}</Typography>
+                                <Typography variant='h4' fontWeight={"bold"}>{`${criterion.title} ${criterion.weight?`(${criterion.weight}%)`:''}`}</Typography>
                                 <Typography variant='caption'>{criterion.description}</Typography>
                             </div>
                         </div>
@@ -77,7 +82,7 @@ const EvaluationModal: React.FC<EvaluationModalProps> = ({ open, setOpen }) => {
                                                 step={0.1}
                                                 aria-label="Small"
                                                 valueLabelDisplay="auto"
-                                                onChange={(event, newValue) => handleSliderChange(studentName, newValue, criterion.criterionID)} // Update grade on change
+                                                onChange={(event, newValue) => handleSliderChange(studentName, newValue, criterion)} // Update grade on change
                                                 sx={{
                                                     color: lgreen,
                                                     '& .MuiSlider-thumb': {

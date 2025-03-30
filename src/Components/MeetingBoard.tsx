@@ -39,7 +39,8 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                         criterionID:criterion.criterionID,
                         meetingID:meeting.meetingID,
                         editionNote:null,
-                        grade:0
+                        grade:0,
+                        weightedGrade:0
                     })
                 })
             });
@@ -64,12 +65,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
     Grades?.forEach((member) => {
         if (studentGrades[member.studentName]) {
             // Add to the existing grades for that student
-            studentGrades[member.studentName].totalGrade += member.grade;
+            studentGrades[member.studentName].totalGrade += Rubric?.isWeighted?member.weightedGrade:member.grade;
             studentGrades[member.studentName].count += 1;
         } else {
             // Initialize the data for a new student
             studentGrades[member.studentName] = {
-                totalGrade: member.grade,
+                totalGrade: Rubric?.isWeighted?member.weightedGrade:member.grade,
                 count: 1
             };
         }
@@ -79,7 +80,7 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
         const { totalGrade, count } = studentGrades[studentName];
         return {
             studentName,
-            grade: totalGrade / count, // Calculate the average grade
+            grade: Rubric?.isWeighted?totalGrade:totalGrade / count, // Calculate the average grade
         };
     });
 

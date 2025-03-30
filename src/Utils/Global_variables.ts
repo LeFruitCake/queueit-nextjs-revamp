@@ -250,6 +250,7 @@ export interface Grade{
     editionNote:string|null
     studentName:string
     grade:number
+    weightedGrade: number
 }
 
 export enum MeetingStatus{
