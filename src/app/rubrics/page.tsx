@@ -17,20 +17,22 @@ export default function Page() {
   const [filter, setFilter] = useState("All Templates");
 
   useEffect(() => {
-    const fetchRubrics = async () => {
-      try {
-        const response = await fetch(`http://localhost:8081/rubrics/user/${user?.uid}`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch rubrics");
+    if(user){
+      const fetchRubrics = async () => {
+        try {
+          const response = await fetch(`http://localhost:8081/rubrics/user/${user?.uid}`);
+          if (!response.ok) {
+            throw new Error("Failed to fetch rubrics");
+          }
+          const data = await response.json();
+          setRubrics(data);
+        } catch (error) {
+          console.error("Error fetching rubrics:", error);
         }
-        const data = await response.json();
-        setRubrics(data);
-      } catch (error) {
-        console.error("Error fetching rubrics:", error);
-      }
-    };
-
-    fetchRubrics();
+      };
+  
+      fetchRubrics();
+    }
   }, [user?.uid, setRubrics]);
 
   const RubricCardAction = (rubric) => {
@@ -47,7 +49,7 @@ export default function Page() {
 
   return (
     <BaseComponent>
-      <div className="bg-white w-full min-h-screen flex flex-col relative rounded-md px-10 py-6 border-2 border-black">
+      <div className="bg-white w-full flex flex-col relative rounded-md px-10 py-6 border-2 border-black h-fit">
         <div className="flex justify-between items-center w-full">
           <RubricHeader onFilterChange={setFilter} />
           <CreateRubricButton />

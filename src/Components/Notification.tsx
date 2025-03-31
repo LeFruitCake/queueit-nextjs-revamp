@@ -9,6 +9,16 @@ interface NotificationProps{
 }
 
 const Notification:React.FC<NotificationProps> = ({notification, action}) => {
+    const date = new Date(notification.notification.dateTimeGenerated)
+    const options = {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        hour12: true, // Use 12-hour format
+    };
+    const formattedDate = date.toLocaleString('en-US',options)
     const  avatar = useRef(notification.notification.notificationType === NotificationType.TEAM_ENQUEUE?randomGroupImage()
                             :notification.notification.notificationType === NotificationType.MANUALLY_APPOINTMENT_STARTED 
                             || notification.notification.notificationType === NotificationType.APPOINTMENT_CANCELLED
@@ -26,7 +36,7 @@ const Notification:React.FC<NotificationProps> = ({notification, action}) => {
             <img src={avatar.current} alt="avatar" style={{height:'15%', width:'15%'}}/>
             <div className='flex-1 flex flex-col justify-center'>
                 <Typography variant='subtitle2' fontWeight={"bold"}>{notification.notification.notificationMessage}</Typography>
-                <Typography variant='caption' color='gray'>{new Date(notification.notification.dateTimeGenerated).toISOString()}</Typography>
+                <Typography variant='caption' color='gray'>{formattedDate}</Typography>
             </div>
 
             

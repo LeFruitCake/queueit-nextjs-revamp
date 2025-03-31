@@ -95,7 +95,7 @@ const Page = () => {
     }else{
         return (
             <BaseComponent>
-                <div className='relative rounded-md bg-dpurple h-full p-6 flex flex-col overflow-hidden gap-10'>
+                <div className='relative rounded-md bg-dpurple p-6 flex flex-col gap-10'>
                     <div className='flex gap-6 items-center'>
                         <BackButton />
                         <div className='flex flex-col gap-3'>
@@ -132,7 +132,7 @@ const Page = () => {
                             <MenuItem value="Grade">Grade</MenuItem>
                         </Select>
                     </div>
-                    <div className='flex-1 bg-white overflow-auto relative'>
+                    <div className='bg-white relative'>
                         <table className='w-full border-collapse' ref={tableref}>
                             <thead className='sticky top-0 z-10 bg-gray-200'>
                                 <tr>

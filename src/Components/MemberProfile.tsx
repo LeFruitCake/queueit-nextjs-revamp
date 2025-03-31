@@ -15,30 +15,32 @@ const MemberProfile:React.FC<MemberProfileProps> = ({memberID}) => {
     const avatar = useRef(randomAvatar())
     const user=useUserContext().user
     useEffect(()=>{
-        fetch(`${SPEAR_URL}/get-student/${memberID}`,{
-            method:"GET",
-            headers:{
-                'Authorization': `Bearer ${user?.token}`
-            }
-        })
-        .then(async(res)=>{
-            switch(res.status){
-                case 200:
-                    const response = await res.json()
-                    setStudentDetails(response)
-                    break;
-                case 404:
-                    toast.error(`Student with ID: ${memberID} not found.`)
-                    break;
-                default:
-                    console.log(res.status)
-                    toast.error("Server error.");
-            }
-        })
-        .catch((err)=>{
-            console.log(err);
-            toast.error("Caught an exception while fetching student details.")
-        })
+        if(memberID){
+            fetch(`${SPEAR_URL}/get-student/${memberID}`,{
+                method:"GET",
+                headers:{
+                    'Authorization': `Bearer ${user?.token}`
+                }
+            })
+            .then(async(res)=>{
+                switch(res.status){
+                    case 200:
+                        const response = await res.json()
+                        setStudentDetails(response)
+                        break;
+                    case 404:
+                        toast.error(`Student with ID: ${memberID} not found.`)
+                        break;
+                    default:
+                        console.log(res.status)
+                        toast.error("Session expired. Please log in.");
+                }
+            })
+            .catch((err)=>{
+                console.log(err);
+                toast.error("Caught an exception while fetching student details.")
+            })
+        }
     },[memberID])
     return (
         <div className='bg-white rounded-md flex justify-center items-center flex-col w-60 p-6 overflow-hidden'>

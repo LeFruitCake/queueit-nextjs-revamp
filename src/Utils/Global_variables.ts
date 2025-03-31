@@ -250,6 +250,7 @@ export interface Grade{
     editionNote:string|null
     studentName:string
     grade:number
+    weightedGrade: number
 }
 
 export enum MeetingStatus{
@@ -290,11 +291,13 @@ export interface Criterion{
     rubric:Rubric
     title:string
     description:string
+    weight:number|undefined
 }
 
 export interface CriterionDTO{
     title:string|null|undefined
     description:string|null|undefined
+    weight:number|undefined
 }
 
 export interface Rubric{
@@ -305,6 +308,7 @@ export interface Rubric{
     isPrivate:boolean
     userID:number
     facultyName:string
+    isWeighted:boolean
 }
 
 export interface RubricDTO{
@@ -312,6 +316,7 @@ export interface RubricDTO{
     description:string|null|undefined
     criteria:Array<CriterionDTO>
     isPrivate:boolean
+    isWeighted:boolean
 }
 
 export interface Chat{
