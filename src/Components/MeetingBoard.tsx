@@ -10,6 +10,7 @@ import SelectRubricModal from './SelectRubricModal'
 import EvaluationModal from './EvaluationModal'
 import { useGradesContext } from '@/Contexts/GradesContext'
 import { MentionsInput, Mention } from "react-mentions";
+import InfoIcon from '@mui/icons-material/Info';
 
 interface MeetingBoardProps{
     meeting: Meeting
@@ -160,12 +161,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                 <div className='flex flex-col p-3'>
                     <div className='flex justify-between items-center'>
                         <div className='flex flex-col gap-3'>
-                            <div className='px-3 font-bold'>
-                                Student Evaluation
-                            </div>
-                            <div className='text-gray-500 px-3 w-full lg:w-1/2 xl:w-1/2'>
-                                Find a suitable rubric to evaluate team members and provide ratings for each member based on their contributions.
-                            </div>
+                        <div className="px-3 font-bold">
+                            Student Evaluation  
+                            <Tooltip title="Find a suitable rubric to evaluate team members and provide ratings for each member based on their contributions">
+                                <InfoIcon className="cursor-pointer ml-2" fontSize="small" />
+                            </Tooltip>
+                        </div>
                         </div>
                         <Tooltip title="Mark this as check if this meeting session is considered as just a follow up session. Grades not recorded.">
                             <div className='border-2 bg-dpurple text-white p-3 flex gap-3 items-center text-xs rounded-md'>
