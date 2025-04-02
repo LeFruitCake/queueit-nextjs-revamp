@@ -2,18 +2,10 @@
 
 import { Radar } from 'react-chartjs-2';
 import { Chart as ChartJS, RadialLinearScale, PointElement, LineElement, Title, Tooltip, Legend } from 'chart.js';
+import { RadarData } from '@/Utils/Global_variables';
 
 ChartJS.register(RadialLinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-interface DataEntry{
-  data: Array<number>
-  backgroundColor: Array<string>
-}
-
-interface RadarData{
-  labels: Array<string>
-  datasets: Array<DataEntry>
-}
 
 interface RadarChartProps{
   data:RadarData

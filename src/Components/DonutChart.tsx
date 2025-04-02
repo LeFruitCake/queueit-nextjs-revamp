@@ -1,6 +1,6 @@
 import { DonutChartData } from '@/Utils/Global_variables'
 import React from 'react'
-import {Doughnut} from "react-chartjs-2"
+import {Pie} from "react-chartjs-2"
 import {
     Chart as ChartJS,
     ArcElement,
@@ -30,7 +30,7 @@ const DonutChart:React.FC<DonutChartProps> = ({chartData, chartTitle}) => {
         },
       };
     return (
-        <Doughnut data={chartData} options={options}/>
+        <Pie data={chartData} options={options}/>
     )
 }
 

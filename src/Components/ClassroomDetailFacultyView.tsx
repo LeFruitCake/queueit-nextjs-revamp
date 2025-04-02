@@ -4,18 +4,14 @@ import BackButton from './BackButton'
 import { Avatar, Button, CircularProgress, IconButton, Modal, Typography } from '@mui/material'
 import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
 import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
-import { DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL, Team } from '@/Utils/Global_variables';
+import { AnalyticsResult, DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL, Team } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
-import person from '../../public/images/pointingUpwardPerson.png'
-import whiteStar from '../../public/images/star-white.png'
-import whiteSquiggly from '../../public/images/squiggly-white.png'
 import GroupBar from './GroupBar';
 import { useTeamsContext } from '@/Contexts/TeamsContext';
 import { toast } from 'react-toastify';
 import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
 import SickIcon from '@mui/icons-material/Sick';
-import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 
 import medalOne from '../../public/images/1st_Place_Medal.png'
 import medalTwo from '../../public/images/2nd_Place_Medal.png'
@@ -26,41 +22,7 @@ import LowEngagementChart from './LowEngagementChart';
 import LowPerformantStudentsChart from './LowPerformantStudentsChart';
 import CatLoader from './CatLoader';
 
-interface LowestEngagement{
-    teamName:string
-    meetingCount:number
-}
 
-interface StudentAtRiskEntry{
-    firstname:string
-    lastname:string
-    attendanceCount:string
-    gradeAverage:number
-    attendanceRate:number
-}
-
-interface TopTeam{
-    teamName:string
-    gradeAverage:number
-}
-
-interface PieChartCoord{
-    data:Array<number>
-    backgroundColor:Array<string>
-}
-
-interface PieChartDataEntry{
-    labels:Array<string>
-    datasets:Array<PieChartCoord>
-}
-
-interface AnalyticsResult{
-    lowestEngagementDTO:Array<LowestEngagement>
-    atRiskForKickOuts:Array<StudentAtRiskEntry>
-    topTeams:Array<TopTeam>
-    pieChartData:PieChartDataEntry
-    scatterPlotDataset:ScatterChartData
-}
 
 
 const GroupDetailAdviserView = () => {
@@ -155,13 +117,14 @@ const GroupDetailAdviserView = () => {
     useEffect(() => {
         const updateAnalytics = async () => {
             if (!dummyAnalytics) return;
-    
             let foo: AnalyticsResult = JSON.parse(JSON.stringify(dummyAnalytics));
             const teacherNames = new Set<string>();
             const teamNames = new Set<string>();
     
             Teams?.forEach((team) => {
-                teacherNames.add(team.adviserName);
+                if(team.adviserName){
+                    teacherNames.add(team.adviserName);
+                }
                 teamNames.add(team.groupName);
             });
     
@@ -169,7 +132,7 @@ const GroupDetailAdviserView = () => {
                 if (!foo.pieChartData.labels.includes(name)) {
                     foo.pieChartData.labels.push(name);
                     foo.pieChartData.datasets[0].backgroundColor.push('red');
-                    foo.pieChartData.datasets[0].data.push(0);
+                    // foo.pieChartData.datasets[0].data.push(0);
                 }
             }
     
@@ -183,7 +146,7 @@ const GroupDetailAdviserView = () => {
                 }
             }
     
-            // console.log("Updated foo:", foo);
+            console.log("Updated foo:", foo);
             setAnalyticsData(foo);
         };
     
@@ -255,78 +218,18 @@ const GroupDetailAdviserView = () => {
                             <></>
                         }
                     </div>
-    
-    
-                    
-                    <div className='flex-1 rounded-md flex gap-3 bg-white items-center'>
-                        {
-                            analyticsData?.scatterPlotDataset?
-                            <ScatterChart dataset={analyticsData?.scatterPlotDataset} chartTitle='Teams Performance Indicator'  style={{ objectFit: 'contain' }}/>
-                            :
-                            <CircularProgress/>
-                        }
-                    </div>
                 </div>
     
-                <div className='w-full flex gap-6'>
-                    {/* {
-                        analyticsData?.lowestEngagementDTO?.length ? */}
-                        <div className='bg-white min-h-20 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
-                                <HeartBrokenIcon fontSize='small' className='text-notlushred'/>Teams With Low Engagement
-                            </Typography>
-                            <div className='flex-grow flex min-h-40 max-h-80 items-center justify-center'>
-                                {
-                                    analyticsData?.lowestEngagementDTO?.length ? 
-                                    <LowEngagementChart data={analyticsData.lowestEngagementDTO} style={{ height: '100%', width: '100%', objectFit: 'contain' }} />
-                                    :
-                                    <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
-                                        Teams are doing great.
-                                    </Typography>
-                                }
-                            </div>
-                        </div>
-                        {/* :
-                        <></>
-                    } */}
-                    {/* {
-                        analyticsData?.atRiskForKickOuts.length ? */}
-                        <div className='bg-white min-h-20 max-h-80 overflow-auto p-3 rounded-md flex-1 flex flex-col'>
-                            <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
-                                <SickIcon fontSize='small' className='text-notlushred'/> Low-Performing Students 
-                            </Typography>
-                            <div className='flex-grow flex min-h-40 max-h-80 items-center justify-center'>
-                                {
-                                    analyticsData?.atRiskForKickOuts.length ? 
-                                    <LowPerformantStudentsChart data={analyticsData.atRiskForKickOuts} style={{ height: '100%', width: '100%', objectFit: 'contain' }} />
-                                    :
-                                    <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> 
-                                        Students are doing great.
-                                    </Typography>
-                                }
-                            </div>
-                        </div>
-                        {/* :
-                        <></>
-                    } */}
-                </div>
-                {/* <div className='w-full flex gap-6'>
-                    <div className='bg-white min-h-40 p-3 rounded-md flex-1 flex flex-col'>
-                        <Typography variant='caption' color='gray' fontWeight={"bold"} sx={{display:'flex', gap:'1em'}}> <KeyboardDoubleArrowDownIcon fontSize='small' className='text-notlushred'/> Teams With Declining Performance</Typography>
-                        <div className='flex-grow flex items-center justify-between'>
-                            
-                        </div>
-                    </div>
-                </div> */}
+                
     
-                <div className='flex gap-6 w-full'>
+                <div className='flex gap-6 w-full h-fit' style={{height:'500px'}}>
                    <div className='bg-white p-6 rounded-md flex flex-col gap-6 flex-grow overflow-auto'>
                         <Typography variant='h6' fontWeight={"bold"}>Teams</Typography>
                         {Teams?.map((team,index)=>(
                             <GroupBar key={index} team={team} index={index}/>
                         ))}
                    </div>
-                   <div className='bg-white p-6 rounded-md flex flex-col gap-6 w-1/3 aspect-square h-fit'>
+                   <div className='bg-white p-6 rounded-md flex-1 h-full flex flex-col gap-6 w-1/3 aspect-square h-fit'>
                         {
                             analyticsData?.pieChartData?
                             <DonutChart chartData={analyticsData?.pieChartData} chartTitle='Mentor Performance'/>

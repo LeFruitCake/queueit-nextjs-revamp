@@ -5,7 +5,7 @@ import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Attendance, AttendanceStatus, dpurple, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
+import { Attendance, AttendanceStatus, dpurple, GroupAnalytics, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import '../group/group.css'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions'
@@ -38,25 +38,7 @@ interface ModifyAttendanceGradeEntryProps{
 }
 
 
-interface DataEntry{
-    data: Array<number>
-    backgroundColor: Array<string>
-}
 
-interface RadarData{
-    labels: Array<string>
-    datasets: Array<DataEntry>
-}
-
-interface HistogramData{
-    labels: Array<string>
-    datasets: Array<DataEntry>
-}
-
-interface GroupAnalytics{
-    histogramData: HistogramData
-    radarData: RadarData
-}
 
 
 const page = () => {

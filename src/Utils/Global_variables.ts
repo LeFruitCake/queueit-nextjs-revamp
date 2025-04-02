@@ -1,3 +1,4 @@
+
 export const BASE_URL = ''
 export const special_characters = ['"',"'",';','-','/','=','(',')','\\','%','/','<','>','&','{','}']
 
@@ -208,6 +209,107 @@ export interface ProjectProposal{
     courseCode:string
 }
 
+export interface Task{
+    taskID: number|undefined|null
+    taskName: string
+    description: string
+    isCompleted: boolean
+    completionDate: string
+}
+
+export interface Module{
+    moduleID: number
+    moduleName: string
+    isCompleted: boolean
+    tasks: Array<Task>
+    completionDate: string
+    completionPercentage: number
+}
+
+export interface Milestone{
+    milestoneID: number
+    title: string
+    isCompleted: boolean
+    heirarchyOrder: number
+    modules: Array<Module>
+    completionDate: string
+    completionPercentage: number
+}
+
+export interface MilestoneSet{
+    milestoneSetID: number
+    milestones: Array<Milestone>
+    teamID: number
+    teamName: string
+    approverID: number
+    isApproved: boolean
+    approvedDate: string
+    completionPercentage: number
+}
+
+export interface LowestEngagement{
+    teamName:string
+    meetingCount:number
+}
+
+export interface StudentAtRiskEntry{
+    firstname:string
+    lastname:string
+    attendanceCount:string
+    gradeAverage:number
+    attendanceRate:number
+}
+
+export interface TopTeam{
+    teamName:string
+    gradeAverage:number
+}
+
+interface PieChartCoord{
+    data:Array<number>
+    backgroundColor:Array<string>
+}
+
+export interface PieChartDataEntry{
+    labels:Array<string>
+    datasets:Array<PieChartCoord>
+}
+
+export interface AnalyticsResult{
+    lowestEngagementDTO:Array<LowestEngagement>
+    atRiskForKickOuts:Array<StudentAtRiskEntry>
+    topTeams:Array<TopTeam>
+    pieChartData:PieChartDataEntry
+    scatterPlotDataset:ScatterChartData
+}
+
+export interface DataEntry{
+    data: Array<number>
+    backgroundColor: Array<string>
+}
+
+export interface DataEntryv2{
+    data: Array<number>
+    backgroundColor: string
+    borderColor:string
+    pointBackgroundColor:string
+}
+
+export interface RadarData{
+    labels: Array<string>
+    datasets: Array<DataEntryv2>
+}
+
+export interface HistogramData{
+    labels: Array<string>
+    datasets: Array<DataEntry>
+}
+
+export interface GroupAnalytics{
+    histogramData: HistogramData
+    radarData: RadarData
+}
+
 export interface ChatDTO{
     userID:number
     adviserID:number
@@ -225,6 +327,7 @@ export interface QueueingManager{
     queueingEntries:Array<QueueingEntry> | null
     meeting: Meeting | null | undefined
     cateredClassrooms:Array<number | null>
+    lastActive:string
 }
 
 export interface QueueingEntry{

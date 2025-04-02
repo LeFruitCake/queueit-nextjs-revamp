@@ -4,23 +4,34 @@ import BaseComponent from '@/Components/BaseComponent';
 import { useUserContext } from '@/Contexts/AuthContext';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import { Typography, TextField, InputAdornment, MenuItem, Select } from '@mui/material';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDownloadExcel } from 'react-export-table-to-excel';
 import SearchIcon from '@mui/icons-material/Search';
 import ExportToExcelButton from '@/Components/ExportToExcelButton';
 import { toast } from 'react-toastify';
 import { dpurple, lgreen, QUEUEIT_URL } from '@/Utils/Global_variables';
 import CatLoader from '@/Components/CatLoader';
+import DateRangePicker from '@/Components/DateRangePicker';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+
+interface Row{
+    studentName:string
+    teamName:string
+    gradeAverage:number
+}
 
 const Page = () => {
     const user = useUserContext().user;
     const { classroom } = useClassroomContext();
     const tableref = useRef(null);
     const [originalData, setOriginalData] = useState([]); 
-    const [filteredData, setFilteredData] = useState([]);
+    const [filteredData, setFilteredData] = useState<Array<Row>>([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortCategory, setSortCategory] = useState("All Category");
     const loading = useUserContext().loading
+    const [dateRange, setDateRange] = useState("");
+    const [startDate,setStartDate] = useState<Date|undefined>();
+    const [endDate, setEndDate] = useState<Date|undefined>()
 
     const fetchClassRecords = async () => {
         if (!classroom?.cid) return;
@@ -38,6 +49,13 @@ const Page = () => {
             toast.error("Caught an exception while fetching class records");
         }
     };
+
+    useEffect(()=>{
+        if(dateRange!=""){
+            setStartDate(new Date(dateRange.split('-')[0]))
+            setEndDate(new Date(dateRange.split('-')[1]))
+        }
+    },[dateRange])
 
     React.useEffect(() => {
         fetchClassRecords();
@@ -132,12 +150,12 @@ const Page = () => {
                             <MenuItem value="Grade">Grade</MenuItem>
                         </Select>
                     </div>
-                    <div className='bg-white relative'>
+                    <div className='bg-white relative h-screen overflow-auto'>
                         <table className='w-full border-collapse' ref={tableref}>
-                            <thead className='sticky top-0 z-10 bg-gray-200'>
+                            <thead className='sticky top-0 z-10 bg-lgreen'>
                                 <tr>
-                                    <th className='p-4 border'>STUDENT NAME</th>
-                                    <th className='p-4 border'>GROUP NAME</th>
+                                    <th className='p-4 border text-start'>STUDENT NAME</th>
+                                    <th className='p-4 border text-start'>GROUP NAME</th>
                                     <th className='p-4 border'>GRADE</th>
                                 </tr>
                             </thead>
@@ -146,12 +164,13 @@ const Page = () => {
                                     <tr key={index} className='border-b'>
                                         <td className='p-4 border'>{row.studentName}</td>
                                         <td className='p-4 border'>{row.teamName}</td>
-                                        <td className='p-4 border'>{row.gradeAverage}</td>
+                                        <td className={`p-4 border ${row.gradeAverage < 3?'text-red-500':''} text-center font-bold`}>{row.gradeAverage}</td>
                                     </tr>
                                 ))}
                             </tbody>
                         </table>
                     </div>
+                    
                 </div>
             </BaseComponent>
         );

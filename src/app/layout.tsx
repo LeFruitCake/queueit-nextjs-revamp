@@ -16,6 +16,7 @@ import { GradesProvider } from "@/Contexts/GradesContext";
 import { TeamsProvider } from "@/Contexts/TeamsContext";
 import { MeetingsProvider } from "@/Contexts/MeetingsContext";
 import { ReportSummaryProvider } from "@/Contexts/ReportSummaryContext";
+import { MilestoneSetProvider } from "@/Contexts/MilestoneSetContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,7 +60,9 @@ export default function RootLayout({
                             <GradesProvider>
                               <MeetingsProvider>
                                 <ReportSummaryProvider>
-                                  {children}
+                                  <MilestoneSetProvider>
+                                    {children}
+                                  </MilestoneSetProvider>
                                 </ReportSummaryProvider>
                               </MeetingsProvider>
                             </GradesProvider>

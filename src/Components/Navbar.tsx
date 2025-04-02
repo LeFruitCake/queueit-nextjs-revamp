@@ -136,7 +136,6 @@ const Navbar = () => {
             .then(async(res)=>{
                 if(res.ok){
                     const response:Array<NotificationRecipient> = await res.json();
-                    console.log(response)
                     setNotifications((prev) => {
                         const existingIDs = new Set(prev.map(n => n.notificationRecipientID));
                         const newNotifications = response.filter(n => !existingIDs.has(n.notificationRecipientID));
