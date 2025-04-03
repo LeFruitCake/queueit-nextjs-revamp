@@ -56,6 +56,10 @@ export default function Page() {
   const handleMerge = () => {
     const selectedRubrics = rubrics.filter(rubric => selectedRubricIds.has(rubric.id));
     
+    if (selectedRubricIds.size === 0) {
+      toast.error("Please select at least one rubric to merge.");
+      return;
+    }
     const mergedRubric = {
       title: selectedRubrics.map(r => r.title).join(' + '),
       description: selectedRubrics.map(r => r.description).join(' | '),
