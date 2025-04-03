@@ -8,12 +8,12 @@ import { useUserContext } from "@/Contexts/AuthContext";
 import { useRubricsContext } from "@/Contexts/RubricsContext";
 import { useRubricContext } from "@/Contexts/RubricContext";
 import { useRouter } from "next/navigation";
-import MergeCancelButtons from "@/Components/MergeCancelButtons"; 
+import MergeCancelButtons from "@/Components/MergeCancelButtons";
 import { toast } from "react-toastify";
 import RubricDetailModal from "@/Components/RubricDetailModal";
 import { lgreen, dpurple } from "@/Utils/Global_variables";
 import { Typography } from '@mui/material';
-
+import CatLoader from '@/Components/CatLoader';
 
 export default function Page() {
   const { Rubrics: rubrics, setRubrics } = useRubricsContext();
@@ -23,13 +23,14 @@ export default function Page() {
   const [filter, setFilter] = useState("All Templates");
   const [loading, setLoading] = useState(true);
   const [isMerging, setIsMerging] = useState(false);
-  const [selectedRubricIds, setSelectedRubricIds] = useState(new Set()); 
-  const [modalOpen, setModalOpen] = useState(false); 
+  const [selectedRubricIds, setSelectedRubricIds] = useState(new Set());
+  const [modalOpen, setModalOpen] = useState(false);
   const [selectedRubric, setSelectedRubric] = useState(null);
 
   useEffect(() => {
     if (user) {
       const fetchRubrics = async () => {
+        setLoading(true);
         try {
           const response = await fetch(`http://localhost:8081/rubrics/user/${user?.uid}`);
           if (!response.ok) {
@@ -39,6 +40,8 @@ export default function Page() {
           setRubrics(data);
         } catch (error) {
           console.error("Error fetching rubrics:", error);
+        } finally {
+          setLoading(false);
         }
       };
 
@@ -62,7 +65,7 @@ export default function Page() {
 
   const handleMerge = () => {
     const selectedRubrics = rubrics.filter(rubric => selectedRubricIds.has(rubric.id));
-    
+
     if (selectedRubricIds.size === 0) {
       toast.error("Please select at least one rubric to merge.");
       return;
@@ -70,23 +73,23 @@ export default function Page() {
     const mergedRubric = {
       title: selectedRubrics.map(r => r.title).join(' + '),
       description: selectedRubrics.map(r => r.description).join(' | '),
-      criteria: selectedRubrics.flatMap(r => 
+      criteria: selectedRubrics.flatMap(r =>
         r.criteria.map(({ title, description }) => ({ title, description }))
       ),
       isPrivate: true,
       isWeighted: false,
     };
-  
+
     // Construct the URL with query parameters
     const mergedRubricQuery = encodeURIComponent(JSON.stringify(mergedRubric));
     const createPageUrl = `/rubrics/create?mergedRubric=${mergedRubricQuery}`;
-  
+
     // Navigate to the create page with the merged rubric data
     router.push(createPageUrl);
-  
+
     setIsMerging(false);
   };
-  
+
 
   const handleCancel = () => {
     setIsMerging(false);
@@ -113,48 +116,57 @@ export default function Page() {
   });
 
   return (
+
     <BaseComponent>
-      <div className="bg-white w-full flex flex-col relative rounded-md px-10 py-6 border-2 border-black h-fit">
-        <div className="flex justify-between items-center w-full">
-          <RubricHeader onFilterChange={setFilter} />
-          {isMerging ? (
-            <MergeCancelButtons onMerge={handleMerge} onCancel={handleCancel} />
-          ) : (
-            <CreateRubricButton onSelectAndMerge={handleSelectAndMergeRubrics} />
-          )}
-        </div>
+      {loading ? ( 
+        <CatLoader loading={loading} />
+      ) : (
+        user ? (
+        <div className="bg-white w-full flex flex-col relative rounded-md px-10 py-6 border-2 border-black h-fit">
+          <div className="flex justify-between items-center w-full">
+            <RubricHeader onFilterChange={setFilter} />
+            {isMerging ? (
+              <MergeCancelButtons onMerge={handleMerge} onCancel={handleCancel} />
+            ) : (
+              <CreateRubricButton onSelectAndMerge={handleSelectAndMergeRubrics} />
+            )}
+          </div>
 
-        {isMerging && (
-          <Typography variant="body1" sx={{ color: dpurple }}>
-            Check the checkboxes on the rubric cards you want to merge.
-          </Typography>
-        )}
-
-        <div className="relative pt-10 flex flex-wrap gap-10 p-5">
-          {filteredRubrics?.length > 0 ? (
-            filteredRubrics.map((rubric) => (
-              <div key={rubric.id} className="flex items-start">
-                {isMerging && (
-                  <input
-                    type="checkbox"
-                    checked={selectedRubricIds.has(rubric.id)}
-                    onChange={() => handleCheckboxChange(rubric.id)}
-                    className="mr-2"
-                  />
-                )}
-                <RubricCard onClickAction={RubricCardAction} rubric={rubric} />
-              </div>
-            ))
-          ) : (
-            <p>No rubric found</p>
+          {isMerging && (
+            <Typography variant="body1" sx={{ color: dpurple }}>
+              Check the checkboxes on the rubric cards you want to merge.
+            </Typography>
           )}
+
+          <div className="relative pt-10 flex flex-wrap gap-10 p-5">
+            {filteredRubrics?.length > 0 ? (
+              filteredRubrics.map((rubric) => (
+                <div key={rubric.id} className="flex items-start">
+                  {isMerging && (
+                    <input
+                      type="checkbox"
+                      checked={selectedRubricIds.has(rubric.id)}
+                      onChange={() => handleCheckboxChange(rubric.id)}
+                      className="mr-2"
+                    />
+                  )}
+                  <RubricCard onClickAction={RubricCardAction} rubric={rubric} />
+                </div>
+              ))
+            ) : (
+              <p>No rubric found</p>
+            )}
+          </div>
         </div>
-      </div>
-      <RubricDetailModal 
-        open={modalOpen} 
-        onClose={() => setModalOpen(false)} 
+      ) : (
+        <CatLoader loading={!user} />
+      )
+    )}
+      <RubricDetailModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
         rubric={selectedRubric} 
-      />
+        />
     </BaseComponent>
   );
 }
