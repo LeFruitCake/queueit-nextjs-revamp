@@ -1,25 +1,26 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import $ from "jquery";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "daterangepicker/daterangepicker.css";
 import "daterangepicker";
 import moment from "moment";
 
-
-interface DateRangePickerProps{
-    dateRange:string
-    setDateRange: Function
+interface DateRangePickerProps {
+  dateRange: string;
+  setDateRange: Function;
 }
 
-const DateRangePicker:React.FC<DateRangePickerProps> = ({dateRange,setDateRange}) => {
+const DateRangePicker: React.FC<DateRangePickerProps> = ({
+  dateRange,
+  setDateRange,
+}) => {
   const pickerRef = useRef<HTMLInputElement | null>(null);
-  
 
   useEffect(() => {
     if (!pickerRef.current) return;
 
-    const start = moment().subtract(29, "days");
-    const end = moment();
+    const start = moment().add(0, "month").startOf("month"); // First day of the next month
+    const end = moment().add(0, "month").endOf("month"); // Last day of the next month
 
     function cb(start: moment.Moment, end: moment.Moment) {
       setDateRange(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
@@ -37,16 +38,17 @@ const DateRangePicker:React.FC<DateRangePickerProps> = ({dateRange,setDateRange}
           "Last 30 Days": [moment().subtract(29, "days"), moment()],
           "This Month": [moment().startOf("month"), moment().endOf("month")],
           "Last Month": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")],
+          "Next Month": [moment().add(1, "month").startOf("month"), moment().add(1, "month").endOf("month")], // Added Next Month range
         },
       },
       cb
     );
 
-    cb(start, end);
+    cb(start, end); // Set the initial range
 
     return () => {
       if ($picker.data("daterangepicker")) {
-        $picker.data("daterangepicker").remove(); // ✅ Only remove if initialized
+        $picker.data("daterangepicker").remove(); // Clean up
       }
     };
   }, []);

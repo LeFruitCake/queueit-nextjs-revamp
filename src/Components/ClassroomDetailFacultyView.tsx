@@ -1,28 +1,29 @@
 "use client"
 import React, { useEffect, useState } from 'react'
 import BackButton from './BackButton'
-import { Avatar, Button, CircularProgress, IconButton, Modal, Typography } from '@mui/material'
-import { sampleGroupMembers, sampleTeams } from '@/Sample_Data/SampleData1';
-import { capitalizeFirstLetter, randomQuotes, stringAvatar } from '@/Utils/Utility_functions';
+import { Avatar, Button, CircularProgress, IconButton, Modal, Tooltip, Typography } from '@mui/material'
 import { AnalyticsResult, DonutChartData, dpurple, lgreen, QUEUEIT_URL, ScatterChartData, SPEAR_URL, Team } from '@/Utils/Global_variables';
 import { useRouter } from 'next/navigation';
 import { useClassroomContext } from '@/Contexts/ClassroomContext';
 import GroupBar from './GroupBar';
 import { useTeamsContext } from '@/Contexts/TeamsContext';
 import { toast } from 'react-toastify';
-import HeartBrokenIcon from '@mui/icons-material/HeartBroken';
-import SickIcon from '@mui/icons-material/Sick';
 
 import medalOne from '../../public/images/1st_Place_Medal.png'
 import medalTwo from '../../public/images/2nd_Place_Medal.png'
 import medalThree from '../../public/images/3rd_Place_Medal.png'
 import DonutChart from './DonutChart';
-import ScatterChart from './ScatterChart';
-import LowEngagementChart from './LowEngagementChart';
-import LowPerformantStudentsChart from './LowPerformantStudentsChart';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import CatLoader from './CatLoader';
+import DateRangePicker from './DateRangePicker';
 
-
+interface MeetingTableRow{
+    facultyName:string
+    groupName:string
+    numFailedMeetings:number
+    numGradedMeetings:number
+    numUngradedMeetings:number
+}
 
 
 const GroupDetailAdviserView = () => {
@@ -32,6 +33,47 @@ const GroupDetailAdviserView = () => {
     const [viewEnrolleesModalOpen, setViewEnrolleesModalOpen] = useState(false)
     const [analyticsData, setAnalyticsData] = useState<AnalyticsResult | undefined>()
     const [dummyAnalytics, setDummyAnalytics] = useState<AnalyticsResult | undefined>()
+    const [dateRange, setDateRange] = useState("");
+    const [startDate,setStartDate] = useState<string|undefined>();
+    const [endDate, setEndDate] = useState<string|undefined>()
+    const [meetingAnalytics, setMeetingAnalytics] = useState<Array<MeetingTableRow>>()
+    const [filteredData, setFilteredData] = useState<Array<MeetingTableRow>>();
+    const [filterInputString, setFilterInputString] = useState<string>("")
+
+    
+    useEffect(()=>{
+        if(dateRange!=""){
+            setStartDate(new Date(dateRange.split('-')[0]).toISOString())
+            setEndDate(new Date(dateRange.split('-')[1]).toISOString())
+        }
+    },[dateRange])
+
+    useEffect(()=>{
+        fetch(`${QUEUEIT_URL}/faculty/meetingsTable/${classroom?.cid}`,{
+            body:JSON.stringify({
+                "start":startDate,
+                "end":endDate
+            }),
+            method:'POST',
+            headers:{
+                'Content-Type':'application/json'
+            }
+        })
+        .then(async(res)=>{
+            if(res.ok){
+                const response:Array<MeetingTableRow> = await res.json()
+                setMeetingAnalytics(response)
+            }else{
+                const err_text = await res.text()
+                console.log(err_text)
+            }
+        })
+        .catch((err)=>{
+            console.log(err)
+        })
+    },[startDate,endDate])
+
+    
     const openViewEnrolleesModal = ()=>{
     setViewEnrolleesModalOpen(true)
     }
@@ -132,7 +174,7 @@ const GroupDetailAdviserView = () => {
                 if (!foo.pieChartData.labels.includes(name)) {
                     foo.pieChartData.labels.push(name);
                     foo.pieChartData.datasets[0].backgroundColor.push('red');
-                    // foo.pieChartData.datasets[0].data.push(0);
+                    foo.pieChartData.datasets[0].data.push(0);
                 }
             }
     
@@ -151,7 +193,19 @@ const GroupDetailAdviserView = () => {
         };
     
         updateAnalytics();
-    }, [dummyAnalytics, Teams]); // Dependencies to trigger update
+    }, [dummyAnalytics, Teams]); 
+
+    useEffect(() => {
+        if (filterInputString === "") {
+            setFilteredData(meetingAnalytics || []); 
+        } else {
+            const filtered = (meetingAnalytics || []).filter(item => 
+                item.groupName.toLowerCase().includes(filterInputString.toLowerCase()) ||
+                item.facultyName.toLowerCase().includes(filterInputString.toLowerCase())
+            );
+            setFilteredData(filtered); 
+        }
+    }, [filterInputString, meetingAnalytics]);
     
 
     if(!Teams && !analyticsData){
@@ -217,6 +271,74 @@ const GroupDetailAdviserView = () => {
                             :
                             <></>
                         }
+                    </div>
+
+                    <div className='bg-white flex-1 h-full py-6 overflow-hidden'>
+                        <div className='w-full flex justify-between gap-3 items-end px-3'>
+                            <input onChange={(e)=>{setFilterInputString(e.target.value)}} className='border rounded-md h-fit flex-1 p-2' type="text" name="filter" id="filter" placeholder='Filter'/>
+                            <div className='w-fit'>  
+                                <span className='flex'><CalendarMonthIcon fontSize='small'/><Typography variant='caption' >Date Filter</Typography></span>
+                                <DateRangePicker dateRange={dateRange} setDateRange={setDateRange}/>
+                            </div>
+                        </div>
+                        <div className='h-96 overflow-auto'>
+                            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '20px' }}>
+                                <thead>
+                                    <tr>
+                                        <th className='p-2 text-start bg-lgreen'>Group Name</th>
+                                        <th className='p-2 text-start bg-lgreen'>Faculty Name</th>
+                                        <th className='p-2 text-start bg-lgreen'>Meeting Sparkline</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredData?.map((item, index) => {
+                                        const totalMeetings =
+                                            item.numFailedMeetings + item.numGradedMeetings + item.numUngradedMeetings;
+                                        const failedWidth = (item.numFailedMeetings / totalMeetings) * 100;
+                                        const gradedWidth = (item.numGradedMeetings / totalMeetings) * 100;
+                                        const ungradedWidth = (item.numUngradedMeetings / totalMeetings) * 100;
+
+                                    return (
+                                        <tr key={index}>
+                                            <td className={`p-2 ${index%2!=0?'bg-slate-200':'bg-white'}`}>{item.groupName}</td>
+                                            <td className={`p-2 ${index%2!=0?'bg-slate-200':'bg-white'}`}>{item.facultyName}</td>
+                                            <td className={`p-2 ${index%2!=0?'bg-slate-200':'bg-white'}`}>
+                                                <div style={{ width: '100%', height: '10px', display: 'flex' }}>
+                                                    <Tooltip title={`Failed Meetings: ${item.numFailedMeetings}`}>
+                                                        <div
+                                                            style={{
+                                                            width: `${failedWidth}%`,
+                                                            backgroundColor: 'red',
+                                                            height: '100%',
+                                                            }}
+                                                        ></div>
+                                                    </Tooltip>
+                                                    <Tooltip title={`Graded Meetings: ${item.numGradedMeetings}`}>
+                                                        <div
+                                                            style={{
+                                                            width: `${gradedWidth}%`,
+                                                            backgroundColor: 'green',
+                                                            height: '100%',
+                                                            }}
+                                                        ></div>
+                                                    </Tooltip>
+                                                    <Tooltip title={`Ungraded Meetings: ${item.numUngradedMeetings}`}>
+                                                        <div
+                                                            style={{
+                                                            width: `${ungradedWidth}%`,
+                                                            backgroundColor: 'orange',
+                                                            height: '100%',
+                                                            }}
+                                                        ></div>
+                                                    </Tooltip>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                    })}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
     
