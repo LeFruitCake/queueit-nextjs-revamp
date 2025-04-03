@@ -249,7 +249,7 @@ const page = () => {
     }else{
         return (
             <BaseComponent>
-                <div className='flex-grow relative pb-5 rounded-xl bg-black mt-5'>
+                <div className='flex-grow relative pb-5 rounded-xl bg-black mt-5 gap-12'>
                     <div className='bg-dpurple flex flex-col p-5 pb-48 z-20 relative' style={{borderTopLeftRadius:'10px', borderTopRightRadius:'10px', borderBottomLeftRadius:'80px', borderBottomRightRadius:'80px'}}>
                         <div className='flex flex-col lg:flex-row xl:flex-row gap-10 justify-between items-start'>
                             <BackButton/>
@@ -268,7 +268,7 @@ const page = () => {
 
                         <div className='pt-3 w-full'>
                             <Typography textAlign={"center"} variant='h4' fontWeight='bold' color='white'>Members</Typography>
-                            <div className='flex justify-start md:justify-center lg:justify-center gap-3 w-full overflow-auto py-3'>
+                            <div className={`flex ${team?.memberIds?.length>=5?'justify-start':'justify-center'} gap-3 w-full overflow-auto py-3`}>
                                 {team?.memberIds.map((member, index)=>(
                                     <div key={index}>
                                         <MemberProfile  memberID={member}/>

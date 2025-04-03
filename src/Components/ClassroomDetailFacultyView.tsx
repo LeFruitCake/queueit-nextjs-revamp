@@ -235,7 +235,7 @@ const GroupDetailAdviserView = () => {
                     <div className='bg-white p-6 flex-1 rounded-md gap-12 flex flex-col'>
                         <Typography variant='h6' fontWeight={"bold"} textAlign={"center"}>{`Top Teams`}</Typography>
                         {analyticsData?.topTeams && (analyticsData?.topTeams[0]?.gradeAverage != 0 || analyticsData?.topTeams[0]?.gradeAverage != null || analyticsData?.topTeams[0]?.gradeAverage != undefined)?
-                            <div className='w-full flex items-end'>
+                            <div className='w-full flex items-end h-full'>
                                 {
                                     analyticsData?.topTeams.length >= 2 && analyticsData.topTeams[1].gradeAverage != 0?
                                     <div className='bg-gradient-to-b overflow-hidden from-dpurple to-white h-48 flex-1 relative rounded-md rounded-tr-none'>
@@ -274,7 +274,7 @@ const GroupDetailAdviserView = () => {
                     </div>
 
                     <div className='bg-white flex-1 h-full py-6 overflow-hidden'>
-                        <div className='w-full flex justify-between gap-3 items-end px-3'>
+                        <div className='w-full flex justify-between gap-3 items-end px-3 pb-2'>
                             <input onChange={(e)=>{setFilterInputString(e.target.value)}} className='border rounded-md h-fit flex-1 p-2' type="text" name="filter" id="filter" placeholder='Filter'/>
                             <div className='w-fit'>  
                                 <span className='flex'><CalendarMonthIcon fontSize='small'/><Typography variant='caption' >Date Filter</Typography></span>

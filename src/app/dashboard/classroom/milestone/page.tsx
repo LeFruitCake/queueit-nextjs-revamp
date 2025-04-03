@@ -389,7 +389,8 @@ const page = () => {
                   display:'flex',
                   gap:1,
                   marginLeft:8,
-                  '&:hover':{backgroundColor:'#5A3EC8'}
+                  '&:hover':{backgroundColor:'#5A3EC8'},
+                  alignItems:'center'
               }}
               onClick={()=>{handleLockIn()}}
             >
