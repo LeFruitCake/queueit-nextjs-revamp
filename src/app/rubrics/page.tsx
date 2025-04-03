@@ -10,6 +10,10 @@ import { useRubricContext } from "@/Contexts/RubricContext";
 import { useRouter } from "next/navigation";
 import MergeCancelButtons from "@/Components/MergeCancelButtons"; 
 import { toast } from "react-toastify";
+import RubricDetailModal from "@/Components/RubricDetailModal";
+import { lgreen, dpurple } from "@/Utils/Global_variables";
+import { Typography } from '@mui/material';
+
 
 export default function Page() {
   const { Rubrics: rubrics, setRubrics } = useRubricsContext();
@@ -20,6 +24,8 @@ export default function Page() {
   const [loading, setLoading] = useState(true);
   const [isMerging, setIsMerging] = useState(false);
   const [selectedRubricIds, setSelectedRubricIds] = useState(new Set()); 
+  const [modalOpen, setModalOpen] = useState(false); 
+  const [selectedRubric, setSelectedRubric] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -42,7 +48,8 @@ export default function Page() {
 
   const RubricCardAction = (rubric) => {
     if (isMerging) {
-      window.open("/rubrics/details");
+      setSelectedRubric(rubric);
+      setModalOpen(true);
     } else {
       setRubric(rubric);
       router.push("/rubrics/details");
@@ -63,9 +70,11 @@ export default function Page() {
     const mergedRubric = {
       title: selectedRubrics.map(r => r.title).join(' + '),
       description: selectedRubrics.map(r => r.description).join(' | '),
-      criteria: selectedRubrics.flatMap(r => r.criteria),
+      criteria: selectedRubrics.flatMap(r => 
+        r.criteria.map(({ title, description }) => ({ title, description }))
+      ),
       isPrivate: true,
-      isWeighted: selectedRubrics.some(r => r.isWeighted),
+      isWeighted: false,
     };
   
     // Construct the URL with query parameters
@@ -115,6 +124,12 @@ export default function Page() {
           )}
         </div>
 
+        {isMerging && (
+          <Typography variant="body1" sx={{ color: dpurple }}>
+            Check the checkboxes on the rubric cards you want to merge.
+          </Typography>
+        )}
+
         <div className="relative pt-10 flex flex-wrap gap-10 p-5">
           {filteredRubrics?.length > 0 ? (
             filteredRubrics.map((rubric) => (
@@ -135,6 +150,11 @@ export default function Page() {
           )}
         </div>
       </div>
+      <RubricDetailModal 
+        open={modalOpen} 
+        onClose={() => setModalOpen(false)} 
+        rubric={selectedRubric} 
+      />
     </BaseComponent>
   );
 }
