@@ -486,7 +486,8 @@ export default function Page() {
                                     const groupName = eventInfo.event._def.extendedProps.teamName;
     
                                     return (
-                                        <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
+                                        <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , 
+                                        backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:meetingStatus === MeetingStatus.STARTED_AUTOMATED || meetingStatus === MeetingStatus.STARTED_FACULTY_INITIATED || meetingStatus === MeetingStatus.STARTED_MANUALLY || meetingStatus === MeetingStatus.STARTED_TEAM_INITIATED?'orange':lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
                                             <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
                                             <Typography  fontWeight={"bold"}>{groupName}</Typography>
                                             <Typography color={meetingStatus === MeetingStatus.SET_MANUALLY?lgreen:dpurple} variant='caption' >{meetingStatus === MeetingStatus.SET_AUTOMATED?<>Scheduled</>:meetingStatus === MeetingStatus.SET_MANUALLY?<>Appointment</>:<></>}</Typography>
@@ -678,29 +679,36 @@ export default function Page() {
                                         {selectedEvent?.end?.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                     </Typography>
                                 </div>
-                                {selectedEvent.meetingStatus != MeetingStatus.SCHEDULED?
-                                    <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
-    
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => setConfirmationOpen(true)}
-                                            style={{
-                                                backgroundColor: '#7D57FC',
-                                                color: 'white',
-                                                borderRadius: '5px',
-                                                borderWidth: '1px',
-                                                borderStyle: 'solid',
-                                                borderColor: 'black',
-                                                transition: 'background-color 0.3s',
-                                                textTransform: 'none',
-                                            }}
-                                        >
-                                            <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
-                                            Cancel Session
-                                        </Button>
-                                    </div>
-                                    :<></>
-                                }
+                                {[
+                                MeetingStatus.SCHEDULED,
+                                MeetingStatus.STARTED_AUTOMATED,
+                                MeetingStatus.STARTED_FACULTY_INITIATED,
+                                MeetingStatus.STARTED_MANUALLY,
+                                MeetingStatus.STARTED_TEAM_INITIATED,
+                                MeetingStatus.ATTENDED_FACULTY_CONDUCTED,
+                                MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED
+                                ].includes(selectedEvent.meetingStatus) || (
+                                <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
+                                    <Button
+                                    variant="outlined"
+                                    onClick={() => setConfirmationOpen(true)}
+                                    style={{
+                                        backgroundColor: '#7D57FC',
+                                        color: 'white',
+                                        borderRadius: '5px',
+                                        borderWidth: '1px',
+                                        borderStyle: 'solid',
+                                        borderColor: 'black',
+                                        transition: 'background-color 0.3s',
+                                        textTransform: 'none',
+                                    }}
+                                    >
+                                    <ClearRoundedIcon style={{ marginRight: '8px', fontSize: '1.3em' }} />
+                                    Cancel Session
+                                    </Button>
+                                </div>
+                                )}
+
                             </div>
                         )}
                     </Box>
