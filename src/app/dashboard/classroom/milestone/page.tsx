@@ -357,9 +357,9 @@ const page = () => {
           const success_msg = await res.text()
           toast.success(success_msg)
         }else{
-          const err_msg = await res.text()
-          console.log(err_msg)
-          toast.error("Something went wrong.")
+          // const err_msg = await res.text()
+          // console.log(err_msg)
+          toast.error("Milestone or module or task name might be too long.")
         }
       })
       .catch((err)=>{

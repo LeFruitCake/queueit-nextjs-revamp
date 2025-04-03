@@ -5,7 +5,7 @@ import { useTeamContext } from '@/Contexts/TeamContext'
 import { Button, CircularProgress, IconButton, Tooltip, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import CampaignIcon from '@mui/icons-material/Campaign';
-import { Attendance, AttendanceStatus, dpurple, GroupAnalytics, lgreen, MeetingStatus, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
+import { Attendance, AttendanceStatus, dpurple, GroupAnalytics, lgreen, MeetingStatus, MilestoneSet, QUEUEIT_URL, SPEAR_URL, User, UserRetrieved, UserType } from '@/Utils/Global_variables'
 import MemberProfile from '@/Components/MemberProfile'
 import '../group/group.css'
 import { capitalizeFirstLetter, randomAvatar, randomQuotes } from '@/Utils/Utility_functions'
@@ -21,6 +21,8 @@ import CatLoader from '@/Components/CatLoader'
 import ModifyAttendanceGradeEntry from '@/Components/ModifyAttendanceGradeEntry'
 import HistogramChart from '@/Components/Histogram'
 import RadarChart from '@/Components/RadarChart'
+import { useMilestoneSetContext } from '@/Contexts/MilestoneSetContext'
+import MilestoneProgressBar from '@/Components/MilestoneProgressBar'
 
 interface MeetingPackage{
     attendanceList: Array<Attendance>
@@ -51,7 +53,7 @@ const page = () => {
     const {Meetings,setMeetings} = useMeetingsContext();
     const router = useRouter();
     const {QueueingManager, setQueueingManager} = useQueueingManagerContext()
-
+    const {MilestoneSet, setMilestoneSet} = useMilestoneSetContext()
     const [teamAnalytics,setTeamAnalytics] = useState<GroupAnalytics>()
     
     useEffect(()=>{
@@ -71,7 +73,21 @@ const page = () => {
             .catch((err)=>{
                 console.log(err)
             })
+
+            fetch(`${QUEUEIT_URL}/milestone/getSet/${team.tid}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:MilestoneSet = await res.json()
+                    setMilestoneSet(response)
+                }else{
+                    setMilestoneSet(null)
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
         }
+        
     },[team])
 
     useEffect(()=>{
@@ -234,7 +250,7 @@ const page = () => {
         return (
             <BaseComponent>
                 <div className='flex-grow relative pb-5 rounded-xl bg-black mt-5'>
-                    <div className='bg-dpurple flex flex-col p-5 pb-32 z-20 relative' style={{borderTopLeftRadius:'10px', borderTopRightRadius:'10px', borderBottomLeftRadius:'80px', borderBottomRightRadius:'80px'}}>
+                    <div className='bg-dpurple flex flex-col p-5 pb-48 z-20 relative' style={{borderTopLeftRadius:'10px', borderTopRightRadius:'10px', borderBottomLeftRadius:'80px', borderBottomRightRadius:'80px'}}>
                         <div className='flex flex-col lg:flex-row xl:flex-row gap-10 justify-between items-start'>
                             <BackButton/>
                             <div className=' flex-1 flex flex-col self-center'>
@@ -250,9 +266,9 @@ const page = () => {
                             </IconButton>
                         </div>
 
-                        <div className='py-10 w-full'>
+                        <div className='pt-3 w-full'>
                             <Typography textAlign={"center"} variant='h4' fontWeight='bold' color='white'>Members</Typography>
-                            <div className='flex justify-start md:justify-center lg:justify-center gap-8 w-full overflow-auto py-3'>
+                            <div className='flex justify-start md:justify-center lg:justify-center gap-3 w-full overflow-auto py-3'>
                                 {team?.memberIds.map((member, index)=>(
                                     <div key={index}>
                                         <MemberProfile  memberID={member}/>
@@ -260,22 +276,33 @@ const page = () => {
                                 ))}
                             </div>
                         </div>
-                        <div className='w-full h-96 flex gap-6'>
-                            <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
-                                {teamAnalytics?.histogramData?
-                                    <HistogramChart data={teamAnalytics?.histogramData}/>
-                                    :
-                                    <CircularProgress/>
-                                }
+                        {teamAnalytics?.histogramData != null && teamAnalytics.radarData != null?
+                            <div className='w-full h-96 flex gap-3'>
+                                <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
+                                    {teamAnalytics?.histogramData?
+                                        <HistogramChart data={teamAnalytics?.histogramData}/>
+                                        :
+                                        <CircularProgress/>
+                                    }
+                                </div>
+                                <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
+                                    {teamAnalytics?.radarData?
+                                        <RadarChart data={teamAnalytics?.radarData}/>
+                                        :
+                                        <CircularProgress/>
+                                    }
+                                </div>
                             </div>
-                            <div className='flex-1 bg-white rounded-md flex justify-center items-center p-12'>
-                                {teamAnalytics?.radarData?
-                                    <RadarChart data={teamAnalytics?.radarData}/>
-                                    :
-                                    <CircularProgress/>
-                                }
+                            :<></>
+                        }
+                        {
+                            MilestoneSet != null?
+                            <div className='w-full py-3 z-10'>
+                                <MilestoneProgressBar/>
                             </div>
-                        </div>
+                            :
+                            <></>
+                        }
                     </div>
                     <div className='relative'>
                         <div className='relative z-50 px-5'>
@@ -286,7 +313,7 @@ const page = () => {
                                             <Typography variant='h6' fontWeight='bold'>{`${capitalizeFirstLetter(mentor.firstname)} ${capitalizeFirstLetter(mentor.lastname)}`}</Typography>
                                             <Typography variant='subtitle2'>Mentor</Typography>
                                         </span>
-                                        <img src={mentorImage.src} alt="mentor" style={{height:'200%', position:'absolute', right:0,bottom:0, marginBottom:'-86px', marginRight:'-50px'}} />
+                                        <img src={mentorImage.src} alt="mentor" style={{height:'200%', position:'absolute', right:0,bottom:0, marginBottom:'-86px', marginRight:'-50px', zIndex:-1}} />
                                     </div> 
                                     :
                                     <div className='flex flex-col gap-3 p-5 text-center'>

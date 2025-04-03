@@ -213,7 +213,7 @@ export interface Task{
     taskID: number|undefined|null
     taskName: string
     description: string
-    isCompleted: boolean
+    completed: boolean
     completionDate: string
 }
 
@@ -229,7 +229,7 @@ export interface Module{
 export interface Milestone{
     milestoneID: number
     title: string
-    isCompleted: boolean
+    completed: boolean
     heirarchyOrder: number
     modules: Array<Module>
     completionDate: string
@@ -242,7 +242,7 @@ export interface MilestoneSet{
     teamID: number
     teamName: string
     approverID: number
-    isApproved: boolean
+    approved: boolean
     approvedDate: string
     completionPercentage: number
 }

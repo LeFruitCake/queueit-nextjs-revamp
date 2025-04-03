@@ -127,17 +127,21 @@ const GroupDetailStudentView = () => {
             .then(async(res)=>{
                 if(res.ok){
                     const response:GroupAnalytics = await res.json()
-                    
-                    response.histogramData.datasets[0].label = "Number Of Presence in Meetings"
-                    response.radarData.datasets[0].label = "Grade"
-                    response.radarData.datasets[0].fill = true
+                    if(response.histogramData != null){
+                        response.histogramData.datasets[0].label = "Number Of Presence in Meetings"
+                    }
+
+                    if(response.radarData != null){
+                        response.radarData.datasets[0].label = "Grade"
+                        response.radarData.datasets[0].fill = true
+                    }
                     setTeamAnalytics(response)
                 }else{
                     console.log(res.status)
                 }
             })
             .catch((err)=>{
-                console.log(err)
+                // console.log(err)
             })
 
 
@@ -148,7 +152,7 @@ const GroupDetailStudentView = () => {
                     setMilestoneSet(response)
                 }else{
                     const err_text = await res.text()
-                    console.log(err_text)
+                    // console.log(err_text)
                     setMilestoneSet({
                         "teamID": team.tid,
                         "approverID": team?.adviserId ? team.adviserId : classroom.uid,
@@ -168,14 +172,14 @@ const GroupDetailStudentView = () => {
 
     return (
         <>
-            <div className='flex flex-col h-full relative z-10'>
+            <div className='flex flex-col h-full relative z-2'>
                 <div className='bg-dpurple w-full flex relative rounded-md items-center p-10 h-40'>
                     <BackButton/>
                     <div className='flex flex-col justify-start gap-2 flex-1 px-10 z-10'>
                         <p className='text-base md:lg:xl:text-3xl text-white font-bold' >{classroom?.courseDescription}</p>
                         <Typography variant='h6' color='white'>{classroom?.section}</Typography>
                     </div>
-                    <img className='hidden md:block lg:block xl:block' src={season} alt="season" style={{height:'250%', position:'absolute', bottom:0, right:0, zIndex:0}}/>
+                    <img className='hidden md:block lg:block xl:block z-0' src={season} alt="season" style={{height:'250%', position:'absolute', bottom:0, right:0, zIndex:0}}/>
                 </div>
                 <div className='w-full flex flex-col md:lg:xl:flex-row py-5 gap-3 relative h-[calc(100vh*1.5)]'>
                     <div className='flex flex-col gap-3 w-full md:lg:xl:w-2/3 h-full'>
@@ -194,7 +198,7 @@ const GroupDetailStudentView = () => {
                         </div>
 
                         {
-                            team?
+                            team && MilestoneSet?.milestones?.length >0?
                             <div className='w-full'>
                                 <MilestoneProgressBar/>
                             </div>
@@ -308,7 +312,7 @@ const GroupDetailStudentView = () => {
                             <></>
                         }
                         {
-                                team?
+                                team && teamAnalytics?.radarData != null?
                                  <div className=' flex-1 border border-black bg-white rounded-lg flex flex-col py-3'>
                                     {teamAnalytics?.radarData?
                                         <RadarChart data={teamAnalytics?.radarData}/>
@@ -321,7 +325,7 @@ const GroupDetailStudentView = () => {
                         }
                         
                         {
-                            team?
+                            team && teamAnalytics?.histogramData != null?
                             <div className=' flex-1 border border-black bg-white rounded-lg flex flex-col py-3'>
                                 {teamAnalytics?.histogramData?
                                     <HistogramChart data={teamAnalytics.histogramData}/>

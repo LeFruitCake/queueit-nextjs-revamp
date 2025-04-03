@@ -1,5 +1,5 @@
 "use client"
-import { dpurple, Grade, Meeting, QueueingEntry, Team } from '@/Utils/Global_variables'
+import { dpurple, Grade, Meeting, MilestoneSet, QueueingEntry, QUEUEIT_URL, Team } from '@/Utils/Global_variables'
 import React, { useEffect, useState } from 'react'
 import AttendanceLogger from './AttendanceLogger'
 import HistoryBoard from './HistoryBoard'
@@ -11,6 +11,9 @@ import EvaluationModal from './EvaluationModal'
 import { useGradesContext } from '@/Contexts/GradesContext'
 import { MentionsInput, Mention } from "react-mentions";
 import InfoIcon from '@mui/icons-material/Info';
+import { useMilestoneSetContext } from '@/Contexts/MilestoneSetContext'
+import { useQueueingManagerContext } from '@/Contexts/QueueingManagerContext'
+import MilestoneProgressBar from './MilestoneProgressBar'
 
 interface MeetingBoardProps{
     meeting: Meeting
@@ -28,6 +31,8 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
     const {Grades, setGrades} = useGradesContext();
     const [taskNote, setTaskNote] = useState("");
     const [impedimentNote, setImpedimentNote] = useState("");
+    const {MilestoneSet, setMilestoneSet} = useMilestoneSetContext()
+    const queueingManager = useQueueingManagerContext().QueueingManager
     
     useEffect(()=>{
         if((!Grades || Rubric?.criteria[0].criterionID != Grades[0]?.criterionID) && !isFollowUp){
@@ -49,6 +54,23 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
         }
         console.log(isFollowUp)
     },[Rubric, isFollowUp])
+
+    useEffect(()=>{
+        if(queueingManager?.meeting?.queueingEntry.teamID){
+            fetch(`${QUEUEIT_URL}/milestone/getSet/${queueingManager?.meeting?.queueingEntry.teamID}`)
+            .then(async(res)=>{
+                if(res.ok){
+                    const response:MilestoneSet = await res.json()
+                    setMilestoneSet(response)
+                }else{
+                    setMilestoneSet(null)
+                }
+            })
+            .catch((err)=>{
+                console.log(err)
+            })
+        }
+    },[queueingManager?.meeting?.queueingEntry.teamID])
 
     const getUniqueStudents = () => {
         return meeting.queueingEntry.attendanceList.map((student) => ({
@@ -100,6 +122,12 @@ const MeetingBoard:React.FC<MeetingBoardProps> = ({meeting, updateAttendanceStat
                     <HistoryBoard/>
                 </div>
             </div>
+            {
+                MilestoneSet != null?
+                <MilestoneProgressBar/>
+                :
+                <></>
+            }
             <div className='w-full border-2 border-black rounded-md'>
                 <div className='border-b-2 border-black p-3' style={{ backgroundColor: "#7D57FC" }}>
                     Note Title

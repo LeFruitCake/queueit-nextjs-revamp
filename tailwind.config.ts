@@ -13,6 +13,8 @@ export default {
         background: "var(--background)",
         foreground: "var(--foreground)",
         lgreen: "#CCFC57",
+        lgreenHover: "#A8D94A",
+        redHover:"#CC5252",
         dpurple: "#7D57FC",
         lushgreen: "rgba(204,252,87,0.5)",
         lushred: "rgba(255,102,102,0.5)",
