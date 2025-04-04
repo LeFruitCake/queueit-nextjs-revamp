@@ -487,7 +487,12 @@ export default function Page() {
     
                                     return (
                                         <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , 
-                                        backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:meetingStatus === MeetingStatus.STARTED_AUTOMATED || meetingStatus === MeetingStatus.STARTED_FACULTY_INITIATED || meetingStatus === MeetingStatus.STARTED_MANUALLY || meetingStatus === MeetingStatus.STARTED_TEAM_INITIATED?'orange':lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
+                                        backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:
+                                        meetingStatus === MeetingStatus.STARTED_AUTOMATED 
+                                        || meetingStatus === MeetingStatus.STARTED_FACULTY_INITIATED 
+                                        || meetingStatus === MeetingStatus.STARTED_MANUALLY 
+                                        || meetingStatus === MeetingStatus.STARTED_TEAM_INITIATED?'orange': meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED
+                                        || meetingStatus === MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED?'silver':lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
                                             <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
                                             <Typography  fontWeight={"bold"}>{groupName}</Typography>
                                             <Typography color={meetingStatus === MeetingStatus.SET_MANUALLY?lgreen:dpurple} variant='caption' >{meetingStatus === MeetingStatus.SET_AUTOMATED?<>Scheduled</>:meetingStatus === MeetingStatus.SET_MANUALLY?<>Appointment</>:<></>}</Typography>
