@@ -3,7 +3,7 @@ import { useFacultyContext } from '@/Contexts/FacultyContext'
 import { dpurple, QueueingManager, QUEUEIT_URL } from '@/Utils/Global_variables';
 import { capitalizeFirstLetter, randomAvatar, randomGroupImage, convertTo12HourFormat  } from '@/Utils/Utility_functions';
 import { Typography } from '@mui/material';
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import CurrentlyTending from './CurrentlyTending';
 import Chat from './Chat';
 import QueueingList from './QueueingList';
@@ -24,6 +24,28 @@ const QueueingPageStudentView = () => {
     const router = useRouter()
     const team = useTeamContext().Team
     const [openModal, setOpenModal] = useState(false);
+    const prevQueueingManager = usePrevious(queueingManager);
+
+    function usePrevious<T>(value: T): T | undefined {
+        const ref = useRef<T>(undefined);
+        useEffect(() => {
+          ref.current = value;
+        }, [value]);
+        return ref.current;
+    }
+
+    useEffect(() => {
+        if (!prevQueueingManager || !queueingManager || !team?.tid) return;
+      
+        const wasInQueue = prevQueueingManager.queueingEntries?.some(entry => entry.teamID === team.tid);
+        const isInQueueNow = queueingManager.queueingEntries?.some(entry => entry.teamID === team.tid);
+      
+        if (wasInQueue && !isInQueueNow) {
+          alert("Your team has been removed from the queue.");
+        }
+      }, [queueingManager]);
+
+      
     useEffect(() => {
         // Set the avatar when the component mounts
         setAvatar(randomAvatar())
