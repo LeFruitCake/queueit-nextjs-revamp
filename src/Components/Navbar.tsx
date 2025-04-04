@@ -220,7 +220,7 @@ const Navbar = () => {
                     }}
                     PaperProps={{
                         sx:{
-                            width:'40%'
+                            width:'20%'
                         }
                     }}
                     anchorOrigin={{
