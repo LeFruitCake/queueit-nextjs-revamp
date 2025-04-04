@@ -28,11 +28,11 @@ export default function Page() {
         const fetchUserData = async () => {
             try {
                 if (user.role === UserType.FACULTY) {
-                    const response = await fetch(`http://localhost:8080/get-teacher/${user.uid}`);
+                    const response = await fetch(`${SPEAR_URL}/get-teacher/${user.uid}`);
                     const data = await response.json();
                     setFacultyName(data.firstname || "Unknown User");
                 } else if (user.role === UserType.STUDENT) {
-                    const response = await fetch(`http://localhost:8080/get-student/${user.uid}`);
+                    const response = await fetch(`${SPEAR_URL}/get-student/${user.uid}`);
                     const data = await response.json();
                     setStudentName(data.firstname || "Unknown User");
                 }
@@ -89,7 +89,7 @@ export default function Page() {
     }, [mentoredClass]);
 
     return (
-        <div className="h-screen overflow-auto">
+        <div className="h-screen overflow-auto relative">
             {user ? (
                 <BaseComponent>
                     <GreetingBar name={user.role === UserType.FACULTY ? `Teacher ${facultyName}` : studentName} />

@@ -5,7 +5,7 @@ import { useRubricContext } from '@/Contexts/RubricContext'
 import { useRubricsContext } from '@/Contexts/RubricsContext'
 import { useUserContext } from '@/Contexts/AuthContext'
 import RubricCard from './RubricCard'
-import { Rubric as RubricType } from '@/Utils/Global_variables'
+import { QUEUEIT_URL, Rubric as RubricType } from '@/Utils/Global_variables'
 
 interface SelectRubricModalProps {
     open: boolean;
@@ -21,22 +21,26 @@ const SelectRubricModal: React.FC<SelectRubricModalProps> = ({ open = true, setO
     useEffect(() => {
         if (!Rubrics) {
             const fetchRubrics = async () => {
-                try {
-                    const response = await fetch(`http://localhost:8081/rubrics/user/${user?.uid}`);
-                    if (!response.ok) {
-                        throw new Error("Failed to fetch rubrics");
+                if(user){
+                    try {
+                        const response = await fetch(`${QUEUEIT_URL}/rubrics/user/${user?.uid}`);
+                        if (!response.ok) {
+                            throw new Error("Failed to fetch rubrics");
+                        }
+                        const data = await response.json();
+                        console.log(data);
+                        setRubrics(data);
+                    } catch (error) {
+                        console.error("Error fetching rubrics:", error);
                     }
-                    const data = await response.json();
-                    console.log(data);
-                    setRubrics(data);
-                } catch (error) {
-                    console.error("Error fetching rubrics:", error);
                 }
             };
 
-            fetchRubrics();
+            if(user){
+                fetchRubrics();
+            }
         }
-    }, [Rubrics, user?.uid, setRubrics]); // Added dependencies
+    }, [Rubrics, user, setRubrics]); // Added dependencies
 
     const RubricCardAction = (rubric: RubricType) => {
         setRubric(rubric);

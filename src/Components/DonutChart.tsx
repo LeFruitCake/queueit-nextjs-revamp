@@ -21,7 +21,8 @@ const DonutChart:React.FC<DonutChartProps> = ({chartData, chartTitle}) => {
         responsive: true,
         plugins: {
           legend: {
-            position: "top",
+            position: "bottom",
+            align:"start"
           },
           title: {
             display: true,

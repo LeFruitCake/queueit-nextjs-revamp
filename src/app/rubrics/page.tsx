@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import MergeCancelButtons from "@/Components/MergeCancelButtons";
 import { toast } from "react-toastify";
 import RubricDetailModal from "@/Components/RubricDetailModal";
-import { lgreen, dpurple } from "@/Utils/Global_variables";
+import { lgreen, dpurple, SPEAR_URL, QUEUEIT_URL } from "@/Utils/Global_variables";
 import { Typography } from '@mui/material';
 import CatLoader from '@/Components/CatLoader';
 
@@ -32,7 +32,7 @@ export default function Page() {
       const fetchRubrics = async () => {
         setLoading(true);
         try {
-          const response = await fetch(`http://localhost:8081/rubrics/user/${user?.uid}`);
+          const response = await fetch(`${QUEUEIT_URL }/rubrics/user/${user?.uid}`);
           if (!response.ok) {
             throw new Error("Failed to fetch rubrics");
           }

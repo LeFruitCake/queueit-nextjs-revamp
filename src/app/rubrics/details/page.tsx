@@ -58,7 +58,7 @@ export default function Page() {
   useEffect(() => { 
     if (!user?.uid) return; // Ensure user ID exists before fetching
   
-    fetch(`http://localhost:8080/get-teacher/${user.uid}`) 
+    fetch(`${QUEUEIT_URL}/get-teacher/${user.uid}`) 
       .then(response => response.json())
       .then(data => {
         const firstName = data.firstname || "";

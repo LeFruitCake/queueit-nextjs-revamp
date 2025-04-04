@@ -138,10 +138,12 @@ const GroupDetailStudentView = () => {
                     setTeamAnalytics(response)
                 }else{
                     console.log(res.status)
+                    setTeamAnalytics(null)
                 }
             })
             .catch((err)=>{
-                // console.log(err)
+                setTeamAnalytics(null)
+                console.log(err)
             })
 
 
@@ -312,22 +314,22 @@ const GroupDetailStudentView = () => {
                             <></>
                         }
                         {
-                                team && teamAnalytics?.radarData != null?
-                                 <div className=' flex-1 border border-black bg-white rounded-lg flex flex-col py-3'>
-                                    {teamAnalytics?.radarData?
-                                        <RadarChart data={teamAnalytics?.radarData}/>
-                                        :
-                                        <CircularProgress size={'small'}/>
-                                    }
-                                </div>
-                                :
-                                <></>
+                                team && teamAnalytics != null?
+                                    <div className=' flex-1 border border-black bg-white rounded-lg flex flex-col py-3'>
+                                        {teamAnalytics?.radarData?
+                                            <RadarChart data={teamAnalytics?.radarData}/>
+                                            :
+                                            <CircularProgress size={'small'}/>
+                                        }
+                                    </div>
+                                    :
+                                    <></>
                         }
                         
                         {
-                            team && teamAnalytics?.histogramData != null?
+                            team && teamAnalytics != null?
                             <div className=' flex-1 border border-black bg-white rounded-lg flex flex-col py-3'>
-                                {teamAnalytics?.histogramData?
+                                {teamAnalytics?.histogramData != null?
                                     <HistogramChart data={teamAnalytics.histogramData}/>
                                     :
                                     <CircularProgress size={'small'}/>
