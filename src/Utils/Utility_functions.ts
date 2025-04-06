@@ -4,7 +4,7 @@ import Person2 from '../../public/images/Person2.png'
 import Person3 from '../../public/images/Person3.png'
 import Person4 from '../../public/images/person4.png'
 import Person5 from '../../public/images/person5.png'
-import Person6 from '../../public/images/pointingUpwardPerson.png'
+// import Person6 from '../../public/images/pointingUpwardPerson.png'
 import Group1 from '../../public/images/group1.png'
 import Group2 from '../../public/images/group2.png'
 import Group3 from '../../public/images/group3.png'
@@ -27,7 +27,7 @@ import sunny from '../../public/images/sunny-season.png'
 import fall from '../../public/images/fall-season.png'
 // import rainy from '../../public/images/rainy-season.png'
 
-let PersonArray = [Person1, Person2, Person3, Person4, Person5, Person6];
+let PersonArray = [Person1, Person2, Person3, Person4, Person5];
 let AvatarArray = [Avatar1, Avatar2, Avatar3, Avatar4, Avatar5, Avatar6, Avatar7, Avatar8, Avatar9, Avatar10]
 let GroupArray = [Group1, Group2, Group3, Group4, Group5]
 let SeasonArray = [winter, sunny, fall]

@@ -286,9 +286,18 @@ export default function Page() {
             .then(async(res)=>{
                 if(res.ok){
                     
-                    const response = await res.json();
-                    console.log(response)
-                    setAppointments(response)
+                    const response:Array<Meeting> = await res.json();
+                    let foo:Array<CalendarEvent> = []
+                    response.map((meeting)=>{
+                        foo.push({
+                            "end":new Date(meeting.end),
+                            "start":new Date(meeting.start),
+                            "meetingID":meeting.meetingID,
+                            "meetingStatus":meeting.meetingStatus,
+                            "teamName":meeting.teamName
+                        })
+                    })
+                    setAppointments((prev)=>[...prev, ...foo])
                 }else{
                     toast.error("Server error while fetching appointments")
                 }
@@ -299,6 +308,10 @@ export default function Page() {
             })
         }
     }, [user]);
+
+    useEffect(()=>{
+        console.log(appointments)
+    },[appointments])
 
     const formatDateForInput = (date) => {
         // Convert the date to the required format: yyyy-MM-ddTHH:mm
@@ -488,10 +501,14 @@ export default function Page() {
                                     return (
                                         <div style={{ whiteSpace: 'normal', overflowY: 'auto', textOverflow: 'ellipsis', color:meetingStatus === MeetingStatus.SET_MANUALLY ? '#fff':'#000' , 
                                         backgroundColor: meetingStatus === MeetingStatus.SET_MANUALLY ? dpurple:
+
                                         meetingStatus === MeetingStatus.STARTED_AUTOMATED 
                                         || meetingStatus === MeetingStatus.STARTED_FACULTY_INITIATED 
                                         || meetingStatus === MeetingStatus.STARTED_MANUALLY 
-                                        || meetingStatus === MeetingStatus.STARTED_TEAM_INITIATED?'orange': meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED
+                                        || meetingStatus === MeetingStatus.STARTED_TEAM_INITIATED?'orange': 
+                                        
+                                        meetingStatus === MeetingStatus.ATTENDED_FACULTY_CONDUCTED
+                                        || meetingStatus === MeetingStatus.FOLLOWUP_MEETING
                                         || meetingStatus === MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED?'silver':lgreen, width: '100%', height:'100%', display:'flex', flexDirection:'column', padding:'0em 5px'}}>
                                             <Typography variant='caption'>{`${startTime} - ${endTime} `}</Typography>
                                             <Typography  fontWeight={"bold"}>{groupName}</Typography>
@@ -639,8 +656,17 @@ export default function Page() {
                             >
                                 Details
                             </Typography>
-                            {selectedEvent?.meetingStatus != MeetingStatus.SCHEDULED?
-                                <Button
+                            {[
+                                MeetingStatus.SCHEDULED,
+                                MeetingStatus.STARTED_AUTOMATED,
+                                MeetingStatus.STARTED_FACULTY_INITIATED,
+                                MeetingStatus.STARTED_MANUALLY,
+                                MeetingStatus.STARTED_TEAM_INITIATED,
+                                MeetingStatus.ATTENDED_FACULTY_CONDUCTED,
+                                MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED,
+                                MeetingStatus.FOLLOWUP_MEETING
+                                ].includes(selectedEvent?.meetingStatus) || (
+                                    <Button
                                     variant="contained"
                                     onClick={() => startMeeting(selectedEvent?.meetingID)} 
                                     style={{
@@ -657,8 +683,7 @@ export default function Page() {
                                     <CampaignIcon style={{ marginRight: '8px' }} />
                                     Meet Now
                                 </Button>
-                                :<></>
-                            }
+                            )}
                         </Box>
                         {selectedEvent && (
                             <div style={{ padding: '3% 10% 10% 10%' }}>
@@ -691,7 +716,8 @@ export default function Page() {
                                 MeetingStatus.STARTED_MANUALLY,
                                 MeetingStatus.STARTED_TEAM_INITIATED,
                                 MeetingStatus.ATTENDED_FACULTY_CONDUCTED,
-                                MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED
+                                MeetingStatus.ATTENDED_SCHEDULE_CONDUCTED,
+                                MeetingStatus.FOLLOWUP_MEETING
                                 ].includes(selectedEvent.meetingStatus) || (
                                 <div style={{ display: 'flex', justifyContent: 'right', marginTop: '25%' }}>
                                     <Button

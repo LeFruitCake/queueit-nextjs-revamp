@@ -383,6 +383,7 @@ export interface Meeting{
     queueingEntry:QueueingEntry
     notedAssignedTasks: string
     impedimentsEncountered: string
+    teamName:string
 }
 
 export interface AttendanceDTO{

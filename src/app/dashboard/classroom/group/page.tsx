@@ -268,7 +268,7 @@ const page = () => {
 
                         <div className='pt-3 w-full'>
                             <Typography textAlign={"center"} variant='h4' fontWeight='bold' color='white'>Members</Typography>
-                            <div className={`flex ${team?.memberIds?.length>=5?'justify-start':'justify-center'} gap-3 w-full overflow-auto py-3`}>
+                            <div className={`flex justify-center gap-3 w-full overflow-auto py-3`}>
                                 {team?.memberIds.map((member, index)=>(
                                     <div key={index}>
                                         <MemberProfile  memberID={member}/>
